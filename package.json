@@ -14,7 +14,7 @@
     "format:check": "prettier --check .",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "pnpm build && changeset publish"
+    "release": "turbo build --filter=\"typestyles\" --filter=\"@typestyles/vite\" && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
