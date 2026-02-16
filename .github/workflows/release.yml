@@ -33,7 +33,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build packages
-        run: pnpm build
+        run: pnpm turbo build --filter="typestyles" --filter="@typestyles/vite"
 
       - name: Create Release Pull Request or Publish
         id: changesets
