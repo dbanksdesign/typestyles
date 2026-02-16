@@ -11,6 +11,13 @@ const insertedRules = new Set<string>();
 let pendingRules: string[] = [];
 
 /**
+ * All CSS rules ever registered (for SSR extraction).
+ * Unlike pendingRules (which is cleared on flush), this retains every rule
+ * so getRegisteredCss() can return the full stylesheet at any point.
+ */
+const allRules: string[] = [];
+
+/**
  * Whether a flush is scheduled.
  */
 let flushScheduled = false;
@@ -105,6 +112,7 @@ export function insertRule(key: string, css: string): void {
   if (insertedRules.has(key)) return;
   insertedRules.add(key);
   pendingRules.push(css);
+  allRules.push(css);
   scheduleFlush();
 }
 
@@ -117,6 +125,7 @@ export function insertRules(rules: Array<{ key: string; css: string }>): void {
     if (insertedRules.has(key)) continue;
     insertedRules.add(key);
     pendingRules.push(css);
+    allRules.push(css);
     added = true;
   }
   if (added) scheduleFlush();
@@ -156,11 +165,36 @@ export function startCollection(): () => string {
 }
 
 /**
+ * Return all registered CSS as a string.
+ *
+ * Unlike `collectStyles`, this doesn't require wrapping a render function.
+ * It simply returns every CSS rule that has been registered via
+ * `styles.create`, `tokens.create`, `keyframes.create`, etc.
+ *
+ * Ideal for SSR frameworks that need the CSS separately from the render
+ * pass (e.g. TanStack Start's `head()`, Next.js metadata, Remix links).
+ *
+ * @example
+ * ```ts
+ * import { getRegisteredCss } from 'typestyles/server';
+ *
+ * // In a route's head/meta function:
+ * export const head = () => ({
+ *   styles: [{ id: 'typestyles', children: getRegisteredCss() }],
+ * });
+ * ```
+ */
+export function getRegisteredCss(): string {
+  return allRules.join('\n');
+}
+
+/**
  * Reset all state (useful for testing).
  */
 export function reset(): void {
   insertedRules.clear();
   pendingRules = [];
+  allRules.length = 0;
   flushScheduled = false;
   ssrBuffer = null;
   if (isBrowser && styleElement) {

@@ -1,0 +1,84 @@
+// Documentation navigation configuration
+// This defines the structure and organization of the documentation
+
+export const docNavigation = {
+  categories: [
+    {
+      title: 'Getting Started',
+      slug: 'getting-started',
+      items: [
+        { slug: 'getting-started', title: 'Getting Started' },
+        { slug: 'api-reference', title: 'API Reference' },
+      ],
+    },
+    {
+      title: 'Core Concepts',
+      slug: 'core-concepts',
+      items: [
+        { slug: 'styles', title: 'Styles' },
+        { slug: 'tokens', title: 'Tokens' },
+        { slug: 'keyframes', title: 'Keyframes' },
+        { slug: 'color', title: 'Color Helpers' },
+      ],
+    },
+    {
+      title: 'Advanced Features',
+      slug: 'advanced-features',
+      items: [
+        { slug: 'ssr', title: 'Server-Side Rendering' },
+        { slug: 'vite-plugin', title: 'Vite Plugin' },
+        { slug: 'custom-at-rules', title: 'Custom Selectors & At-Rules' },
+        { slug: 'theming-patterns', title: 'Theming Patterns' },
+      ],
+    },
+    {
+      title: 'Guides',
+      slug: 'guides',
+      items: [
+        { slug: 'migration', title: 'Migration Guide' },
+        { slug: 'best-practices', title: 'Best Practices' },
+        { slug: 'testing', title: 'Testing' },
+        { slug: 'performance', title: 'Performance' },
+        { slug: 'typescript-tips', title: 'TypeScript Tips' },
+        { slug: 'troubleshooting', title: 'Troubleshooting' },
+      ],
+    },
+    {
+      title: 'Examples & Recipes',
+      slug: 'examples',
+      items: [
+        { slug: 'react-integration', title: 'React Integration' },
+        { slug: 'component-library', title: 'Component Library' },
+        { slug: 'design-system', title: 'Design System' },
+        { slug: 'animation-patterns', title: 'Animation Patterns' },
+      ],
+    },
+  ],
+};
+
+// Helper to find a category by slug
+export function getCategory(slug: string) {
+  return docNavigation.categories.find((cat) => cat.slug === slug);
+}
+
+// Helper to find a doc by slug
+export function findDoc(slug: string) {
+  for (const category of docNavigation.categories) {
+    const doc = category.items.find((item) => item.slug === slug);
+    if (doc) {
+      return { ...doc, category };
+    }
+  }
+  return null;
+}
+
+// Helper to get next/previous docs for pagination
+export function getDocNeighbors(slug: string) {
+  const allDocs = docNavigation.categories.flatMap((cat) => cat.items);
+  const index = allDocs.findIndex((doc) => doc.slug === slug);
+
+  return {
+    prev: index > 0 ? allDocs[index - 1] : null,
+    next: index < allDocs.length - 1 ? allDocs[index + 1] : null,
+  };
+}
