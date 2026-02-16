@@ -2,6 +2,7 @@ import { createStyles } from './styles.js';
 import { createTokens, useTokens, createTheme } from './tokens.js';
 import { createKeyframes } from './keyframes.js';
 import * as colorFns from './color.js';
+import { getRegisteredCss } from './sheet.js';
 
 export type {
   CSSProperties,
@@ -86,3 +87,27 @@ export const keyframes = {
  * ```
  */
 export const color = colorFns;
+
+/**
+ * Return all registered CSS as a string (for SSR).
+ *
+ * Returns every CSS rule registered via `styles.create`, `tokens.create`,
+ * `keyframes.create`, etc. Use this in your SSR head/meta function to
+ * inject styles into the document.
+ *
+ * This is safe to import on the client — it has no server-specific
+ * dependencies and will simply return whatever CSS has been registered.
+ *
+ * @example
+ * ```ts
+ * import { getRegisteredCss } from 'typestyles';
+ *
+ * // In a route's head function (e.g. TanStack Start):
+ * export const Route = createRootRoute({
+ *   head: () => ({
+ *     styles: [{ id: 'typestyles', children: getRegisteredCss() }],
+ *   }),
+ * });
+ * ```
+ */
+export { getRegisteredCss };

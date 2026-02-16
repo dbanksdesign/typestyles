@@ -26,3 +26,4 @@ dist-ssr
 
 .claude/settings.local.json
 .turbo
+.pnpm-store

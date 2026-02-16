@@ -1,4 +1,6 @@
-import { startCollection, flushSync } from './sheet.js';
+import { startCollection, flushSync, getRegisteredCss } from './sheet.js';
+
+export { getRegisteredCss };
 
 /**
  * Collect all CSS generated during a render pass (for SSR).
@@ -6,6 +8,10 @@ import { startCollection, flushSync } from './sheet.js';
  * Wraps a synchronous render function and captures all CSS that would
  * normally be injected into the DOM. Returns both the render result
  * and the collected CSS string.
+ *
+ * For frameworks where you need the CSS separately from the render pass
+ * (e.g. TanStack Start's `head()`, Next.js metadata), use the simpler
+ * `getRegisteredCss()` instead.
  *
  * @example
  * ```ts

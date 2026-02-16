@@ -1,0 +1,485 @@
+---
+title: TypeScript Tips
+description: TypeScript best practices and advanced types for typestyles
+---
+
+# TypeScript Tips
+
+TypeStyles is built with TypeScript in mind. This guide covers tips for getting the most out of types.
+
+## Basic types
+
+### Style definitions
+
+TypeStyles automatically infers types from your definitions:
+
+```ts
+import { styles } from 'typestyles';
+
+// Types are inferred automatically
+const button = styles.create('button', {
+  base: {
+    padding: '8px 16px',
+    backgroundColor: '#0066ff',
+  },
+  primary: {
+    color: 'white',
+  },
+});
+
+// selector function is typed
+const classes = button('base', 'primary');
+//     ^? string
+```
+
+### Token types
+
+Token references are typed as strings:
+
+```ts
+import { tokens } from 'typestyles';
+
+const color = tokens.create('color', {
+  primary: '#0066ff',
+  secondary: '#6b7280',
+});
+
+// color is typed with specific keys
+color.primary; // string
+color.secondary; // string
+color.tertiary; // Error: Property 'tertiary' does not exist
+```
+
+## Strict mode compatibility
+
+TypeStyles works great with TypeScript's strict mode. Ensure your `tsconfig.json` has:
+
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true
+  }
+}
+```
+
+## Extending types
+
+### Custom CSS properties
+
+If you need custom CSS properties that aren't in the standard types:
+
+```ts
+import { CSSProperties } from 'typestyles';
+
+// Extend the base type
+interface CustomProperties extends CSSProperties {
+  '--custom-property'?: string;
+  '--theme-color'?: string;
+}
+
+// Use in your style definitions
+const customStyles: Record<string, CustomProperties> = {
+  base: {
+    '--custom-property': 'value',
+    '--theme-color': '#0066ff',
+  },
+};
+```
+
+### Custom at-rules
+
+For custom at-rules that TypeStyles doesn't know about:
+
+```ts
+interface CustomAtRules extends CSSProperties {
+  '@layer'?: Record<string, CSSProperties>;
+}
+
+const styles: Record<string, CustomAtRules> = {
+  base: {
+    '@layer': {
+      utilities: {
+        padding: '8px',
+      },
+    },
+  },
+};
+```
+
+## Component prop types
+
+### Typed variant props
+
+Make your component props type-safe:
+
+```ts
+import { styles } from 'typestyles';
+
+const button = styles.create('button', {
+  base: { ... },
+  primary: { ... },
+  secondary: { ... },
+  ghost: { ... },
+  small: { ... },
+  medium: { ... },
+  large: { ... },
+});
+
+// Extract variant types
+type ButtonVariants = Parameters<typeof button>;
+//   ^? ('base' | 'primary' | 'secondary' | 'ghost' | 'small' | 'medium' | 'large' | false | null | undefined)[]
+
+// Or define explicitly
+interface ButtonProps {
+  variant?: 'primary' | 'secondary' | 'ghost';
+  size?: 'small' | 'medium' | 'large';
+  children: React.ReactNode;
+}
+
+function Button({ variant = 'primary', size = 'medium', children }: ButtonProps) {
+  return (
+    <button className={button('base', variant, size)}>
+      {children}
+    </button>
+  );
+}
+```
+
+### Strict variant checking
+
+Use `as const` for stricter variant checking:
+
+```ts
+const button = styles.create('button', {
+  base: { ... },
+  primary: { ... },
+  secondary: { ... },
+} as const);
+
+// Without as const: variant accepts any string
+// With as const: variant only accepts 'base' | 'primary' | 'secondary'
+```
+
+## Utility types
+
+### Extracting style types
+
+```ts
+import { styles } from 'typestyles';
+
+const card = styles.create('card', {
+  base: { ... },
+  elevated: { ... },
+});
+
+// Get the style definition type
+type CardStyle = Parameters<typeof card>[number];
+//   ^? 'base' | 'elevated' | null | undefined | false
+
+// Create a type for your component props
+type CardProps = {
+  variant?: Extract<CardStyle, string>; // Only the string variants
+};
+```
+
+### Token type extraction
+
+```ts
+const tokens = {
+  color: tokens.create('color', {
+    primary: '#0066ff',
+    secondary: '#6b7280',
+  }),
+  space: tokens.create('space', {
+    sm: '8px',
+    md: '16px',
+  }),
+};
+
+// Extract specific token types
+type ColorToken = keyof typeof tokens.color;
+//   ^? 'primary' | 'secondary'
+
+type SpaceToken = keyof typeof tokens.space;
+//   ^? 'sm' | 'md'
+```
+
+## Type-safe themes
+
+### Theme type definition
+
+```ts
+// types/theme.ts
+export interface Theme {
+  color: {
+    primary: string;
+    secondary: string;
+    text: string;
+    surface: string;
+  };
+  space: {
+    sm: string;
+    md: string;
+    lg: string;
+  };
+}
+
+// Ensure your tokens match the theme
+export const color = tokens.create('color', {
+  primary: '#0066ff',
+  secondary: '#6b7280',
+  text: '#111827',
+  surface: '#ffffff',
+});
+
+// TypeScript will error if you miss a key
+```
+
+### Theme-aware components
+
+```ts
+interface ThemedComponentProps {
+  color: keyof typeof tokens.color;
+  space: keyof typeof tokens.space;
+}
+
+function ThemedComponent({ color, space }: ThemedComponentProps) {
+  const styles = {
+    color: tokens.color[color],
+    padding: tokens.space[space],
+  };
+
+  return <div style={styles}>Content</div>;
+}
+
+// Usage with autocomplete:
+// <ThemedComponent color="primary" space="md" />
+```
+
+## Generic components
+
+### Generic style components
+
+```ts
+import { styles } from 'typestyles';
+
+// Generic component that accepts any style set
+function StyledBox<T extends string>({
+  styleSet,
+  variant,
+  children,
+}: {
+  styleSet: { (...variants: (T | false | null | undefined)[]): string };
+  variant?: T;
+  children: React.ReactNode;
+}) {
+  return <div className={styleSet('base', variant)}>{children}</div>;
+}
+
+// Usage
+const box = styles.create('box', {
+  base: { padding: '16px' },
+  elevated: { boxShadow: '0 4px 6px rgba(0,0,0,0.1)' },
+});
+
+<StyledBox styleSet={box} variant="elevated">
+  Content
+</StyledBox>;
+```
+
+## Conditional types
+
+### Responsive style types
+
+```ts
+type Breakpoint = 'sm' | 'md' | 'lg' | 'xl';
+
+type ResponsiveValue<T> = T | Partial<Record<Breakpoint, T>>;
+
+interface ResponsiveProps {
+  padding: ResponsiveValue<string>;
+  display: ResponsiveValue<'block' | 'flex' | 'grid'>;
+}
+
+// Implementation would handle responsive logic
+```
+
+### Variant combinations
+
+```ts
+// Type for all possible button combinations
+type ButtonVariant =
+  | { variant: 'primary'; size: 'small' | 'medium' | 'large' }
+  | { variant: 'secondary'; size: 'small' | 'medium' | 'large' }
+  | { variant: 'ghost'; size: 'small' | 'medium' };
+
+function Button(props: ButtonVariant & { children: React.ReactNode }) {
+  const { variant, size, children } = props;
+  // Implementation
+}
+
+// TypeScript enforces valid combinations:
+Button({ variant: 'primary', size: 'large', children: 'Click' }); // ✓
+Button({ variant: 'ghost', size: 'large', children: 'Click' }); // ✗ Error: 'large' not assignable
+```
+
+## Module augmentation
+
+### Extending typestyles types
+
+If you need to add custom types to typestyles:
+
+```ts
+// types/typestyles.d.ts
+declare module 'typestyles' {
+  export interface CSSProperties {
+    // Add custom properties
+    'anchor-name'?: string;
+    'position-anchor'?: string;
+
+    // Add custom values to existing properties
+    display?: 'block' | 'flex' | 'grid' | 'custom-value';
+  }
+}
+```
+
+## Type guards
+
+### Safe variant checking
+
+```ts
+function isValidVariant(
+  variant: string
+): variant is 'primary' | 'secondary' | 'ghost' {
+  return ['primary', 'secondary', 'ghost'].includes(variant);
+}
+
+function Button({ variant }: { variant?: string }) {
+  const safeVariant = variant && isValidVariant(variant) ? variant : 'primary';
+
+  return <button className={button('base', safeVariant)}>Click</button>;
+}
+```
+
+## Configuration types
+
+### Strict style configuration
+
+```ts
+// styles/config.ts
+import { styles } from 'typestyles';
+
+interface StyleConfig<V extends string> {
+  namespace: string;
+  variants: Record<V, CSSProperties>;
+}
+
+function createStrictStyles<V extends string>(config: StyleConfig<V>) {
+  return styles.create(config.namespace, config.variants);
+}
+
+// Usage with full type safety
+const button = createStrictStyles({
+  namespace: 'button',
+  variants: {
+    base: { padding: '8px' },
+    primary: { backgroundColor: 'blue' },
+  },
+});
+
+// TypeScript knows these are the only valid variants
+button('base', 'primary'); // ✓
+button('invalid'); // ✗ Type error
+```
+
+## Type narrowing
+
+### Narrowing with type predicates
+
+```ts
+// Define your variant type
+type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+
+// Type predicate function
+function isButtonVariant(value: string): value is ButtonVariant {
+  return ['primary', 'secondary', 'ghost'].includes(value);
+}
+
+// Use in component
+function Button({ variant: variantProp }: { variant?: string }) {
+  const variant: ButtonVariant = isButtonVariant(variantProp ?? '')
+    ? variantProp
+    : 'primary';
+
+  return <button className={button('base', variant)}>Click</button>;
+}
+```
+
+## Best practices
+
+1. **Let types be inferred** when possible
+2. **Define explicit interfaces** for component props
+3. **Use `as const`** for stricter variant checking
+4. **Extract shared types** to avoid duplication
+5. **Leverage `keyof`** for token-based props
+6. **Use strict mode** for best type safety
+7. **Export types** that consumers might need
+8. **Document complex types** with JSDoc comments
+
+## Common type issues
+
+### Issue: "Type instantiation is excessively deep"
+
+This can happen with very complex nested styles. Solution: simplify nesting or add explicit type annotations.
+
+```ts
+// If you get deep type errors, add explicit return type
+const complex = styles.create('complex', {
+  base: {
+    // very deep nesting
+  },
+} as const); // or use explicit type annotation
+```
+
+### Issue: "Property does not exist"
+
+Make sure you're importing the correct types:
+
+```ts
+// ✅ Import from typestyles
+import type { CSSProperties } from 'typestyles';
+
+// ❌ Don't use React's CSSProperties for styles
+import type { CSSProperties } from 'react'; // Wrong!
+```
+
+### Issue: "Excessively deep type instantiation"
+
+Break complex styles into smaller pieces:
+
+```ts
+// ❌ Avoid very complex single definitions
+const complex = styles.create('complex', {
+  base: {
+    // hundreds of lines
+  },
+});
+
+// ✅ Break into logical groups
+const header = styles.create('header', { ... });
+const content = styles.create('content', { ... });
+const footer = styles.create('footer', { ... });
+```
+
+## Summary
+
+TypeStyles provides excellent TypeScript support out of the box. Key points:
+
+- Types are inferred automatically
+- Strict mode is fully supported
+- You can extend types for custom use cases
+- Use explicit interfaces for component props
+- Leverage TypeScript's type system for variant safety

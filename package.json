@@ -11,9 +11,13 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.8",
     "@eslint/js": "^9.39.2",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
