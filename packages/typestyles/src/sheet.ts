@@ -293,6 +293,16 @@ export function invalidateKeys(keys: string[], prefixes: string[]): void {
 }
 
 function ruleMatchesPrefix(rule: CSSRule, prefix: string): boolean {
+  if (prefix.startsWith('font-face:')) {
+    const family = prefix.slice('font-face:'.length).split(':')[0];
+    // CSSFontFaceRule has type 5 and cssText contains @font-face
+    if (rule.cssText.includes('@font-face')) {
+      return (
+        rule.cssText.includes(`"${family}"`) || rule.cssText.includes(`'${family}'`)
+      );
+    }
+    return false;
+  }
   if ('selectorText' in rule) {
     return (rule as CSSStyleRule).selectorText.startsWith(prefix);
   }

@@ -51,3 +51,40 @@ export type ThemeOverrides = Record<string, Partial<TokenValues>>;
  * Keyframe stops: 'from', 'to', or percentage strings mapped to CSS properties.
  */
 export type KeyframeStops = Record<string, CSSProperties>;
+
+/**
+ * A map of variant dimensions to their options (each option maps to CSSProperties).
+ */
+export type VariantDefinitions = Record<string, Record<string, CSSProperties>>;
+
+/**
+ * The full config object passed to styles.component().
+ */
+export type ComponentConfig<V extends VariantDefinitions> = {
+  base?: CSSProperties;
+  variants?: V;
+  compoundVariants?: Array<{
+    variants: { [K in keyof V]?: keyof V[K] };
+    style: CSSProperties;
+  }>;
+  defaultVariants?: { [K in keyof V]?: keyof V[K] };
+};
+
+/**
+ * The function returned by styles.component().
+ */
+export type ComponentFunction<V extends VariantDefinitions> = (
+  selections?: { [K in keyof V]?: keyof V[K] | false | null | undefined }
+) => string;
+
+/**
+ * Font face property declarations.
+ */
+export type FontFaceProps = {
+  src: string;
+  fontWeight?: string | number;
+  fontStyle?: 'normal' | 'italic' | 'oblique' | string;
+  fontDisplay?: 'auto' | 'block' | 'swap' | 'fallback' | 'optional';
+  fontStretch?: string;
+  unicodeRange?: string;
+};
