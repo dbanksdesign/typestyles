@@ -4,15 +4,21 @@ import type { Plugin } from 'vite';
  * Regex patterns to extract namespace strings from typestyles API calls.
  *
  * Matches:
- *   styles.create('button', ...)   → prefix ".button-"
- *   tokens.create('color', ...)    → key "tokens:color"
- *   tokens.createTheme('dark', ...)→ key "theme:dark"  (also createTheme('dark', ...))
- *   keyframes.create('fadeIn', ..) → key "keyframes:fadeIn"
+ *   styles.create('button', ...)      → prefix ".button-"
+ *   styles.component('button', ...)   → prefix ".button-"
+ *   tokens.create('color', ...)       → key "tokens:color"
+ *   tokens.createTheme('dark', ...)   → key "theme:dark"  (also createTheme('dark', ...))
+ *   keyframes.create('fadeIn', ...)   → key "keyframes:fadeIn"
+ *   global.style('body', ...)         → prefix "body"
+ *   global.fontFace('Inter', ...)     → prefix "font-face:Inter"
  */
 const STYLES_CREATE_RE = /styles\.create\(\s*['"]([^'"]+)['"]/g;
+const STYLES_COMPONENT_RE = /styles\.component\(\s*['"]([^'"]+)['"]/g;
 const TOKENS_CREATE_RE = /tokens\.create\(\s*['"]([^'"]+)['"]/g;
 const CREATE_THEME_RE = /(?:tokens\.)?createTheme\(\s*['"]([^'"]+)['"]/g;
 const KEYFRAMES_CREATE_RE = /keyframes\.create\(\s*['"]([^'"]+)['"]/g;
+const GLOBAL_STYLE_RE = /global\.style\(\s*['"]([^'"]+)['"]/g;
+const GLOBAL_FONT_FACE_RE = /global\.fontFace\(\s*['"]([^'"]+)['"]/g;
 
 /** Check whether a module imports from 'typestyles' */
 const TYPESTYLES_IMPORT_RE = /(?:from\s+|import\s+|require\s*\(\s*)['"]typestyles['"]/;
@@ -37,6 +43,10 @@ export function extractNamespaces(code: string): {
     prefixes.push(`.${match[1]}-`);
   }
 
+  for (const match of code.matchAll(STYLES_COMPONENT_RE)) {
+    prefixes.push(`.${match[1]}-`);
+  }
+
   for (const match of code.matchAll(TOKENS_CREATE_RE)) {
     keys.push(`tokens:${match[1]}`);
   }
@@ -47,6 +57,14 @@ export function extractNamespaces(code: string): {
 
   for (const match of code.matchAll(KEYFRAMES_CREATE_RE)) {
     keys.push(`keyframes:${match[1]}`);
+  }
+
+  for (const match of code.matchAll(GLOBAL_STYLE_RE)) {
+    prefixes.push(match[1]);
+  }
+
+  for (const match of code.matchAll(GLOBAL_FONT_FACE_RE)) {
+    prefixes.push(`font-face:${match[1]}`);
   }
 
   return { keys, prefixes };

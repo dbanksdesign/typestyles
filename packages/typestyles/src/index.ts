@@ -3,6 +3,8 @@ import { createTokens, useTokens, createTheme } from './tokens.js';
 import { createKeyframes } from './keyframes.js';
 import * as colorFns from './color.js';
 import { getRegisteredCss } from './sheet.js';
+import { createComponent } from './component.js';
+import { globalStyle, globalFontFace } from './global.js';
 
 export type {
   CSSProperties,
@@ -13,6 +15,10 @@ export type {
   TokenRef,
   ThemeOverrides,
   KeyframeStops,
+  VariantDefinitions,
+  ComponentConfig,
+  ComponentFunction,
+  FontFaceProps,
 } from './types.js';
 
 export type { ColorMixSpace } from './color.js';
@@ -32,6 +38,21 @@ export type { ColorMixSpace } from './color.js';
  */
 export const styles = {
   create: createStyles,
+  component: createComponent,
+} as const;
+
+/**
+ * Global CSS API for arbitrary selectors and font-face declarations.
+ *
+ * @example
+ * ```ts
+ * global.style('body', { margin: 0 });
+ * global.fontFace('Inter', { src: "url('/Inter.woff2') format('woff2')", fontWeight: 400 });
+ * ```
+ */
+export const global = {
+  style: globalStyle,
+  fontFace: globalFontFace,
 } as const;
 
 /**

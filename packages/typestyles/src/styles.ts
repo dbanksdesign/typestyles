@@ -1,11 +1,7 @@
 import type { CSSProperties, SelectorFunction, StyleDefinitions } from './types.js';
 import { serializeStyle } from './css.js';
 import { insertRules } from './sheet.js';
-
-/**
- * Track registered namespaces for duplicate detection in development.
- */
-const registeredNamespaces = new Set<string>();
+import { registeredNamespaces } from './registry.js';
 
 /**
  * Create a style group and return a selector function.
