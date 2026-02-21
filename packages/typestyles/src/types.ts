@@ -10,8 +10,10 @@ export type CSSValue = string | number;
  * Extends csstype's Properties with nesting capabilities.
  */
 export interface CSSProperties extends CSS.Properties<CSSValue> {
-  /** Nested selector (e.g., '&:hover', '& .child', '&::before') */
+  /** Nested selector (e.g., '&:hover', '& .child', '&::before', '&[data-variant]') */
   [selector: `&${string}`]: CSSProperties;
+  /** Attribute selector (e.g., '[data-variant]', '[data-variant="primary"]', '[disabled]') */
+  [attribute: `[${string}`]: CSSProperties;
   /** At-rule (e.g., '@media (max-width: 768px)', '@container', '@supports') */
   [atRule: `@${string}`]: CSSProperties;
 }
@@ -73,9 +75,9 @@ export type ComponentConfig<V extends VariantDefinitions> = {
 /**
  * The function returned by styles.component().
  */
-export type ComponentFunction<V extends VariantDefinitions> = (
-  selections?: { [K in keyof V]?: keyof V[K] | false | null | undefined }
-) => string;
+export type ComponentFunction<V extends VariantDefinitions> = (selections?: {
+  [K in keyof V]?: keyof V[K] | false | null | undefined;
+}) => string;
 
 /**
  * A reference to a CSS custom property created by createVar().
@@ -101,9 +103,7 @@ export type CSSVarRef = `var(--${string})`;
  * ```
  */
 export type RecipeVariants<T> =
-  T extends ComponentFunction<infer V>
-    ? { [K in keyof V]?: keyof V[K] }
-    : never;
+  T extends ComponentFunction<infer V> ? { [K in keyof V]?: keyof V[K] } : never;
 
 /**
  * Font face property declarations.

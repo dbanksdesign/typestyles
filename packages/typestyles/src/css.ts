@@ -80,10 +80,7 @@ export interface CSSRule {
 /**
  * Serialize a style definition object into CSS rule(s) for a given selector.
  */
-export function serializeStyle(
-  selector: string,
-  properties: CSSProperties
-): CSSRule[] {
+export function serializeStyle(selector: string, properties: CSSProperties): CSSRule[] {
   const rules: CSSRule[] = [];
   const declarations: string[] = [];
 
@@ -93,9 +90,11 @@ export function serializeStyle(
     if (prop.startsWith('&')) {
       // Nested selector: replace & with the parent selector
       const nestedSelector = prop.replace(/&/g, selector);
-      rules.push(
-        ...serializeStyle(nestedSelector, value as CSSProperties)
-      );
+      rules.push(...serializeStyle(nestedSelector, value as CSSProperties));
+    } else if (prop.startsWith('[')) {
+      // Attribute selector: combine with parent selector
+      const attrSelector = selector + prop;
+      rules.push(...serializeStyle(attrSelector, value as CSSProperties));
     } else if (prop.startsWith('@')) {
       // At-rule: wrap the serialized content in the at-rule
       const innerRules = serializeStyle(selector, value as CSSProperties);
@@ -108,9 +107,7 @@ export function serializeStyle(
     } else {
       // Regular CSS property
       const kebabProp = toKebabCase(prop);
-      declarations.push(
-        `${kebabProp}: ${serializeValue(prop, value as string | number)}`
-      );
+      declarations.push(`${kebabProp}: ${serializeValue(prop, value as string | number)}`);
     }
   }
 
