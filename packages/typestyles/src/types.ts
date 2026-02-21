@@ -78,6 +78,34 @@ export type ComponentFunction<V extends VariantDefinitions> = (
 ) => string;
 
 /**
+ * A reference to a CSS custom property created by createVar().
+ * The string value is `var(--ts-N)` and can be used directly as a CSS value.
+ * Template literal type provides type safety without a brand.
+ */
+export type CSSVarRef = `var(--${string})`;
+
+/**
+ * Extract the variant prop types from a ComponentFunction.
+ *
+ * @example
+ * ```ts
+ * const button = styles.component('button', {
+ *   variants: {
+ *     intent: { primary: {...}, ghost: {...} },
+ *     size:   { sm: {...}, lg: {...} },
+ *   },
+ * });
+ *
+ * type ButtonProps = RecipeVariants<typeof button>;
+ * // { intent?: 'primary' | 'ghost'; size?: 'sm' | 'lg' }
+ * ```
+ */
+export type RecipeVariants<T> =
+  T extends ComponentFunction<infer V>
+    ? { [K in keyof V]?: keyof V[K] }
+    : never;
+
+/**
  * Font face property declarations.
  */
 export type FontFaceProps = {

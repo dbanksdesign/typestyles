@@ -24,14 +24,14 @@ import { registeredNamespaces } from './registry.js';
  */
 export function createStyles<K extends string>(
   namespace: string,
-  definitions: StyleDefinitions & Record<K, CSSProperties>
+  definitions: StyleDefinitions & Record<K, CSSProperties>,
 ): SelectorFunction<K> {
   // Development-mode duplicate detection
   if (process.env.NODE_ENV !== 'production') {
     if (registeredNamespaces.has(namespace)) {
       console.warn(
         `[typestyles] styles.create('${namespace}', ...) called more than once. ` +
-          `This will cause class name collisions. Each namespace should be unique.`
+          `This will cause class name collisions. Each namespace should be unique.`,
       );
     }
   }
@@ -58,4 +58,42 @@ export function createStyles<K extends string>(
   };
 
   return selectorFn as SelectorFunction<K>;
+}
+
+/**
+ * Compose multiple selector functions or class strings into one.
+ * Returns a new SelectorFunction that calls all inputs and joins results.
+ *
+ * @example
+ * ```ts
+ * const base = styles.create('base', { padding: '8px' });
+ * const primary = styles.create('primary', { color: 'blue' });
+ * const button = styles.compose(base, primary);
+ *
+ * button('padding', 'color'); // "base-padding primary-color"
+ * ```
+ */
+type AnySelectorFunction = {
+  (...args: any[]): string;
+};
+
+export function compose(
+  ...selectors: Array<AnySelectorFunction | string | false | null | undefined>
+): AnySelectorFunction {
+  const validSelectors = selectors.filter(Boolean) as Array<AnySelectorFunction | string>;
+
+  return (...args: any[]): string => {
+    const classNames: string[] = [];
+
+    for (const selector of validSelectors) {
+      if (typeof selector === 'string') {
+        classNames.push(selector);
+      } else {
+        const result = selector(...args);
+        if (result) classNames.push(result);
+      }
+    }
+
+    return classNames.join(' ');
+  };
 }

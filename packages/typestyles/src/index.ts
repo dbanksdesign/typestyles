@@ -1,10 +1,11 @@
-import { createStyles } from './styles.js';
+import { createStyles, compose } from './styles.js';
 import { createTokens, useTokens, createTheme } from './tokens.js';
 import { createKeyframes } from './keyframes.js';
 import * as colorFns from './color.js';
-import { getRegisteredCss } from './sheet.js';
+import { getRegisteredCss, insertRules, reset, flushSync } from './sheet.js';
 import { createComponent } from './component.js';
 import { globalStyle, globalFontFace } from './global.js';
+import { createVar, assignVars } from './vars.js';
 
 export type {
   CSSProperties,
@@ -19,7 +20,11 @@ export type {
   ComponentConfig,
   ComponentFunction,
   FontFaceProps,
+  CSSVarRef,
+  RecipeVariants,
 } from './types.js';
+
+export { createVar, assignVars };
 
 export type { ColorMixSpace } from './color.js';
 
@@ -39,6 +44,7 @@ export type { ColorMixSpace } from './color.js';
 export const styles = {
   create: createStyles,
   component: createComponent,
+  compose,
 } as const;
 
 /**
@@ -132,3 +138,40 @@ export const color = colorFns;
  * ```
  */
 export { getRegisteredCss };
+
+/**
+ * Insert multiple CSS rules into the stylesheet.
+ *
+ * This is a low-level API used internally by typestyles and by packages
+ * like @typestyles/props. You typically won't need to use this directly.
+ *
+ * @example
+ * ```ts
+ * import { insertRules } from 'typestyles';
+ *
+ * insertRules([
+ *   { key: '.my-class', css: '.my-class { color: red; }' },
+ *   { key: '.another', css: '.another { padding: 8px; }' },
+ * ]);
+ * ```
+ */
+export { insertRules };
+
+/**
+ * Testing utilities for clearing the stylesheet and flushing pending rules.
+ * These are primarily intended for use in tests.
+ *
+ * @example
+ * ```ts
+ * import { reset, flushSync } from 'typestyles';
+ *
+ * // In a test beforeEach:
+ * beforeEach(() => {
+ *   reset(); // Clear all registered CSS
+ * });
+ *
+ * // To synchronously flush pending rules:
+ * flushSync();
+ * ```
+ */
+export { reset, flushSync };

@@ -3,7 +3,7 @@ import { color, space, font } from './tokens';
 
 const bp = '@media (max-width: 768px)';
 
-export const layout = styles.create('docs-layout', {
+const layoutBase = styles.create('docs-layout', {
   root: {
     display: 'flex',
     minHeight: '100vh',
@@ -21,15 +21,17 @@ export const layout = styles.create('docs-layout', {
     },
   },
   main: {
-    maxWidth: '800px',
-    padding: `${space.xxl} ${space.xxl}`,
+    maxWidth: '768px',
+    padding: space.xxl,
     [bp]: {
       padding: `${space.lg} ${space.md}`,
     },
   },
 });
 
-export const sidebar = styles.create('docs-sidebar', {
+export const layout = layoutBase;
+
+const sidebarBase = styles.create('docs-sidebar', {
   root: {
     width: '280px',
     flexShrink: 0,
@@ -43,13 +45,15 @@ export const sidebar = styles.create('docs-sidebar', {
     transition: 'background-color 0.2s ease, border-color 0.2s ease',
     [bp]: {
       position: 'fixed',
+      height: 'auto',
       top: 0,
       left: 0,
       bottom: 0,
       zIndex: 200,
       transform: 'translateX(-100%)',
       visibility: 'hidden',
-      transition: 'transform 0.25s ease, visibility 0.25s ease, background-color 0.2s ease, border-color 0.2s ease',
+      transition:
+        'transform 0.25s ease, visibility 0.25s ease, background-color 0.2s ease, border-color 0.2s ease',
     },
   },
   rootOpen: {
@@ -78,9 +82,9 @@ export const sidebar = styles.create('docs-sidebar', {
     },
   },
   header: {
-    padding: `${space.lg} ${space.lg} ${space.md}`,
     display: 'flex',
     alignItems: 'center',
+    padding: `${space.lg} ${space.lg} ${space.md}`,
   },
   logo: {
     fontSize: '18px',
@@ -153,8 +157,8 @@ export const sidebar = styles.create('docs-sidebar', {
   },
   nav: {
     flex: 1,
-    padding: `0 ${space.md}`,
     overflowY: 'auto',
+    padding: `0 ${space.md}`,
   },
   section: {
     marginBottom: space.sm,
@@ -217,19 +221,21 @@ export const sidebar = styles.create('docs-sidebar', {
   },
 });
 
+export const sidebar = sidebarBase;
+
 export const mobileBar = styles.create('docs-mobile-bar', {
   root: {
     display: 'none',
     [bp]: {
       display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       position: 'fixed',
       top: 0,
       left: 0,
       right: 0,
       height: '56px',
       zIndex: 300,
-      alignItems: 'center',
-      justifyContent: 'space-between',
       padding: `0 ${space.md}`,
       backgroundColor: color.sidebarBg,
       borderBottom: `1px solid ${color.sidebarBorder}`,
@@ -442,6 +448,11 @@ export const home = styles.create('docs-home', {
     maxWidth: '540px',
     marginBottom: space.xl,
   },
+  actions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: space.md,
+  },
   cta: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -478,10 +489,5 @@ export const home = styles.create('docs-home', {
       borderColor: color.textMuted,
       backgroundColor: color.surfaceRaised,
     },
-  },
-  actions: {
-    display: 'flex',
-    gap: space.md,
-    alignItems: 'center',
   },
 });
