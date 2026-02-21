@@ -12,6 +12,7 @@ import { allDocs } from 'content-collections';
 import { layout, sidebar, mobileBar } from '../styles';
 import { darkTheme } from '../tokens';
 import { docNavigation } from '../navigation';
+import '../codeTheme';
 
 function getSlug(metaPath: string): string {
   return metaPath.replace(/\.md$/, '').replace(/^docs\/?/, '');
@@ -96,25 +97,32 @@ function CloseIcon() {
   );
 }
 
-function useTheme() {
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
+function getInitialTheme(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
     const saved = localStorage.getItem('typestyles-theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setIsDark(saved === 'dark' || (!saved && prefersDark));
-  }, []);
+    return saved === 'dark' || (!saved && prefersDark);
+  } catch {
+    return false;
+  }
+}
+
+function useTheme() {
+  const [isDark, setIsDark] = useState(getInitialTheme);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add(darkTheme);
+    } else {
+      document.documentElement.classList.remove(darkTheme);
+    }
+  }, [isDark]);
 
   const toggle = useCallback(() => {
     setIsDark((prev) => {
       const next = !prev;
-      if (next) {
-        document.documentElement.classList.add(darkTheme);
-        localStorage.setItem('typestyles-theme', 'dark');
-      } else {
-        document.documentElement.classList.remove(darkTheme);
-        localStorage.setItem('typestyles-theme', 'light');
-      }
+      localStorage.setItem('typestyles-theme', next ? 'dark' : 'light');
       return next;
     });
   }, []);
@@ -146,11 +154,7 @@ function MobileBar({
         type<span className={mobileBar('logoAccent')}>styles</span>
       </Link>
       <div className={mobileBar('actions')}>
-        <button
-          className={mobileBar('themeBtn')}
-          onClick={onToggleTheme}
-          aria-label="Toggle theme"
-        >
+        <button className={mobileBar('themeBtn')} onClick={onToggleTheme} aria-label="Toggle theme">
           {isDark ? <SunIcon /> : <MoonIcon />}
         </button>
       </div>
@@ -186,18 +190,12 @@ function SidebarPanel({
     <>
       <div
         className={
-          open
-            ? `${sidebar('backdrop')} ${sidebar('backdropVisible')}`
-            : sidebar('backdrop')
+          open ? `${sidebar('backdrop')} ${sidebar('backdropVisible')}` : sidebar('backdrop')
         }
         onClick={onClose}
         aria-hidden="true"
       />
-      <aside
-        className={
-          open ? `${sidebar('root')} ${sidebar('rootOpen')}` : sidebar('root')
-        }
-      >
+      <aside className={open ? `${sidebar('root')} ${sidebar('rootOpen')}` : sidebar('root')}>
         <div className={sidebar('header')}>
           <Link to="/" className={sidebar('logo')}>
             type<span className={sidebar('logoAccent')}>styles</span>
@@ -239,9 +237,7 @@ function SidebarPanel({
                     to="/docs/$slug"
                     params={{ slug: item.slug }}
                     className={
-                      isActive
-                        ? `${sidebar('link')} ${sidebar('linkActive')}`
-                        : sidebar('link')
+                      isActive ? `${sidebar('link')} ${sidebar('linkActive')}` : sidebar('link')
                     }
                   >
                     {docItem.title}
@@ -289,13 +285,14 @@ function RootComponent() {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
-      </head>
-      <body suppressHydrationWarning>
+        {/* This is to prevent theme flashing on load */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var s=localStorage.getItem('typestyles-theme');var p=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='dark'||(!s&&p)){document.documentElement.classList.add('theme-docs-dark')}}catch(e){}})();`,
+            __html: `(function(){try{var s=localStorage.getItem('typestyles-theme');var p=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='dark'||(!s&&p)){document.documentElement.classList.add('${darkTheme}')}}catch(e){}})();`,
           }}
         />
+      </head>
+      <body suppressHydrationWarning>
         <MobileBar
           isDark={isDark}
           onToggleTheme={toggleTheme}

@@ -16,6 +16,8 @@ export const docNavigation = {
       slug: 'core-concepts',
       items: [
         { slug: 'styles', title: 'Styles' },
+        { slug: 'compose', title: 'Style Composition' },
+        { slug: 'atomic-css', title: 'Atomic CSS Utilities' },
         { slug: 'tokens', title: 'Tokens' },
         { slug: 'keyframes', title: 'Keyframes' },
         { slug: 'color', title: 'Color Helpers' },

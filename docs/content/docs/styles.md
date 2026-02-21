@@ -46,6 +46,25 @@ const button = styles.create('button', {
 });
 ```
 
+## Composing styles
+
+Use `styles.compose()` to combine multiple selector functions or class strings:
+
+```ts
+const base = styles.create('base', {
+  root: { padding: '8px', borderRadius: '4px' },
+});
+
+const primary = styles.create('primary', {
+  root: { backgroundColor: '#0066ff', color: 'white' },
+});
+
+const button = styles.compose(base, primary);
+button('root'); // "base-root primary-root"
+```
+
+See the [Style Composition](/docs/compose) guide for more details.
+
 ## Composing with tokens
 
 Use token references (e.g. from `tokens.create()`) in your style values. They compile to `var(--name-key)` and work with themes.

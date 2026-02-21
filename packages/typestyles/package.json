@@ -57,10 +57,10 @@
     "design-tokens",
     "css-custom-properties"
   ],
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/typestyles/typestyles",
+    "url": "https://github.com/dbanksdesign/typestyles",
     "directory": "packages/typestyles"
   },
   "dependencies": {

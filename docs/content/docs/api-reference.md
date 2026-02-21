@@ -11,11 +11,13 @@ Auto-generated documentation for all typestyles APIs.
 
 ### `styles`
 
-Style creation API.
+Style creation and composition API.
 
 **Methods:**
 
-- `styles.create(namespace, definitions)`: Style creation API
+- `styles.create(namespace, definitions)`: Creates style variants
+- `styles.compose(...selectors)`: Combines multiple selector functions or class strings
+- `styles.component(namespace, config)`: Creates variant-based component styles
 
 
 ### `tokens`
@@ -76,6 +78,65 @@ const fadeIn = keyframes.create('fadeIn', {
 
 // Use in styles
 animation: `${fadeIn} 300ms ease`
+```
+
+### Composing Styles
+
+```ts
+import { styles } from 'typestyles';
+
+const base = styles.create('base', {
+  root: { padding: '8px' },
+});
+
+const primary = styles.create('primary', {
+  root: { color: 'blue' },
+});
+
+const button = styles.compose(base, primary);
+button('root'); // "base-root primary-root"
+```
+
+## @typestyles/props
+
+Atomic CSS utility generator for type-safe utility classes.
+
+### `defineProperties(config)`
+
+Define a collection of CSS properties with allowed values.
+
+```ts
+import { defineProperties } from '@typestyles/props';
+
+const utilities = defineProperties({
+  conditions: {
+    mobile: { '@media': '(min-width: 768px)' },
+  },
+  properties: {
+    display: ['flex', 'block', 'grid'],
+    padding: { 0: '0', 1: '4px', 2: '8px' },
+  },
+  shorthands: {
+    p: ['padding'],
+  },
+});
+```
+
+### `createProps(namespace, ...collections)`
+
+Generate atomic utility classes from property collections.
+
+```ts
+import { createProps } from '@typestyles/props';
+
+const atoms = createProps('atom', utilities);
+
+atoms({
+  display: 'flex',
+  padding: 2,
+  p: { mobile: 1 },
+});
+// Returns: "atom-display-flex atom-padding-2 atom-p-mobile-1"
 ```
 
 ---

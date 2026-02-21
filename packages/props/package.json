@@ -1,7 +1,7 @@
 {
-  "name": "@typestyles/vite",
+  "name": "@typestyles/props",
   "version": "0.1.0",
-  "description": "Vite plugin for typestyles HMR support",
+  "description": "Type-safe atomic CSS utility generator for typestyles",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -22,30 +22,22 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "build": "tsup",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": [
-    "vite",
-    "vite-plugin",
-    "typestyles",
-    "hmr",
-    "css-in-js"
-  ],
+  "dependencies": {
+    "typestyles": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.0.0"
+  },
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/dbanksdesign/typestyles",
-    "directory": "packages/vite"
-  },
-  "peerDependencies": {
-    "vite": ">=5.0.0"
-  },
-  "devDependencies": {
-    "tsup": "^8.0.0",
-    "typescript": "^5.4.0",
-    "vite": "^6.0.0",
-    "vitest": "^3.0.0"
+    "directory": "packages/props"
   }
 }

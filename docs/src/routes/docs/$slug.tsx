@@ -6,8 +6,6 @@ import hljs from 'highlight.js';
 import { doc, docPage } from '../../styles';
 import { getDocNeighbors } from '../../navigation';
 
-import '../../code-theme.css';
-
 const marked = new Marked(
   markedHighlight({
     langPrefix: 'hljs language-',
