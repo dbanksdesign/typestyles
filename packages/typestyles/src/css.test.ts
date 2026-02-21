@@ -49,7 +49,7 @@ describe('serializeStyle', () => {
     });
 
     expect(rules[0].css).toBe(
-      '.text { font-weight: 700; line-height: 1.5; opacity: 0.8; z-index: 10; }'
+      '.text { font-weight: 700; line-height: 1.5; opacity: 0.8; z-index: 10; }',
     );
   });
 
@@ -91,9 +91,7 @@ describe('serializeStyle', () => {
 
     expect(rules).toHaveLength(2);
     expect(rules[0].css).toBe('.card { display: flex; }');
-    expect(rules[1].css).toBe(
-      '@media (max-width: 768px) { .card { display: block; } }'
-    );
+    expect(rules[1].css).toBe('@media (max-width: 768px) { .card { display: block; } }');
   });
 
   it('serializes container queries', () => {
@@ -104,7 +102,7 @@ describe('serializeStyle', () => {
     });
 
     expect(rules[0].css).toBe(
-      '@container (min-width: 400px) { .widget { grid-template-columns: 1fr 1fr; } }'
+      '@container (min-width: 400px) { .widget { grid-template-columns: 1fr 1fr; } }',
     );
   });
 
@@ -121,5 +119,20 @@ describe('serializeStyle', () => {
   it('returns empty array for all-null properties', () => {
     const rules = serializeStyle('.empty', {});
     expect(rules).toHaveLength(0);
+  });
+
+  it('serializes attribute selectors', () => {
+    const rules = serializeStyle('.button', {
+      color: 'blue',
+      '[data-variant="primary"]': { backgroundColor: 'blue' },
+      '[disabled]': { opacity: 0.5 },
+      '[data-size]': { padding: '8px' },
+    });
+
+    expect(rules).toHaveLength(4);
+    expect(rules[0].css).toBe('.button { color: blue; }');
+    expect(rules[1].css).toBe('.button[data-variant="primary"] { background-color: blue; }');
+    expect(rules[2].css).toBe('.button[disabled] { opacity: 0.5; }');
+    expect(rules[3].css).toBe('.button[data-size] { padding: 8px; }');
   });
 });
