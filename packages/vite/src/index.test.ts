@@ -76,6 +76,38 @@ describe('extractNamespaces', () => {
     expect(result.prefixes).toEqual(['.button-']);
   });
 
+  it('extracts styles.component namespaces as prefixes', () => {
+    const code = `
+      import { styles } from 'typestyles';
+      const button = styles.component('button', {
+        base: { color: 'red' },
+      });
+    `;
+    const result = extractNamespaces(code);
+    expect(result.prefixes).toEqual(['.button-']);
+    expect(result.keys).toEqual([]);
+  });
+
+  it('extracts global.style selectors as prefixes', () => {
+    const code = `
+      import { global } from 'typestyles';
+      global.style('body', { margin: 0 });
+    `;
+    const result = extractNamespaces(code);
+    expect(result.prefixes).toEqual(['body']);
+    expect(result.keys).toEqual([]);
+  });
+
+  it('extracts global.fontFace as font-face prefixes', () => {
+    const code = `
+      import { global } from 'typestyles';
+      global.fontFace('Inter', { src: "url('/Inter.woff2')" });
+    `;
+    const result = extractNamespaces(code);
+    expect(result.prefixes).toEqual(['font-face:Inter']);
+    expect(result.keys).toEqual([]);
+  });
+
   it('returns empty arrays for code with no typestyles calls', () => {
     const code = `
       const x = 1 + 2;
