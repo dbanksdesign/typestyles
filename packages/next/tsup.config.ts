@@ -9,4 +9,5 @@ export default defineConfig({
   loader: {
     '.tsx': 'tsx',
   },
+  external: ['typestyles', 'typestyles/server', 'react', 'react-dom', 'next'],
 });
