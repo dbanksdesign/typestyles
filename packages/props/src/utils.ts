@@ -23,9 +23,9 @@ export function toKebabCase(str: string): string {
  * Check if a value is a conditional object (has condition keys).
  */
 export function isConditionalValue(
-  value: any,
-  conditionKeys: Set<string>
-): value is Record<string, any> {
+  value: unknown,
+  conditionKeys: Set<string>,
+): value is Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     return false;
   }

@@ -12,10 +12,10 @@ import { sanitizeValue, isConditionalValue } from './utils.js';
 export function buildLookupMap<
   P extends PropertyDefinitions,
   C extends ConditionDefinitions,
-  S extends ShorthandDefinitions<P>
+  S extends ShorthandDefinitions<P>,
 >(
-  namespace: string,
-  collections: PropertyCollection<P, C, S>[]
+  _namespace: string,
+  collections: PropertyCollection<P, C, S>[],
 ): {
   propertyMap: Map<string, Set<string>>;
   conditionKeys: Set<string>;
@@ -51,10 +51,10 @@ export function buildLookupMap<
  * Expand shorthands in props object.
  */
 export function expandShorthands(
-  props: Record<string, any>,
-  shorthands: Map<string, string[]>
-): Record<string, any> {
-  const expanded: Record<string, any> = {};
+  props: Record<string, unknown>,
+  shorthands: Map<string, string[]>,
+): Record<string, unknown> {
+  const expanded: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(props)) {
     if (shorthands.has(key)) {
@@ -78,8 +78,8 @@ export function expandShorthands(
 function resolveValue(
   namespace: string,
   property: string,
-  value: any,
-  conditionKeys: Set<string>
+  value: unknown,
+  conditionKeys: Set<string>,
 ): string[] {
   const classNames: string[] = [];
 
@@ -105,11 +105,11 @@ function resolveValue(
  */
 export function createResolver(
   namespace: string,
-  propertyMap: Map<string, Set<string>>,
+  _propertyMap: Map<string, Set<string>>,
   conditionKeys: Set<string>,
-  shorthands: Map<string, string[]>
-): (props: Record<string, any>) => string {
-  return (props: Record<string, any>): string => {
+  shorthands: Map<string, string[]>,
+): (props: Record<string, unknown>) => string {
+  return (props: Record<string, unknown>): string => {
     // Expand shorthands
     const expanded = expandShorthands(props, shorthands);
 

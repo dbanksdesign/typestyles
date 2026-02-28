@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { invalidatePrefix, invalidateKeys } from './hmr.js';
-import { insertRule, insertRules, flushSync, reset } from './sheet.js';
+import { insertRule, flushSync, reset } from './sheet.js';
 
 describe('invalidatePrefix', () => {
   beforeEach(() => {

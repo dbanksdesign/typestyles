@@ -74,7 +74,7 @@ export function createStyles<K extends string>(
  * ```
  */
 type AnySelectorFunction = {
-  (...args: any[]): string;
+  (...args: unknown[]): string;
 };
 
 export function compose(
@@ -82,7 +82,7 @@ export function compose(
 ): AnySelectorFunction {
   const validSelectors = selectors.filter(Boolean) as Array<AnySelectorFunction | string>;
 
-  return (...args: any[]): string => {
+  return (...args: unknown[]): string => {
     const classNames: string[] = [];
 
     for (const selector of validSelectors) {

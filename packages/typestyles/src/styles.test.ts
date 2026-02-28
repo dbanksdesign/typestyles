@@ -42,7 +42,9 @@ describe('createStyles', () => {
       disabled: { opacity: 0.5 },
     });
 
+    // eslint-disable-next-line no-constant-binary-expression
     expect(card('base', false && 'active', null, undefined)).toBe('card-base');
+    // eslint-disable-next-line no-constant-binary-expression
     expect(card('base', true && 'active')).toBe('card-base card-active');
   });
 
@@ -152,7 +154,7 @@ describe('compose', () => {
     const isDisabled = false;
 
     expect(composed('root', isActive && 'active', isDisabled && 'disabled')).toBe(
-      'base3-root base3-active extra-class'
+      'base3-root base3-active extra-class',
     );
   });
 
