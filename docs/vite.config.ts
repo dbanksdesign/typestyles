@@ -10,7 +10,14 @@ export default defineConfig({
     contentCollections(),
     tsConfigPaths({ projects: ['./tsconfig.json'] }),
     typestylesPlugin(),
-    tanstackStart(),
+    tanstackStart({
+      prerender: {
+        enabled: true,
+        crawlLinks: true,
+        autoSubfolderIndex: true,
+        filter: ({ path }) => !path.startsWith('.'),
+      },
+    }),
     react(),
   ],
 });

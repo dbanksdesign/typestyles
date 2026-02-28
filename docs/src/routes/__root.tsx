@@ -285,7 +285,6 @@ function RootComponent() {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
-        {/* This is to prevent theme flashing on load */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var s=localStorage.getItem('typestyles-theme');var p=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='dark'||(!s&&p)){document.documentElement.classList.add('${darkTheme}')}}catch(e){}})();`,
