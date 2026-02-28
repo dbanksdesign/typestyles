@@ -14,7 +14,7 @@
     "format:check": "prettier --check .",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "turbo build --filter=\"typestyles\" --filter=\"@typestyles/vite\" && changeset publish",
+    "release": "turbo build && changeset publish",
     "prepare": "husky"
   },
   "devDependencies": {

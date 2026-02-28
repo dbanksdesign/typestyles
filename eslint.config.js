@@ -7,7 +7,14 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   prettier,
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**', '**/.turbo/**'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/coverage/**',
+      '**/.turbo/**',
+      'docs/.content-collections/**',
+      'scripts/**',
+    ],
   },
   {
     rules: {
