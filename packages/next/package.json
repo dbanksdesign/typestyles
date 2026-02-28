@@ -18,8 +18,7 @@
     "src"
   ],
   "scripts": {
-    "build": "tsup",
-    "typecheck": "tsc --noEmit"
+    "build": "tsup"
   },
   "keywords": [
     "next",
