@@ -4,6 +4,7 @@ import type {
   PropertyCollection,
   ConditionDefinition,
   PropertyValues,
+  ShorthandDefinitions,
 } from './types.js';
 import { sanitizeValue, toKebabCase } from './utils.js';
 
@@ -15,7 +16,7 @@ function generateAtomicClass(
   property: string,
   valueKey: string,
   cssValue: string | number,
-  condition?: ConditionDefinition & { name: string }
+  condition?: ConditionDefinition & { name: string },
 ): { key: string; css: string } {
   const sanitizedValue = sanitizeValue(valueKey);
   const className = condition
@@ -93,12 +94,12 @@ function getValueEntries(values: PropertyValues): Array<[string, string | number
  */
 export function generateAllAtomicClasses<
   P extends PropertyDefinitions,
-  C extends ConditionDefinitions
+  C extends ConditionDefinitions,
 >(
   namespace: string,
   properties: P,
   conditions: C,
-  defaultCondition: keyof C | false
+  defaultCondition: keyof C | false,
 ): Array<{ key: string; css: string }> {
   const rules: Array<{ key: string; css: string }> = [];
 
@@ -116,7 +117,7 @@ export function generateAllAtomicClasses<
             generateAtomicClass(namespace, property, valueKey, cssValue, {
               ...condition,
               name: defaultCondition as string,
-            })
+            }),
           );
         }
       }
@@ -132,7 +133,7 @@ export function generateAllAtomicClasses<
           generateAtomicClass(namespace, property, valueKey, cssValue, {
             ...condDef,
             name: condName,
-          })
+          }),
         );
       }
     }
@@ -146,7 +147,11 @@ export function generateAllAtomicClasses<
  */
 export function generateFromCollections(
   namespace: string,
-  collections: PropertyCollection<any, any, any>[]
+  collections: PropertyCollection<
+    PropertyDefinitions,
+    ConditionDefinitions,
+    ShorthandDefinitions<PropertyDefinitions>
+  >[],
 ): Array<{ key: string; css: string }> {
   const allRules: Array<{ key: string; css: string }> = [];
 
@@ -155,7 +160,7 @@ export function generateFromCollections(
       namespace,
       collection.properties,
       collection.conditions,
-      collection.defaultCondition
+      collection.defaultCondition,
     );
     allRules.push(...rules);
   }

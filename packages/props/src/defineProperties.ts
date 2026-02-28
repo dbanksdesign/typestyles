@@ -29,11 +29,9 @@ import type {
  */
 export function defineProperties<
   P extends PropertyDefinitions,
-  C extends ConditionDefinitions = {},
-  S extends ShorthandDefinitions<P> = {}
->(
-  config: DefinePropertiesConfig<P, C, S>
-): PropertyCollection<P, C, S> {
+  C extends ConditionDefinitions = ConditionDefinitions,
+  S extends ShorthandDefinitions<P> = Record<string, Array<keyof P>>,
+>(config: DefinePropertiesConfig<P, C, S>): PropertyCollection<P, C, S> {
   const conditions = (config.conditions || {}) as C;
   const shorthands = (config.shorthands || {}) as S;
   const defaultCondition = config.defaultCondition ?? false;

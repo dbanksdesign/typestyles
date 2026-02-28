@@ -60,9 +60,7 @@ describe('createProps', () => {
     const props = createProps('atoms', collection);
 
     expect(props({ display: { mobile: 'flex' } })).toBe('atoms-display-mobile-flex');
-    expect(props({ display: { desktop: 'block' } })).toBe(
-      'atoms-display-desktop-block'
-    );
+    expect(props({ display: { desktop: 'block' } })).toBe('atoms-display-desktop-block');
   });
 
   it('handles mixed conditional and direct values', () => {
@@ -79,7 +77,7 @@ describe('createProps', () => {
     const props = createProps('atoms', collection);
 
     expect(props({ display: { mobile: 'flex' }, padding: 1 })).toBe(
-      'atoms-display-mobile-flex atoms-padding-1'
+      'atoms-display-mobile-flex atoms-padding-1',
     );
   });
 
@@ -153,9 +151,7 @@ describe('createProps', () => {
 
     const props = createProps('atoms', layout, spacing);
 
-    expect(props({ display: 'flex', padding: 1 })).toBe(
-      'atoms-display-flex atoms-padding-1'
-    );
+    expect(props({ display: 'flex', padding: 1 })).toBe('atoms-display-flex atoms-padding-1');
   });
 
   it('handles null and undefined values', () => {
@@ -168,7 +164,7 @@ describe('createProps', () => {
 
     const props = createProps('atoms', collection);
 
-    expect(props({ display: 'flex', padding: null as any })).toBe('atoms-display-flex');
-    expect(props({ display: undefined as any, padding: 1 })).toBe('atoms-padding-1');
+    expect(props({ display: 'flex', padding: null as unknown })).toBe('atoms-display-flex');
+    expect(props({ display: undefined as unknown, padding: 1 })).toBe('atoms-padding-1');
   });
 });

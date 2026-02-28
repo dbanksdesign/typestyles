@@ -27,10 +27,7 @@ export type PropertyDefinitions = Record<string, PropertyValues>;
 /**
  * Shorthand definitions - map shorthand names to arrays of property names.
  */
-export type ShorthandDefinitions<P extends PropertyDefinitions> = Record<
-  string,
-  Array<keyof P>
->;
+export type ShorthandDefinitions<P extends PropertyDefinitions> = Record<string, Array<keyof P>>;
 
 /**
  * The configuration object passed to defineProperties().
@@ -38,7 +35,7 @@ export type ShorthandDefinitions<P extends PropertyDefinitions> = Record<
 export interface DefinePropertiesConfig<
   P extends PropertyDefinitions,
   C extends ConditionDefinitions,
-  S extends ShorthandDefinitions<P>
+  S extends ShorthandDefinitions<P>,
 > {
   properties: P;
   conditions?: C;
@@ -52,7 +49,7 @@ export interface DefinePropertiesConfig<
 export interface PropertyCollection<
   P extends PropertyDefinitions,
   C extends ConditionDefinitions,
-  S extends ShorthandDefinitions<P>
+  S extends ShorthandDefinitions<P>,
 > {
   readonly properties: P;
   readonly conditions: C;
@@ -65,9 +62,9 @@ export interface PropertyCollection<
  */
 type ExtractValue<T> = T extends (infer U)[]
   ? U
-  : T extends Record<string, any>
-  ? keyof T
-  : never;
+  : T extends Record<string, unknown>
+    ? keyof T
+    : never;
 
 /**
  * Create a prop value type that can be a direct value or a conditional object.
@@ -84,30 +81,32 @@ type PropValue<V, C extends ConditionDefinitions> =
 export type ExtractProps<
   P extends PropertyDefinitions,
   C extends ConditionDefinitions,
-  S extends ShorthandDefinitions<P>
+  S extends ShorthandDefinitions<P>,
 > = {
   [K in keyof P | keyof S]?: K extends keyof S
     ? PropValue<ExtractValue<P[S[K][number]]>, C>
     : K extends keyof P
-    ? PropValue<ExtractValue<P[K]>, C>
-    : never;
+      ? PropValue<ExtractValue<P[K]>, C>
+      : never;
 };
 
 /**
  * The props function signature.
  */
-export type PropsFunction<Collections extends PropertyCollection<any, any, any>[]> = ((
+export type PropsFunction<
+  Collections extends PropertyCollection<
+    PropertyDefinitions,
+    ConditionDefinitions,
+    ShorthandDefinitions<PropertyDefinitions>
+  >[],
+> = ((
   props: UnionToIntersection<
     {
-      [I in keyof Collections]: Collections[I] extends PropertyCollection<
-        infer P,
-        infer C,
-        infer S
-      >
+      [I in keyof Collections]: Collections[I] extends PropertyCollection<infer P, infer C, infer S>
         ? ExtractProps<P, C, S>
         : never;
     }[number]
-  >
+  >,
 ) => string) & {
   properties: Set<string>;
 };
@@ -115,8 +114,8 @@ export type PropsFunction<Collections extends PropertyCollection<any, any, any>[
 /**
  * Convert a union type to an intersection type.
  */
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
-  k: infer I
+type UnionToIntersection<U> = (U extends unknown ? (k: U) => void : never) extends (
+  k: infer I,
 ) => void
   ? I
   : never;

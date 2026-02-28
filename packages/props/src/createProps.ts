@@ -1,4 +1,10 @@
-import type { PropertyCollection, PropsFunction } from './types.js';
+import type {
+  PropertyCollection,
+  PropsFunction,
+  PropertyDefinitions,
+  ConditionDefinitions,
+  ShorthandDefinitions,
+} from './types.js';
 import { insertRules } from 'typestyles';
 import { generateFromCollections } from './generate.js';
 import { buildLookupMap, createResolver } from './runtime.js';
@@ -19,10 +25,13 @@ import { buildLookupMap, createResolver } from './runtime.js';
  * // Returns: "atoms-display-flex atoms-padding-2 atoms-paddingTop-mobile-3"
  * ```
  */
-export function createProps<Collections extends PropertyCollection<any, any, any>[]>(
-  namespace: string,
-  ...collections: Collections
-): PropsFunction<Collections> {
+export function createProps<
+  Collections extends PropertyCollection<
+    PropertyDefinitions,
+    ConditionDefinitions,
+    ShorthandDefinitions<PropertyDefinitions>
+  >[],
+>(namespace: string, ...collections: Collections): PropsFunction<Collections> {
   // Generate all CSS rules upfront
   const cssRules = generateFromCollections(namespace, collections);
 
@@ -30,10 +39,7 @@ export function createProps<Collections extends PropertyCollection<any, any, any
   insertRules(cssRules);
 
   // Build runtime lookup
-  const { propertyMap, conditionKeys, shorthands } = buildLookupMap(
-    namespace,
-    collections
-  );
+  const { propertyMap, conditionKeys, shorthands } = buildLookupMap(namespace, collections);
 
   // Create resolver function
   const resolver = createResolver(namespace, propertyMap, conditionKeys, shorthands);
