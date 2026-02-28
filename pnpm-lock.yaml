@@ -113,7 +113,7 @@ importers:
   packages/next:
     dependencies:
       typestyles:
-        specifier: workspace:*
+        specifier: '>=0.1.0'
         version: link:../typestyles
     devDependencies:
       '@types/node':
