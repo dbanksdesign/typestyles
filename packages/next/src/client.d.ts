@@ -1,7 +1,5 @@
-'use client';
-
-import React, { useState, useEffect, useServerInsertedHTML, useSyncExternalStore } from 'react';
-import { getRegisteredCss } from 'typestyles/server';
+import type * as React from 'react';
+import type { useSyncExternalStore, useServerInsertedHTML } from 'react';
 
 /**
  * Subscribe to typestyles CSS changes. Use this in client components
@@ -24,7 +22,9 @@ export interface TypestylesStylesheetProps {
 /**
  * A React component that renders typestyles CSS.
  */
-export function TypestylesStylesheet(props: TypestylesStylesheetProps): React.JSX.Element | null;
+export function TypestylesStylesheet(
+  props: TypestylesStylesheetProps,
+): React.JSX.Element | null;
 
 /**
  * Create a Next.js layout export that includes typestyles.

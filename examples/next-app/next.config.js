@@ -3,4 +3,4 @@ const nextConfig = {
   transpilePackages: ['typestyles', '@typestyles/next'],
 };
 
-module.exports = nextConfig;
+export default nextConfig;
