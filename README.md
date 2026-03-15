@@ -378,6 +378,13 @@ export default defineConfig({
 });
 ```
 
+## Examples
+
+- Vite build integration: `examples/vite-app`
+- Rollup build integration: `examples/rollup-app`
+- Rolldown build integration: `examples/rolldown-app`
+- Next.js integration: `examples/next-app`
+
 ## License
 
 MIT

@@ -1,0 +1,17 @@
+{
+  "name": "typestyles-rollup-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "mkdir -p dist && cp index.html dist/index.html && rollup -c"
+  },
+  "dependencies": {
+    "typestyles": "workspace:*"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@typestyles/rollup": "workspace:*",
+    "rollup": "^4.0.0"
+  }
+}

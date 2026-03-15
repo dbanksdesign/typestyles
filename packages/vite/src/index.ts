@@ -1,4 +1,5 @@
-import type { Plugin } from 'vite';
+import type { Plugin, ResolvedConfig, UserConfig } from 'vite';
+import { runTypestylesBuild } from '@typestyles/build-runner';
 
 /**
  * Regex patterns to extract namespace strings from typestyles API calls.
@@ -23,9 +24,32 @@ const GLOBAL_FONT_FACE_RE = /global\.fontFace\(\s*['"]([^'"]+)['"]/g;
 /** Check whether a module imports from 'typestyles' */
 const TYPESTYLES_IMPORT_RE = /(?:from\s+|import\s+|require\s*\(\s*)['"]typestyles['"]/;
 
+export interface TypestylesExtractOptions {
+  /**
+   * Modules that should be imported during build to register styles.
+   * Paths are resolved relative to Vite's project root.
+   */
+  modules: string[];
+  /**
+   * Output CSS filename (in the build assets). Defaults to "typestyles.css".
+   */
+  fileName?: string;
+}
+
 export interface TypestylesPluginOptions {
   /** Warn about duplicate namespaces across modules. Defaults to true. */
   warnDuplicates?: boolean;
+  /**
+   * Mode for typestyles integration:
+   * - "runtime" (default): HMR only, no build-time extraction.
+   * - "build": emit a static CSS asset during build using typestyles/build.
+   * - "hybrid": both runtime injection and build-time CSS asset.
+   */
+  mode?: 'runtime' | 'build' | 'hybrid';
+  /**
+   * Options for build-time CSS extraction when mode is "build" or "hybrid".
+   */
+  extract?: TypestylesExtractOptions;
 }
 
 /**
@@ -77,17 +101,38 @@ export function extractNamespaces(code: string): {
  * accept/dispose handlers that invalidate the module's style registrations
  * before re-execution — so updated CSS takes effect without a full reload.
  */
-export default function typestylesPlugin(
-  options: TypestylesPluginOptions = {}
-): Plugin {
-  const { warnDuplicates = true } = options;
+export default function typestylesPlugin(options: TypestylesPluginOptions = {}): Plugin {
+  const { warnDuplicates = true, mode = 'runtime', extract } = options;
 
   // Track namespaces per module for duplicate detection
   const moduleNamespaces = new Map<string, { keys: string[]; prefixes: string[] }>();
+  let resolvedConfig: ResolvedConfig | null = null;
+  let isBuildCommand = false;
 
   return {
     name: 'typestyles',
     enforce: 'pre',
+
+    config(config: UserConfig, env) {
+      isBuildCommand = env.command === 'build';
+
+      if (
+        env.command === 'build' &&
+        (mode === 'build' || mode === 'hybrid')
+      ) {
+        config.define = {
+          ...(config.define ?? {}),
+          // Inlined by the bundler so typestyles sheet skips creating <style> in production
+          __TYPESTYLES_RUNTIME_DISABLED__: JSON.stringify('true'),
+        };
+      }
+
+      return config;
+    },
+
+    configResolved(config) {
+      resolvedConfig = config;
+    },
 
     transform(code, id) {
       // Skip non-JS/TS modules and node_modules
@@ -120,7 +165,8 @@ export default function typestylesPlugin(
 
       moduleNamespaces.set(id, { keys, prefixes });
 
-      // Inject HMR code
+      // Inject HMR code (dev/runtime path). Even in "build" mode this is
+      // effectively dev-only because import.meta.hot is stripped in production.
       const keysJSON = JSON.stringify(keys);
       const prefixesJSON = JSON.stringify(prefixes);
 
@@ -138,6 +184,32 @@ if (import.meta.hot) {
         code: code + hmrCode,
         map: null,
       };
+    },
+
+    async generateBundle() {
+      if (!isBuildCommand) return;
+      if (mode === 'runtime') return;
+      if (!extract || !extract.modules.length) return;
+      if (!resolvedConfig) return;
+
+      const root = resolvedConfig.root ?? process.cwd();
+      const fileName = extract.fileName ?? 'typestyles.css';
+
+      try {
+        const css = await runTypestylesBuild({
+          root,
+          modules: extract.modules,
+        });
+        this.emitFile({
+          type: 'asset',
+          fileName,
+          source: css,
+        });
+      } catch (err) {
+        this.error(
+          `[typestyles] Failed to extract CSS: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
     },
   };
 }

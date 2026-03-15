@@ -1,148 +1,129 @@
 'use client';
 
-import { useState } from 'react';
-import { button } from '../styles/button';
-import { card, cardHeader, cardTitle, cardDescription, cardContent } from '../styles/card';
-import { pageStyles } from '../styles/page';
+import { useMemo, useState } from 'react';
+import {
+  Button,
+  Checkbox,
+  createDesignSystemTheme,
+  DesignSystemProvider,
+  Dialog,
+  dsLayout,
+  dsText,
+  Link,
+  RadioGroup,
+  Select,
+  Switch,
+  Tabs,
+  TextAreaField,
+  TextField,
+} from '@examples/react-design-system';
 
-const EXAMPLES = ['Examples', 'Dashboard', 'Tasks', 'Playground', 'Authentication'] as const;
+const sunsetThemeClass = createDesignSystemTheme('sunset', {
+  color: {
+    accent: '#ea580c',
+    accentHover: '#c2410c',
+    accentForeground: '#fff7ed',
+    focusRing: '#fb923c',
+  },
+});
+
+type ThemeMode = 'light' | 'dark' | 'sunset';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<string>('Examples');
+  const [themeMode, setThemeMode] = useState<ThemeMode>('light');
+  const [accepted, setAccepted] = useState(true);
+  const [autoDeploy, setAutoDeploy] = useState(false);
+  const [framework, setFramework] = useState('next');
+  const [teamRole, setTeamRole] = useState('frontend');
+  const [tabId, setTabId] = useState('consume');
+
+  const tabs = useMemo(
+    () => [
+      { id: 'consume', label: 'Consume', content: 'Apps import one package and use the same accessible components.' },
+      { id: 'tokens', label: 'Token API', content: 'Token references stay stable while themes only override CSS vars.' },
+      { id: 'theme', label: 'Theme API', content: 'createDesignSystemTheme enables per-app brand theming with partial overrides.' },
+    ],
+    [],
+  );
+
+  const customThemeClassName = themeMode === 'sunset' ? sunsetThemeClass : undefined;
+  const providerTheme = themeMode === 'dark' ? 'dark' : 'light';
 
   return (
-    <div className={pageStyles.page}>
-      <div className={pageStyles.container}>
-        {/* Hero Section */}
-        <section className={pageStyles.hero}>
-          <h1 className={pageStyles.h1}>The Foundation for your Design System</h1>
-          <p className={pageStyles.subtitle}>
-            A set of beautifully designed components that you can customize, extend, and build on.
-            Start here then make it your own. Open Source. Open Code.
+    <DesignSystemProvider theme={providerTheme} customThemeClassName={customThemeClassName}>
+      <main className={dsLayout('stack')} style={{ maxWidth: 920, margin: '0 auto', padding: '32px 20px' }}>
+        <header className={dsLayout('stack')} style={{ gap: 10 }}>
+          <h1 className={dsText('title')}>Next.js consuming shared typestyles design system</h1>
+          <p className={dsText('subtitle')}>
+            This example consumes the same React library as Vite and applies app-level custom theming.
           </p>
-          <div className={pageStyles.heroButtons}>
-            <button className={button('default', 'lg')}>New Project</button>
-            <button className={button('outline', 'lg')}>View Components</button>
+          <div className={dsLayout('row')}>
+            <Button intent={themeMode === 'light' ? 'primary' : 'secondary'} onPress={() => setThemeMode('light')}>
+              Light
+            </Button>
+            <Button intent={themeMode === 'dark' ? 'primary' : 'secondary'} onPress={() => setThemeMode('dark')}>
+              Dark
+            </Button>
+            <Button intent={themeMode === 'sunset' ? 'primary' : 'secondary'} onPress={() => setThemeMode('sunset')}>
+              Sunset (custom)
+            </Button>
           </div>
+        </header>
+
+        <section className={dsLayout('section')}>
+          <h2 className={dsText('sectionTitle')}>10 Common Components</h2>
+          <div className={dsLayout('row')}>
+            <Button intent="primary">Button</Button>
+            <Link href="https://react-spectrum.adobe.com/react-aria/">Link</Link>
+            <Dialog
+              triggerLabel="Dialog"
+              title="Shared, themed modal"
+              description="Underlying accessibility behavior comes from react-aria-components."
+            />
+          </div>
+          <div className={dsLayout('row')}>
+            <TextField
+              label="Repository name"
+              placeholder="design-system"
+              description="TextField and Input are wrapped by the shared library."
+            />
+            <Select
+              label="Framework"
+              selectedKey={framework}
+              onSelectionChange={(key) => setFramework(String(key))}
+              options={[
+                { id: 'next', label: 'Next.js' },
+                { id: 'vite', label: 'Vite' },
+                { id: 'remix', label: 'Remix' },
+              ]}
+            />
+          </div>
+          <TextAreaField
+            label="Theme notes"
+            placeholder="Document brand token overrides..."
+            description="Token customization still uses typestyles vars under the hood."
+          />
+          <div className={dsLayout('row')}>
+            <Checkbox isSelected={accepted} onChange={setAccepted}>
+              Checkbox
+            </Checkbox>
+            <Switch isSelected={autoDeploy} onChange={setAutoDeploy}>
+              Switch
+            </Switch>
+          </div>
+          <RadioGroup
+            label="Role"
+            value={teamRole}
+            onChange={setTeamRole}
+            options={[
+              { value: 'frontend', label: 'Frontend Engineer' },
+              { value: 'design', label: 'Product Designer' },
+              { value: 'platform', label: 'Platform Engineer' },
+            ]}
+          />
+          <Tabs tabs={tabs} selectedKey={tabId} onSelectionChange={(key) => setTabId(String(key))} />
         </section>
-
-        {/* Components Section */}
-        <section className={pageStyles.section('border')}>
-          <div className={pageStyles.sectionHeader}>
-            <h2 className={pageStyles.sectionTitle}>Components</h2>
-            <p className={pageStyles.sectionDescription}>
-              A collection of reusable components built with typestyles.
-            </p>
-          </div>
-
-          <div className={pageStyles.tabs}>
-            {EXAMPLES.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={pageStyles.tab(activeTab === tab ? 'active' : false)}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-
-          <div className={pageStyles.toolbar}>
-            <select className={pageStyles.select} defaultValue="neutral">
-              <option value="neutral">Neutral</option>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-            </select>
-          </div>
-
-          <div className={pageStyles.grid}>
-            <div className={pageStyles.featureCard}>
-              <div className={pageStyles.featureIcon()}>B</div>
-              <h3 className={pageStyles.featureTitle}>Button</h3>
-              <p className={pageStyles.featureDescription}>
-                Displays a button or a component that looks like a button.
-              </p>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <button className={button('default')}>Default</button>
-                <button className={button('secondary')}>Secondary</button>
-                <button className={button('outline')}>Outline</button>
-                <button className={button('ghost')}>Ghost</button>
-              </div>
-            </div>
-
-            <div className={pageStyles.featureCard}>
-              <div className={pageStyles.featureIcon()}>C</div>
-              <h3 className={pageStyles.featureTitle}>Card</h3>
-              <p className={pageStyles.featureDescription}>
-                Contains content and actions about a single subject.
-              </p>
-              <div className={card}>
-                <div className={cardHeader}>
-                  <h4 className={cardTitle}>Card Title</h4>
-                  <p className={cardDescription}>Card description goes here</p>
-                </div>
-                <div className={cardContent} />
-              </div>
-            </div>
-
-            <div className={pageStyles.featureCard}>
-              <div className={pageStyles.featureIcon('accent')}>T</div>
-              <h3 className={pageStyles.featureTitle}>Theming</h3>
-              <p className={pageStyles.featureDescription}>
-                Support for light and dark mode with CSS variables.
-              </p>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <button className={button('outline', 'sm')}>Light</button>
-                <button className={button('default', 'sm')}>Dark</button>
-              </div>
-            </div>
-
-            <div className={pageStyles.featureCard}>
-              <div className={pageStyles.featureIcon('success')}>✓</div>
-              <h3 className={pageStyles.featureTitle}>Accessible</h3>
-              <p className={pageStyles.featureDescription}>
-                Built with accessibility in mind. Follows WAI-ARIA patterns.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Code Section */}
-        <section className={pageStyles.section('border')}>
-          <div className={pageStyles.sectionHeader}>
-            <h2 className={pageStyles.sectionTitle}>Easy to use</h2>
-            <p className={pageStyles.sectionDescription}>
-              Define styles with a simple, type-safe API.
-            </p>
-          </div>
-
-          <div className={pageStyles.codeBlock}>
-            <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{`import { styles } from 'typestyles';
-
-// Single class — no variants needed
-const card = styles.class('card', {
-  padding: '1rem',
-  borderRadius: '0.5rem',
-  backgroundColor: 'white',
-});
-<div className={card} />
-
-// With variants — base + variants, no 'base' key
-const button = styles.create('button',
-  { padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: '500' },
-  {
-    default: { backgroundColor: 'hsl(222.2 47.4% 11.2%)', color: 'white' },
-    outline: { border: '1px solid', backgroundColor: 'transparent' },
-  }
-);
-<button className={button('default')} />  // base always included`}</pre>
-          </div>
-        </section>
-
-        <footer className={pageStyles.footer}>
-          <p>Built with typestyles. Open source. MIT License.</p>
-        </footer>
-      </div>
-    </div>
+      </main>
+    </DesignSystemProvider>
   );
 }
