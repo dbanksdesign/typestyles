@@ -38,6 +38,35 @@ export function createClass(name: string, properties: CSSProperties): string {
 }
 
 /**
+ * Create a deterministic hashed class from a style object.
+ * The same style object shape+values always returns the same class name.
+ *
+ * Optional `label` is appended as a readable prefix for debugging.
+ *
+ * @example
+ * ```ts
+ * const button = styles.hashClass({
+ *   padding: '8px 12px',
+ *   borderRadius: '8px',
+ * });
+ *
+ * const danger = styles.hashClass(
+ *   { backgroundColor: 'red', color: 'white' },
+ *   'danger'
+ * );
+ * ```
+ */
+export function createHashClass(properties: CSSProperties, label?: string): string {
+  const serialized = stableSerialize(properties);
+  const hash = hashString(serialized);
+  const className = label ? `ts-${sanitizeLabel(label)}-${hash}` : `ts-${hash}`;
+  const selector = `.${className}`;
+  const rules = serializeStyle(selector, properties);
+  insertRules(rules);
+  return className;
+}
+
+/**
  * Create a style group and return a selector function.
  *
  * **Two-argument form** (definitions object with 'base' and variants):
@@ -154,4 +183,31 @@ export function compose(
 
     return classNames.join(' ');
   };
+}
+
+function stableSerialize(value: unknown): string {
+  if (value === null) return 'null';
+  if (typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map((v) => stableSerialize(v)).join(',')}]`;
+
+  const entries = Object.entries(value as Record<string, unknown>)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${JSON.stringify(k)}:${stableSerialize(v)}`);
+
+  return `{${entries.join(',')}}`;
+}
+
+function hashString(input: string): string {
+  // FNV-1a 32-bit hash, compact base36 output.
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < input.length; i++) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+function sanitizeLabel(label: string): string {
+  const normalized = label.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+  return normalized.replace(/-+/g, '-').replace(/^-|-$/g, '') || 'style';
 }

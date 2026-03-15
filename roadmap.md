@@ -32,9 +32,28 @@ Typestyles occupies a unique position in the CSS-in-JS landscape:
 
 ### 2. Zero-Runtime Build Option
 
-- Add `@typestyles/build` package for build-time CSS extraction
-- Generates static CSS files at build time (like vanilla-extract)
-- Addresses the "runtime overhead" concern that led companies to abandon Emotion
+- **Goal**: Optional "no runtime CSS-in-JS" mode that still uses the same `styles`, `tokens`, and `keyframes` APIs.
+- **Package**: `@typestyles/build` for build-time CSS extraction (CLI + Node API).
+- **Output**:
+  - Generates static CSS files at build time (like vanilla-extract).
+  - Emits a manifest mapping namespaces → class name strings so application code can stay untouched.
+- **Integration – Vite**
+  - Extend `@typestyles/vite` with a `mode` option: `"runtime"` (default), `"build"`, `"hybrid"`.
+  - In `"build"` mode, the plugin:
+    - Scans modules that import `typestyles` (re-using the existing namespace extraction logic).
+    - Runs a Node-side collector that imports those modules, calls `getRegisteredCss`, and writes `typestyles.css`.
+    - Injects the CSS file as a virtual asset linked from the Vite bundle.
+    - Ensures browser bundles use a no-op sheet implementation so there is effectively zero runtime styling cost.
+- **Integration – Next.js**
+  - Add a `@typestyles/next/build` entrypoint that:
+    - Provides a Next.js-compatible `build` helper to generate a CSS file + manifest during `next build`.
+    - Hooks into `@typestyles/next/server` utilities (like `getRegisteredCss`) to collect styles.
+  - Recommended wiring:
+    - Use the manifest to keep using `styles.*` APIs in components without runtime insertion on the client.
+    - Inject the generated CSS via Next.js `app` directory layout (e.g. global import in `layout.tsx` or metadata styles).
+- **Motivation**
+  - Addresses the "runtime overhead" concern that led companies to abandon Emotion/styled-components.
+  - Keeps incremental adoption: projects can start in runtime mode and later switch specific routes or the whole app to build mode.
 
 ### 3. Utils API
 
@@ -61,6 +80,19 @@ Typestyles occupies a unique position in the CSS-in-JS landscape:
 
 - Optional atomic/class merging output (like StyleX)
 - CSS size plateaus as codebase grows
+
+#### 6.1 Near-term hashed class prototype
+
+- Add `styles.hashClass(style, label?)` as an opt-in API for deterministic hashed class names.
+- Goal: unlock StyleX/emotion-like ergonomics without changing `styles.create` semantics.
+- Initial scope (prototype):
+  - Hash full style objects into one class (not atomic splitting yet).
+  - Keep compatibility with runtime and build extraction paths.
+  - Optional label for debuggability in class output.
+- Follow-up work:
+  - Add collision tests + explicit development warnings.
+  - Add HMR invalidation support in bundler plugins for hash-based keys.
+  - Explore atomic decomposition as a second phase (`styles.atomic` candidate).
 
 ### 7. Framework-Specific Packages
 

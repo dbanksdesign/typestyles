@@ -1,0 +1,55 @@
+{
+  "name": "@typestyles/rollup",
+  "version": "0.1.0",
+  "description": "Rollup and Rolldown plugin for typestyles",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean --external typestyles,@typestyles/build-runner",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "rollup",
+    "rolldown",
+    "typestyles",
+    "plugin",
+    "css-in-js"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dbanksdesign/typestyles",
+    "directory": "packages/rollup"
+  },
+  "peerDependencies": {
+    "rollup": ">=4.0.0"
+  },
+  "dependencies": {
+    "@typestyles/build-runner": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.1",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^3.0.0",
+    "rollup": "^4.0.0"
+  }
+}

@@ -1,4 +1,4 @@
-import { createStyles, createClass, compose } from './styles.js';
+import { createStyles, createClass, createHashClass, compose } from './styles.js';
 import { createTokens, useTokens, createTheme } from './tokens.js';
 import { createKeyframes } from './keyframes.js';
 import * as colorFns from './color.js';
@@ -38,12 +38,15 @@ export type { ColorMixSpace } from './color.js';
  *   primary: { backgroundColor: '#0066ff' },
  * });
  *
- * <button className={button('base', 'primary')}>
+ * const hashed = styles.hashClass({ display: 'inline-flex' }, 'button');
+ *
+ * <button className={`${button('base', 'primary')} ${hashed}`}>
  * ```
  */
 export const styles = {
   create: createStyles,
   class: createClass,
+  hashClass: createHashClass,
   component: createComponent,
   compose,
 } as const;

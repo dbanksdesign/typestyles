@@ -6,6 +6,16 @@ const STYLE_ELEMENT_ID = 'typestyles';
 const insertedRules = new Set<string>();
 
 /**
+ * Whether runtime DOM insertion is disabled (for build-time/zero-runtime mode).
+ * The Vite plugin (mode: 'build') defines __TYPESTYLES_RUNTIME_DISABLED__ as the
+ * string "true" at build time, so this is true in production and no <style> is created.
+ */
+declare const __TYPESTYLES_RUNTIME_DISABLED__: string | undefined;
+const RUNTIME_DISABLED =
+  typeof __TYPESTYLES_RUNTIME_DISABLED__ !== 'undefined' &&
+  __TYPESTYLES_RUNTIME_DISABLED__ === 'true';
+
+/**
  * Buffer of CSS rules waiting to be flushed.
  */
 let pendingRules: string[] = [];
@@ -69,7 +79,7 @@ function flush(): void {
     return;
   }
 
-  if (!isBrowser) return;
+  if (!isBrowser || RUNTIME_DISABLED) return;
 
   const el = getStyleElement();
   const sheet = el.sheet;
@@ -99,7 +109,7 @@ function scheduleFlush(): void {
     return;
   }
 
-  if (isBrowser) {
+  if (isBrowser && !RUNTIME_DISABLED) {
     // Use microtask for fast, batched insertion
     queueMicrotask(flush);
   }
@@ -111,8 +121,9 @@ function scheduleFlush(): void {
 export function insertRule(key: string, css: string): void {
   if (insertedRules.has(key)) return;
   insertedRules.add(key);
-  pendingRules.push(css);
   allRules.push(css);
+  if (RUNTIME_DISABLED && !ssrBuffer) return;
+  pendingRules.push(css);
   scheduleFlush();
 }
 
@@ -124,9 +135,11 @@ export function insertRules(rules: Array<{ key: string; css: string }>): void {
   for (const { key, css } of rules) {
     if (insertedRules.has(key)) continue;
     insertedRules.add(key);
-    pendingRules.push(css);
     allRules.push(css);
-    added = true;
+    if (!RUNTIME_DISABLED || ssrBuffer) {
+      pendingRules.push(css);
+      added = true;
+    }
   }
   if (added) scheduleFlush();
 }
@@ -135,7 +148,7 @@ export function insertRules(rules: Array<{ key: string; css: string }>): void {
  * Replace a CSS rule (used for HMR). Removes the old rule and inserts the new one.
  */
 export function replaceRule(key: string, css: string): void {
-  if (!isBrowser) return;
+  if (!isBrowser || RUNTIME_DISABLED) return;
 
   insertedRules.delete(key);
 

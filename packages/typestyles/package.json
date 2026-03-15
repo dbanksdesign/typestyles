@@ -36,6 +36,16 @@
         "types": "./dist/hmr.d.cts",
         "default": "./dist/hmr.cjs"
       }
+    },
+    "./build": {
+      "import": {
+        "types": "./dist/build.d.ts",
+        "default": "./dist/build.js"
+      },
+      "require": {
+        "types": "./dist/build.d.cts",
+        "default": "./dist/build.cjs"
+      }
     }
   },
   "files": [

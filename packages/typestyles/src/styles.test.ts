@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createStyles, createClass, compose } from './styles.js';
+import { createStyles, createClass, createHashClass, compose } from './styles.js';
 import { reset, flushSync } from './sheet.js';
 
 describe('createClass', () => {
@@ -156,6 +156,41 @@ describe('createStyles', () => {
         'btn2-base btn2-primary'
       );
     });
+  });
+});
+
+describe('createHashClass', () => {
+  beforeEach(() => {
+    reset();
+  });
+
+  it('returns deterministic class names for identical styles', () => {
+    const a = createHashClass({ color: 'red', padding: '8px' });
+    const b = createHashClass({ color: 'red', padding: '8px' });
+    expect(a).toBe(b);
+  });
+
+  it('returns different class names for different styles', () => {
+    const a = createHashClass({ color: 'red' });
+    const b = createHashClass({ color: 'blue' });
+    expect(a).not.toBe(b);
+  });
+
+  it('supports labels for readability', () => {
+    const cls = createHashClass({ color: 'red' }, 'button-primary');
+    expect(cls.startsWith('ts-button-primary-')).toBe(true);
+  });
+
+  it('injects CSS for the hashed selector', () => {
+    const cls = createHashClass({ color: 'red', fontSize: '14px' }, 'hash-test');
+    flushSync();
+
+    const style = document.getElementById('typestyles') as HTMLStyleElement;
+    const rule = Array.from(style.sheet?.cssRules ?? []).find(
+      (r) => r instanceof CSSStyleRule && r.selectorText === `.${cls}`,
+    ) as CSSStyleRule;
+    expect(rule).toBeDefined();
+    expect(rule.style.color).toBe('red');
   });
 });
 

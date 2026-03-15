@@ -6,13 +6,20 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:runtime": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@examples/react-design-system": "workspace:*",
+    "react": "latest",
+    "react-dom": "latest",
     "typestyles": "workspace:*"
   },
   "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
     "@typestyles/vite": "workspace:*",
+    "@vitejs/plugin-react": "5.2.0",
     "typescript": "^5.4.0",
     "vite": "^6.0.0"
   }
