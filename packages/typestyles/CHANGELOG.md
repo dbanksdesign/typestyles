@@ -1,5 +1,35 @@
 # typestyles
 
+## 0.4.0
+
+### Minor Changes
+
+- 0bb563c: Updating bundler integrations and adding examples
+- ee22964: Add a new `styles.withUtils(utils)` API for defining typed style shorthands (for example `marginX`, `paddingY`, and `size`) and using them with `styles.class`, `styles.create`, and `styles.hashClass`.
+- 5b71381: Add configurable class naming modes for gradual adoption across packages:
+  - `configureClassNaming({ mode, prefix?, scopeId? })` with modes `semantic` (default), `hashed`, and `atomic`.
+  - Applies to `styles.create`, `styles.class`, `styles.component` (including slot recipes), and affects `prefix` / optional `scopeId` mixing for `styles.hashClass`.
+  - Export `getClassNamingConfig` and `resetClassNaming` (for tests).
+
+  Documentation:
+  - New site page `docs/content/docs/class-naming.md` (sidebar: Class naming) describing modes, `scopeId`, SSR, and testing.
+  - Cross-links from Getting Started, Styles, Recipes, Atomic CSS utilities, API Reference, and Testing.
+
+- 3e26285: Unify variant APIs around `styles.component` and add first-class multipart slot support via `slots`.
+
+  Breaking changes:
+  - Remove `styles.recipe` in favor of `styles.component`.
+  - Remove recipe type aliases (`RecipeConfig`, `RecipeFunction`, `RecipeVariants`) and replace with component terminology (`ComponentVariants`, plus new slot component types).
+
+  New capability:
+  - `styles.component(name, { slots, base, variants, compoundVariants, defaultVariants })` now returns per-slot class maps for multipart components.
+
+  Naming update for slot mode:
+  - Slot base classes now use `{namespace}-{slot}` (without `-base`).
+
+- 4f29bb7: Add `styles.class()` for single-class definitions and a three-argument `styles.create(name, base, variants)` API that automatically includes base styles, then updated the Next.js example to use the new DX without affecting published packages.
+- 8f0e9a3: feat: styles.recipe()
+
 ## 0.3.0
 
 ### Minor Changes
