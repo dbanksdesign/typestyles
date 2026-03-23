@@ -29,7 +29,9 @@
     "src"
   ],
   "scripts": {
-    "build": "tsup"
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "next",
@@ -62,9 +64,10 @@
     }
   },
   "devDependencies": {
+    "vitest": "^3.0.0",
     "@types/node": "^25.2.1",
-    "@types/react": "^18.0.0",
-    "@types/react-dom": "^18.0.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
     "next": "^14.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

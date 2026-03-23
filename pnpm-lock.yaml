@@ -291,10 +291,10 @@ importers:
         specifier: ^25.2.1
         version: 25.2.1
       '@types/react':
-        specifier: ^18.0.0
+        specifier: ^18.3.12
         version: 18.3.28
       '@types/react-dom':
-        specifier: ^18.0.0
+        specifier: ^18.3.1
         version: 18.3.7(@types/react@18.3.28)
       next:
         specifier: ^14.0.0
@@ -311,6 +311,9 @@ importers:
       typescript:
         specifier: ^5.4.0
         version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@25.2.1)(jiti@2.6.1)(jsdom@25.0.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/open-props:
     dependencies:
