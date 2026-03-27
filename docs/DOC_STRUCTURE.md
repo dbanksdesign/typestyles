@@ -8,6 +8,7 @@
 ## Core Concepts
 
 - styles.md
+- components.md
 - tokens.md
 - open-props.md
 - keyframes.md
@@ -30,7 +31,7 @@
 - typescript-tips.md
 - troubleshooting.md
 
-## Examples & Recipes
+## Examples
 
 - react-integration.md
 - component-library.md

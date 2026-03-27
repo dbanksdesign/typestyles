@@ -25,8 +25,16 @@ const { docsBySlug, currentSlug, appearanceBootstrap } = Astro.props;
     <span className={sidebar('searchIcon')} aria-hidden="true">
       <Search size={16} stroke-width={2} />
     </span>
-    <input type="search" placeholder="Search docs..." className={sidebar('searchInput')} />
-    <span className={sidebar('searchKbd')}>⌘K</span>
+    <button
+      type="button"
+      id="docs-search-trigger"
+      className={sidebar('searchTrigger')}
+      aria-label="Open search (Command+K)"
+      aria-keyshortcuts="Meta+K Control+K"
+    >
+      Search docs…
+    </button>
+    <span className={sidebar('searchKbd')} aria-hidden="true">⌘K</span>
   </div>
   <nav
     className={sidebar('nav')}

@@ -1,13 +1,13 @@
 ---
-title: Recipes
+title: Components
 description: Build typed variant APIs with styles.component
 ---
 
-# Recipes
+# Components
 
 `styles.component()` is the first-class API for variant-driven component styling.
 
-If you need flat named variants (without dimensioned recipe config), see [Styles](/docs/styles).
+If you need flat named variants (without a dimensioned `variants` config), see [Styles](/docs/styles).
 
 Use it when you want a typed interface with:
 
@@ -16,7 +16,7 @@ Use it when you want a typed interface with:
 - `compoundVariants` for combinations
 - `defaultVariants`
 
-## Basic recipe
+## Basic component
 
 ```ts
 import { styles } from 'typestyles';
@@ -109,9 +109,41 @@ input(); // "input-base input-invalid-false"
 input({ invalid: true }); // "input-base input-invalid-true"
 ```
 
-## Data and ARIA selectors inside recipes
+## Multipart `slots`
 
-Recipes use the same selector model as `styles.create`.
+Pass a `slots` array for components with multiple parts (for example root, trigger, and panel). `base`, `variants`, `compoundVariants`, and `defaultVariants` can each target specific slot keys.
+
+```ts
+const tabs = styles.component('tabs', {
+  slots: ['root', 'trigger', 'content'] as const,
+  base: {
+    root: { display: 'grid' },
+    trigger: { cursor: 'pointer' },
+  },
+  variants: {
+    size: {
+      sm: {
+        trigger: { fontSize: '12px' },
+        content: { padding: '8px' },
+      },
+      lg: {
+        trigger: { fontSize: '16px' },
+        content: { padding: '12px' },
+      },
+    },
+  },
+  defaultVariants: { size: 'sm' },
+});
+
+const c = tabs();
+c.root; // class string for the root element
+c.trigger;
+c.content;
+```
+
+## Data and ARIA selectors
+
+`styles.component` uses the same selector model as `styles.create`.
 
 ```ts
 const accordionTrigger = styles.component('accordion-trigger', {

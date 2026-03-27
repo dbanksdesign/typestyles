@@ -71,7 +71,13 @@ const { title, appearanceBootstrap, typestylesCssHref } = Astro.props;
   })();
 </script>
 <script>
+  import { ensureDocumentStylesAttached } from 'typestyles';
+
   if (import.meta.env.DEV) {
     void import('../../typestyles-entry');
   }
+
+  document.addEventListener('astro:after-swap', () => {
+    ensureDocumentStylesAttached();
+  });
 </script>

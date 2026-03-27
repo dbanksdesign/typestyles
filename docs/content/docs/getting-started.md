@@ -48,7 +48,7 @@ Quick rule of thumb:
 See also:
 
 - [Styles](/docs/styles)
-- [Recipes](/docs/recipes)
+- [Components](/docs/components)
 - [Class naming](/docs/class-naming) — semantic vs hashed output for `styles.create` / `styles.component`
 - [Migration Guide](/docs/migration)
 

@@ -15,6 +15,7 @@ import DocsSidebar from '../components/docs/DocsSidebar.astro';
 import DocsCodeBlockCopy from '../components/docs/DocsCodeBlockCopy.astro';
 import DocsMobileSidebar from '../components/docs/DocsMobileSidebar.astro';
 import DocsToc from '../components/docs/DocsToc.astro';
+import DocsSearchPalette from '../components/docs/DocsSearchPalette.astro';
 import { codeHljsScope } from '@examples/design-system';
 
 type Props = {
@@ -47,6 +48,7 @@ const appearanceBootstrap = {
   clear: docsAppearanceClassesToClear.filter(Boolean),
   map: appearanceMap,
 };
+
 ---
 
 <html lang="en">
@@ -101,5 +103,7 @@ const appearanceBootstrap = {
       sidebarRootOpenClass={sidebarRootOpenClass}
       sidebarBackdropVisibleClass={sidebarBackdropVisibleClass}
     />
+
+    <DocsSearchPalette />
   </body>
 </html>

@@ -144,12 +144,12 @@ Below is a practical feature map to support the full range of approaches.
 - Ensure all CSS attribute selector operators are supported.
 - Add type-safe helpers for common state selectors (optional convenience layer).
 
-### B) Variant and recipe system
+### B) Variant and component system
 
-- First-class `recipe` API:
+- First-class `styles.component` API:
   - `base`, `variants`, `compoundVariants`, `defaultVariants`
 - Support boolean variants and arrays in compound matching.
-- Add slot recipe support for multipart components:
+- Multipart components via `slots`:
   - Ex: `slots: ['root', 'trigger', 'content']`
 - Include class output introspection for tooling/debug docs.
 
@@ -185,15 +185,15 @@ Below is a practical feature map to support the full range of approaches.
   - Duplicate/conflicting variant definitions
   - Invalid selector/state combinations
 - Migration helpers:
-  - from CVA recipe config
+  - from CVA variant config
   - from CSS Modules naming maps
-  - from utility-class lists to typed recipes
+  - from utility-class lists to typed component variants
 
 ## Suggested near-term roadmap for this area
 
 1. **Selector completeness pass**: guarantee full attribute selector support in style objects.
-2. **Recipe API v1**: ship `variants` + `compoundVariants` + `defaultVariants`.
-3. **Slot recipes + data-part guidance**: target headless UI patterns directly.
+2. **Component API v1**: ship `variants` + `compoundVariants` + `defaultVariants`.
+3. **`slots` + data-part guidance**: target headless UI patterns directly.
 4. **Naming strategy options**: semantic + scoped hashed + atomic prototype.
 5. **Lint and migration tooling**: make adoption safe in real production codebases.
 
@@ -205,7 +205,7 @@ When implementing these features, test across:
 - Rendering: SSR, CSR, streaming/hydration
 - State hooks: classes only, data attributes, ARIA attributes, mixed
 - Naming modes: readable semantic, hashed scoped, atomic
-- Authoring modes: recipe variants, utility composition, hand-written selectors
+- Authoring modes: component variants, utility composition, hand-written selectors
 
 ## Closing guidance
 
@@ -213,7 +213,7 @@ The strongest direction for `typestyles` is not choosing one CSS philosophy. It 
 
 - semantic component classes,
 - utility-style composition,
-- typed recipe variants,
+- typed component variants,
 - and stateful attribute selectors,
 
 all while preserving predictable output and excellent TypeScript ergonomics.

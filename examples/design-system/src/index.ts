@@ -16,11 +16,15 @@ export {
   type DesignRadiusValues,
   type DesignShadowValues,
   type DesignSpaceValues,
+  type DesignDurationValues,
+  type DesignEasingValues,
+  type DesignTransitionValues,
 } from './tokens';
 export { proseContent } from './proseContent';
 export { codeHljsScope } from './codeHighlight';
 export { dsLayout, dsText } from './styles';
-export { dsButton, linkButton } from './recipes';
+export { commandPalette } from './commandPalette';
+export { dsButton, linkButton } from './button';
 export { codeBlock } from './codeBlock';
 export { alert } from './alert';
 export { badge } from './badge';

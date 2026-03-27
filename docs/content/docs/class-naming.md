@@ -11,7 +11,7 @@ Naming applies to:
 
 - [`styles.create`](/docs/styles)
 - [`styles.class`](/docs/styles)
-- [`styles.component`](/docs/recipes) (single-part and [slot](/docs/recipes) recipes)
+- [`styles.component`](/docs/components) (single-part components and [multipart `slots`](/docs/components))
 
 It does **not** change [`@typestyles/props`](/docs/atomic-css) utility naming; that package uses its own `createProps` namespace pattern.
 
@@ -59,7 +59,7 @@ Human-readable, stable names derived from the namespace and variant segment:
 
 - `styles.create('card', { base: { … } })` → `card-base`
 - `styles.component('button', { … })` → `button-base`, `button-intent-primary`, etc.
-- Slot recipes → `{namespace}-{slot}`, `{namespace}-{slot}-{dimension}-{option}`, etc.
+- Components with `slots` → `{namespace}-{slot}`, `{namespace}-{slot}-{dimension}-{option}`, etc.
 
 ### `hashed`
 
@@ -71,7 +71,7 @@ Use this when you want shorter, scoped names while still recognizing the namespa
 
 **`{prefix}-{hash}`** only—no namespace slug in the string. Same hash inputs as `hashed`, so behavior is equally deterministic.
 
-This mode is a **prototype** for hash-only ergonomics: each recipe rule is still **one class per chunk of CSS** (the same as today), not one utility class per CSS declaration. True per-property atomic output is a separate roadmap area; for Tailwind-style utilities, use [`@typestyles/props`](/docs/atomic-css).
+This mode is a **prototype** for hash-only ergonomics: each component rule is still **one class per chunk of CSS** (the same as today), not one utility class per CSS declaration. True per-property atomic output is a separate roadmap area; for Tailwind-style utilities, use [`@typestyles/props`](/docs/atomic-css).
 
 ## `styles.hashClass`
 
@@ -108,6 +108,6 @@ See also [Testing](/docs/testing).
 ## Related
 
 - [Styles](/docs/styles) — `styles.create`, `styles.class`, `compose`, `withUtils`
-- [Recipes](/docs/recipes) — `styles.component` and slot recipes
+- [Components](/docs/components) — `styles.component` and `slots`
 - [Atomic CSS Utilities](/docs/atomic-css) — `@typestyles/props` (separate naming scheme)
 - [API Reference](/docs/api-reference) — export list

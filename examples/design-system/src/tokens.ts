@@ -1,5 +1,20 @@
 import { tokens } from 'typestyles';
 
+/**
+ * Derived `ds-color` entries that reference other color vars — same string on every palette,
+ * so hovers, placeholders, and overlays track theme without per-palette hex duplication.
+ */
+const dsColorDerived = {
+  /** Soft accent surface (command rows, subtle highlights). */
+  accentWash: 'color-mix(in srgb, var(--ds-color-accent) 14%, var(--ds-color-surface))',
+  /** Placeholders and decorative icons, quieter than textMuted. */
+  textPlaceholder: 'color-mix(in srgb, var(--ds-color-text-muted) 70%, var(--ds-color-surface))',
+  /** Modal / palette scrim: page bg blended into overlay. */
+  backdropTint: 'color-mix(in srgb, var(--ds-color-bg) 35%, var(--ds-color-overlay))',
+  /** Search hit and inline marker background. */
+  markHighlight: 'color-mix(in srgb, var(--ds-color-accent) 28%, transparent)',
+} as const;
+
 const colorValues = {
   bg: '#ffffff',
   surface: '#ffffff',
@@ -23,6 +38,7 @@ const colorValues = {
   alertDangerFill: '#b91c1c',
   focusRing: '#60a5fa',
   overlay: 'rgb(15 23 42 / 0.55)',
+  ...dsColorDerived,
 } as const;
 
 const spaceValues = {
@@ -54,6 +70,34 @@ const fontValues = {
 const shadowValues = {
   sm: '0 1px 2px rgb(15 23 42 / 0.08)',
   md: '0 8px 30px rgb(15 23 42 / 0.16)',
+  /** Floating overlays (command palette) — depth follows current `overlay` color. */
+  elevated: '0 24px 48px color-mix(in srgb, var(--ds-color-overlay) 90%, transparent)',
+} as const;
+
+const durationValues = {
+  /** List rows, micro interactions */
+  fast: '80ms',
+  /** Controls, links */
+  medium: '140ms',
+  /** Overlays, modals */
+  slow: '220ms',
+} as const;
+
+const easingValues = {
+  standard: 'ease',
+  emphasized: 'cubic-bezier(0.16, 1, 0.3, 1)',
+} as const;
+
+/** Preset `transition` values; reference `ds-duration` / `ds-easing` so timing can be themed. */
+const transitionValues = {
+  /** Full-screen overlay shell (opacity + visibility). */
+  overlayFade: `opacity var(--ds-duration-slow) var(--ds-easing-standard), visibility var(--ds-duration-slow) var(--ds-easing-standard)`,
+  /** Centered panel fade-in (modals, command palette). */
+  panelEnter: `opacity var(--ds-duration-slow) var(--ds-easing-emphasized)`,
+  /** Scrim opacity only. */
+  backdrop: `opacity var(--ds-duration-slow) var(--ds-easing-standard)`,
+  /** Quick background change (e.g. command row hover). */
+  surfaceFast: `background-color var(--ds-duration-fast) var(--ds-easing-standard)`,
 } as const;
 
 /** Semantic colors for syntax highlighting (oklch ramps). */
@@ -102,12 +146,18 @@ export type DesignSpaceValues = typeof spaceValues;
 export type DesignRadiusValues = typeof radiusValues;
 export type DesignFontValues = typeof fontValues;
 export type DesignShadowValues = typeof shadowValues;
+export type DesignDurationValues = typeof durationValues;
+export type DesignEasingValues = typeof easingValues;
+export type DesignTransitionValues = typeof transitionValues;
 export type DesignCodeSyntaxValues = typeof codeSyntaxLightValues;
 type DesignColorOverrides = Partial<Record<keyof DesignColorValues, string>>;
 type DesignSpaceOverrides = Partial<Record<keyof DesignSpaceValues, string>>;
 type DesignRadiusOverrides = Partial<Record<keyof DesignRadiusValues, string>>;
 type DesignFontOverrides = Partial<Record<keyof DesignFontValues, string>>;
 type DesignShadowOverrides = Partial<Record<keyof DesignShadowValues, string>>;
+type DesignDurationOverrides = Partial<Record<keyof DesignDurationValues, string>>;
+type DesignEasingOverrides = Partial<Record<keyof DesignEasingValues, string>>;
+type DesignTransitionOverrides = Partial<Record<keyof DesignTransitionValues, string>>;
 type DesignCodeSyntaxOverrides = Partial<Record<keyof DesignCodeSyntaxValues, string>>;
 
 export const designTokens = {
@@ -116,6 +166,9 @@ export const designTokens = {
   radius: tokens.create('ds-radius', radiusValues),
   font: tokens.create('ds-font', fontValues),
   shadow: tokens.create('ds-shadow', shadowValues),
+  duration: tokens.create('ds-duration', durationValues),
+  easing: tokens.create('ds-easing', easingValues),
+  transition: tokens.create('ds-transition', transitionValues),
   codeSyntax: tokens.create('ds-code-syntax', codeSyntaxLightValues),
 } as const;
 
@@ -125,6 +178,9 @@ export type DesignThemeOverrides = Partial<{
   radius: DesignRadiusOverrides;
   font: DesignFontOverrides;
   shadow: DesignShadowOverrides;
+  duration: DesignDurationOverrides;
+  easing: DesignEasingOverrides;
+  transition: DesignTransitionOverrides;
   codeSyntax: DesignCodeSyntaxOverrides;
 }>;
 
@@ -146,6 +202,15 @@ export function createDesignSystemTheme(name: string, overrides: DesignThemeOver
   if (overrides.shadow) {
     themeOverrides['ds-shadow'] = overrides.shadow as Record<string, string>;
   }
+  if (overrides.duration) {
+    themeOverrides['ds-duration'] = overrides.duration as Record<string, string>;
+  }
+  if (overrides.easing) {
+    themeOverrides['ds-easing'] = overrides.easing as Record<string, string>;
+  }
+  if (overrides.transition) {
+    themeOverrides['ds-transition'] = overrides.transition as Record<string, string>;
+  }
   if (overrides.codeSyntax) {
     themeOverrides['ds-code-syntax'] = overrides.codeSyntax as Record<string, string>;
   }
@@ -153,7 +218,7 @@ export function createDesignSystemTheme(name: string, overrides: DesignThemeOver
   return tokens.createTheme(`ds-${name}`, themeOverrides);
 }
 
-/** Dark `ds-color` overrides — re-use in apps (e.g. docs `theme-docs-dark`) so recipes stay in sync. */
+/** Dark `ds-color` overrides — re-use in apps (e.g. docs `theme-docs-dark`) so component styles stay in sync. */
 export const designColorDarkValues = {
   bg: '#020617',
   surface: '#0f172a',
@@ -175,6 +240,7 @@ export const designColorDarkValues = {
   alertDangerFill: '#991b1b',
   focusRing: '#93c5fd',
   overlay: 'rgb(2 6 23 / 0.65)',
+  ...dsColorDerived,
 } as const satisfies Partial<Record<keyof typeof colorValues, string>>;
 
 const forestLight = {
@@ -198,6 +264,7 @@ const forestLight = {
   alertDangerFill: '#b91c1c',
   focusRing: '#34d399',
   overlay: 'rgb(15 31 23 / 0.55)',
+  ...dsColorDerived,
 } as const satisfies Record<keyof typeof colorValues, string>;
 
 const forestDark = {
@@ -221,6 +288,7 @@ const forestDark = {
   alertDangerFill: '#991b1b',
   focusRing: '#6ee7b7',
   overlay: 'rgb(5 28 20 / 0.65)',
+  ...dsColorDerived,
 } as const satisfies Record<keyof typeof colorValues, string>;
 
 const roseLight = {
@@ -244,6 +312,7 @@ const roseLight = {
   alertDangerFill: '#991b1b',
   focusRing: '#fb7185',
   overlay: 'rgb(28 10 15 / 0.5)',
+  ...dsColorDerived,
 } as const satisfies Record<keyof typeof colorValues, string>;
 
 const roseDark = {
@@ -267,6 +336,7 @@ const roseDark = {
   alertDangerFill: '#991b1b',
   focusRing: '#fb7185',
   overlay: 'rgb(20 8 13 / 0.65)',
+  ...dsColorDerived,
 } as const satisfies Record<keyof typeof colorValues, string>;
 
 const amberLight = {
@@ -290,6 +360,7 @@ const amberLight = {
   alertDangerFill: '#b91c1c',
   focusRing: '#f59e0b',
   overlay: 'rgb(28 20 16 / 0.55)',
+  ...dsColorDerived,
 } as const satisfies Record<keyof typeof colorValues, string>;
 
 const amberDark = {
@@ -313,6 +384,7 @@ const amberDark = {
   alertDangerFill: '#991b1b',
   focusRing: '#fbbf24',
   overlay: 'rgb(15 10 6 / 0.65)',
+  ...dsColorDerived,
 } as const satisfies Record<keyof typeof colorValues, string>;
 
 /**

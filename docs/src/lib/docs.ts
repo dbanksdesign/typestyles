@@ -39,7 +39,7 @@ const marked = new Marked(
 
 function wrapCodeBlocks(html: string): string {
   // Marked emits <pre><code class="hljs language-xyz">…</code></pre> for fenced blocks.
-  // We wrap that structure so the docs site can share a framework-agnostic CodeBlock recipe.
+  // We wrap that structure so the docs site can share framework-agnostic code block styles.
   return html.replace(
     /<pre><code class="hljs language-([^"]*)">([\s\S]*?)<\/code><\/pre>/g,
     (_match, lang: string, highlighted: string) => {

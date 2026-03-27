@@ -7,9 +7,9 @@ description: Create and compose style variants with styles.create
 
 The `styles` API lets you define named style variants and compose them at the call site.
 
-For typed variant dimensions (`variants`, `compoundVariants`, `defaultVariants`), see [Recipes](/docs/recipes).
+For typed variant dimensions (`variants`, `compoundVariants`, `defaultVariants`), see [Components](/docs/components).
 
-Use `styles.create` when your variants are a flat list of class names. If your component API is dimensioned (like `intent`, `size`, `tone`), use [Recipes](/docs/recipes).
+Use `styles.create` when your variants are a flat list of class names. If your component API is dimensioned (like `intent`, `size`, `tone`), use [Components](/docs/components).
 
 ## Creating styles
 
