@@ -12,7 +12,7 @@ import FileTree from '../../components/docs/FileTree.astro';
 import DocsDocFooter from '../../components/docs/DocsDocFooter.astro';
 import DocsPagination from '../../components/docs/DocsPagination.astro';
 import { doc, docProseRoot } from '../../styles';
-import { fileTree as fileTreeRecipe, linkButton } from '@examples/design-system';
+import { fileTree as fileTreeStyles, linkButton } from '@examples/design-system';
 import { extractDocHeadings, getAllDocs, getDocBySlug, getDocNeighbors } from '../../lib/docs';
 import { editUrlForDocSlug } from '../../lib/site';
 
@@ -57,7 +57,7 @@ const editHref = editUrlForDocSlug(slug);
         <div class:list={[docProseRoot, doc('content')]}>
           <h2>Aside (Starlight-style)</h2>
           <p>
-            Thin wrapper over the design-system <code>alert</code> recipe; use <code>Aside</code> for
+            Thin wrapper over the design-system <code>alert</code> styles; use <code>Aside</code> for
             Starlight-like <code>note</code> / <code>tip</code> / <code>caution</code> /{' '}
             <code>danger</code> types.
           </p>
@@ -81,12 +81,12 @@ const editHref = editUrlForDocSlug(slug);
           <h2>Cards & link card</h2>
           <CardGrid>
             <Card title="Card title">
-              Static card body using the <code>card</code> recipe from <code>@examples/design-system</code>.
+              Static card body using the <code>card</code> component styles from <code>@examples/design-system</code>.
             </Card>
             <LinkCard
-              href="/docs/recipes"
-              title="Recipes"
-              description="Compose style recipes and reuse them across UI."
+              href="/docs/components"
+              title="Components"
+              description="Model variant-driven UI with styles.component and optional slots."
             />
           </CardGrid>
 
@@ -113,7 +113,7 @@ const editHref = editUrlForDocSlug(slug);
             <a class:list={[linkButton.base, linkButton.primary]} href="/docs/getting-started">
               Primary CTA
             </a>{' '}
-            <a class:list={[linkButton.base, linkButton.secondary]} href="/docs/recipes">
+            <a class:list={[linkButton.base, linkButton.secondary]} href="/docs/components">
               Secondary
             </a>{' '}
             <a class:list={[linkButton.base, linkButton.ghost]} href="/docs/tokens">
@@ -123,15 +123,15 @@ const editHref = editUrlForDocSlug(slug);
 
           <h2>File tree</h2>
           <FileTree>
-            <ul class={fileTreeRecipe('list')}>
-              <li class={fileTreeRecipe('item')}>
-                <div class:list={[fileTreeRecipe('row'), fileTreeRecipe('folder')]}>src/</div>
-                <ul class={fileTreeRecipe('listNested')}>
-                  <li class={fileTreeRecipe('item')}>
-                    <div class:list={[fileTreeRecipe('row'), fileTreeRecipe('file')]}>index.ts</div>
+            <ul class={fileTreeStyles('list')}>
+              <li class={fileTreeStyles('item')}>
+                <div class:list={[fileTreeStyles('row'), fileTreeStyles('folder')]}>src/</div>
+                <ul class={fileTreeStyles('listNested')}>
+                  <li class={fileTreeStyles('item')}>
+                    <div class:list={[fileTreeStyles('row'), fileTreeStyles('file')]}>index.ts</div>
                   </li>
-                  <li class={fileTreeRecipe('item')}>
-                    <div class:list={[fileTreeRecipe('row'), fileTreeRecipe('file')]}>styles.ts</div>
+                  <li class={fileTreeStyles('item')}>
+                    <div class:list={[fileTreeStyles('row'), fileTreeStyles('file')]}>styles.ts</div>
                   </li>
                 </ul>
               </li>
@@ -140,13 +140,13 @@ const editHref = editUrlForDocSlug(slug);
 
           <h2>Alert / callout (direct)</h2>
           <p>
-            The docs use the same alert recipe as <code>@examples/design-system</code> (see{' '}
+            The docs use the same alert styles as <code>@examples/design-system</code> (see{' '}
             <code>Alert.astro</code>).
           </p>
           <Alert variant="info" title="Info">
             Use informational callouts for neutral context that supports the main content.
           </Alert>
-          <Alert variant="tip" title="Tip" actionLabel="Read the recipes guide" actionHref="/docs/recipes">
+          <Alert variant="tip" title="Tip" actionLabel="Read the components guide" actionHref="/docs/components">
             Optional action links inherit the callout foreground for solid and subtle modes.
           </Alert>
           <Alert variant="warning" title="Warning" appearance="solid">

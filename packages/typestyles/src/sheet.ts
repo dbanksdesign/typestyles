@@ -57,23 +57,62 @@ let ssrBuffer: string[] | null = null;
 const isBrowser =
   typeof document !== 'undefined' && typeof window !== 'undefined';
 
+/**
+ * Re-insert every registered rule into a (usually fresh) <style> element.
+ * Used when the live element was detached (e.g. Astro view transitions replacing <head>).
+ */
+function writeAllRulesToStyleElement(el: HTMLStyleElement): void {
+  if (RUNTIME_DISABLED || allRules.length === 0) return;
+  const sheet = el.sheet;
+  if (sheet) {
+    for (const css of allRules) {
+      try {
+        sheet.insertRule(css, sheet.cssRules.length);
+      } catch {
+        el.appendChild(document.createTextNode(css));
+      }
+    }
+  } else {
+    el.appendChild(document.createTextNode(allRules.join('\n')));
+  }
+}
+
 function getStyleElement(): HTMLStyleElement {
+  let reconnectAfterDetach = false;
+  if (styleElement && !styleElement.isConnected) {
+    reconnectAfterDetach = true;
+    styleElement = null;
+  }
   if (styleElement) return styleElement;
 
-  // Check for an existing element (e.g., from SSR)
+  // Prefer an element actually in the document (SSR or another copy on the page).
   const existing = document.getElementById(
-    STYLE_ELEMENT_ID
+    STYLE_ELEMENT_ID,
   ) as HTMLStyleElement | null;
-  if (existing) {
+  if (existing?.isConnected) {
     styleElement = existing;
     return styleElement;
   }
 
-  // Create a new one
   styleElement = document.createElement('style');
   styleElement.id = STYLE_ELEMENT_ID;
   document.head.appendChild(styleElement);
+
+  // After a doc swap, we have a new empty sheet but insertRule() won't re-queue (deduped keys).
+  if (reconnectAfterDetach && allRules.length > 0) {
+    writeAllRulesToStyleElement(styleElement);
+  }
+
   return styleElement;
+}
+
+/**
+ * Ensure the managed <style id="typestyles"> is attached to the current document and populated.
+ * Call after SPA-style navigation (e.g. Astro `astro:after-swap`) when runtime injection is enabled.
+ */
+export function ensureDocumentStylesAttached(): void {
+  if (!isBrowser || RUNTIME_DISABLED) return;
+  getStyleElement();
 }
 
 function flush(): void {

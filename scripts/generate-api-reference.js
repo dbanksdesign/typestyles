@@ -211,6 +211,9 @@ const docStructure = `# Documentation Structure
 
 ## Core Concepts  
 - styles.md
+- components.md
+- compose.md
+- atomic-css.md
 - tokens.md
 - keyframes.md
 - color.md
@@ -218,6 +221,7 @@ const docStructure = `# Documentation Structure
 ## Advanced Features
 - ssr.md
 - vite-plugin.md
+- class-naming.md
 - custom-at-rules.md
 - theming-patterns.md
 
@@ -229,7 +233,7 @@ const docStructure = `# Documentation Structure
 - typescript-tips.md
 - troubleshooting.md
 
-## Examples & Recipes
+## Examples
 - react-integration.md
 - component-library.md
 - design-system.md

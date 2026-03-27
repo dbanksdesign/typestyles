@@ -89,10 +89,10 @@ export function buildSingleClassName(name: string, properties: CSSProperties): s
 }
 
 /**
- * `styles.create` / `styles.component` / slot recipes: logical namespace plus
+ * `styles.create` / `styles.component` / components with `slots`: logical namespace plus
  * a variant segment (`base`, `intent-primary`, `root-trigger-primary`, …).
  */
-export function buildRecipeClassName(
+export function buildComponentClassName(
   namespace: string,
   suffix: string,
   properties: CSSProperties,

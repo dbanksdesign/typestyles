@@ -10,7 +10,7 @@ import { serializeStyle } from './css.js';
 import { insertRules } from './sheet.js';
 import { registeredNamespaces } from './registry.js';
 import {
-  buildRecipeClassName,
+  buildComponentClassName,
   buildSingleClassName,
   getClassNamingConfig,
   hashString,
@@ -151,7 +151,7 @@ export function createStyles(
 
   for (const [variant, properties] of Object.entries(definitions)) {
     const props = properties as CSSProperties;
-    const className = buildRecipeClassName(namespace, variant, props);
+    const className = buildComponentClassName(namespace, variant, props);
     variantToClass[variant] = className;
     const selector = `.${className}`;
     const variantRules = serializeStyle(selector, props);

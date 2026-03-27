@@ -16,7 +16,7 @@ export const docNavigation = {
       slug: 'core-concepts',
       items: [
         { slug: 'styles', title: 'Styles' },
-        { slug: 'recipes', title: 'Recipes' },
+        { slug: 'components', title: 'Components' },
         { slug: 'compose', title: 'Style Composition' },
         { slug: 'atomic-css', title: 'Atomic CSS Utilities' },
         { slug: 'tokens', title: 'Tokens' },
@@ -48,7 +48,7 @@ export const docNavigation = {
       ],
     },
     {
-      title: 'Examples & Recipes',
+      title: 'Examples',
       slug: 'examples',
       items: [
         { slug: 'react-integration', title: 'React Integration' },

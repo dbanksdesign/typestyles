@@ -80,7 +80,7 @@ The navigation structure is defined in `src/navigation.ts`. Documentation is org
 - Core Concepts
 - Advanced Features
 - Guides
-- Examples & Recipes
+- Examples
 
 ## Deployment
 

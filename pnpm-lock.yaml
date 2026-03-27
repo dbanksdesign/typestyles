@@ -47,6 +47,9 @@ importers:
       astro:
         specifier: ^5.6.1
         version: 5.18.1(@types/node@25.2.1)(jiti@2.6.1)(rollup@4.57.1)(terser@5.46.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      hast-util-to-text:
+        specifier: ^4.0.2
+        version: 4.0.2
       highlight.js:
         specifier: ^11.11.1
         version: 11.11.1
@@ -56,9 +59,24 @@ importers:
       marked-highlight:
         specifier: ^2.2.3
         version: 2.2.3(marked@15.0.12)
+      minisearch:
+        specifier: ^7.2.0
+        version: 7.2.0
+      remark-gfm:
+        specifier: ^4.0.1
+        version: 4.0.1
+      remark-parse:
+        specifier: ^11.0.0
+        version: 11.0.0
+      remark-rehype:
+        specifier: ^11.1.2
+        version: 11.1.2
       typestyles:
         specifier: workspace:*
         version: link:../packages/typestyles
+      unified:
+        specifier: ^11.0.5
+        version: 11.0.5
     devDependencies:
       '@typestyles/astro':
         specifier: workspace:*
@@ -3686,6 +3704,9 @@ packages:
   minipass@7.1.2:
     resolution: {integrity: sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw==}
     engines: {node: '>=16 || 14 >=14.17'}
+
+  minisearch@7.2.0:
+    resolution: {integrity: sha512-dqT2XBYUOZOiC5t2HRnwADjhNS2cecp9u+TJRiJ1Qp/f5qjkeT5APcGPjHw+bz89Ms8Jp+cG4AlE+QZ/QnDglg==}
 
   mlly@1.8.0:
     resolution: {integrity: sha512-l8D9ODSRWLe2KHJSifWGwBqpTZXIXTeo8mlKjY+E2HAakaTeNpqAyBZ8GSqLzHgw4XmHmC8whvpjJNMbFZN7/g==}
@@ -8885,6 +8906,8 @@ snapshots:
       brace-expansion: 2.0.2
 
   minipass@7.1.2: {}
+
+  minisearch@7.2.0: {}
 
   mlly@1.8.0:
     dependencies:

@@ -39,7 +39,7 @@ describe('class naming modes', () => {
     expect(ca).toBe(cb);
   });
 
-  it('scopeId changes hashed output for the same logical recipe', () => {
+  it('scopeId changes hashed output for the same logical component styles', () => {
     configureClassNaming({ mode: 'hashed', scopeId: 'pkg-a' });
     const x = createStyles('box', { main: { margin: 0 } })('main');
     reset();

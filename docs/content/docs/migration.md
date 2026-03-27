@@ -7,11 +7,11 @@ description: Migrate to typestyles from other CSS-in-JS libraries
 
 Switching to typestyles from other styling solutions is straightforward. This guide covers the most common migration paths.
 
-If you are adopting the new variant API, start with [Recipes](/docs/recipes).
+If you are adopting the new variant API, start with [Components](/docs/components).
 
 ## From Panda CSS
 
-Panda and typestyles share many concepts (recipes, tokens, utilities), so migration is mostly API shape changes rather than a full styling rewrite.
+Panda and typestyles share many concepts (component variants, tokens, utilities), so migration is mostly API shape changes rather than a full styling rewrite.
 
 ### `css()` to `styles.class()` or `styles.create()`
 
@@ -141,9 +141,9 @@ atoms({
 });
 ```
 
-### Slot recipe note
+### Slot components (Panda `sva`)
 
-If you use Panda `sva` (slot recipes), migrate by defining explicit per-slot styles in typestyles and composing them in component code. typestyles does not currently expose a first-class slot recipe API.
+If you use Panda `sva` (multipart slot variants), use `styles.component` with a `slots` configuration so each part maps to a named slot. See [Components](/docs/components).
 
 ## From styled-components
 
@@ -477,9 +477,9 @@ const button = styles.component('button', {
 
 ## From vanilla-extract recipes
 
-### Recipe migration
+### `recipe()` migration
 
-**Before (vanilla-extract recipes):**
+**Before (vanilla-extract `recipe`):**
 
 ```ts
 import { recipe } from '@vanilla-extract/recipes';
