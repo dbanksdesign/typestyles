@@ -22,6 +22,17 @@ import {
   transitionValues,
 } from './primitive';
 
+export type { DesignCodeBlockValues } from './component';
+export type {
+  DesignFontFamilyValues,
+  DesignFontSizeValues,
+  DesignFontWeightValues,
+  DesignLineHeightValues,
+  DesignRadiusValues,
+  DesignShadowValues,
+  DesignSpaceValues,
+} from './primitive';
+
 export const paletteTokens = tokens.create('palette', basePaletteTokenValues);
 export const spaceTokens = tokens.create('space', spaceValues);
 export const radiusTokens = tokens.create('radius', radiusValues);
