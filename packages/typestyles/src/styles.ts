@@ -5,6 +5,7 @@ import type {
   FlatComponentResult,
   DimensionedComponentResult,
   VariantDefinitions,
+  ComponentConfig,
 } from './types.js';
 import { serializeStyle } from './css.js';
 import { insertRules } from './sheet.js';
@@ -214,7 +215,9 @@ export function createStylesWithUtils<U extends StyleUtils>(utils: U): StylesWit
         variants: expandedVariants,
         ...(expandedCompound.length ? { compoundVariants: expandedCompound } : {}),
         ...(defaultVariants ? { defaultVariants } : {}),
-      } as Parameters<typeof createComponent>[1]);
+      } as unknown as Omit<ComponentConfig<VariantDefinitions>, 'variants'> & {
+        variants: VariantDefinitions;
+      });
     }
 
     // Flat config
