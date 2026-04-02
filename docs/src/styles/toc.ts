@@ -4,11 +4,11 @@ import { styles } from 'typestyles';
 const belowTocBp = '@media (max-width: 1023px)';
 const tocBp = '@media (min-width: 1024px)';
 
-export const toc = styles.create('docs-toc', {
-  nav: {
+export const toc = {
+  nav: styles.class('docs-toc-nav', {
     fontFamily: t.fontFamily.sans,
-  },
-  title: {
+  }),
+  title: styles.class('docs-toc-title', {
     margin: `0 0 ${t.space[2]}`,
     fontSize: t.fontSize.xs,
     fontWeight: t.fontWeight.semibold,
@@ -18,17 +18,17 @@ export const toc = styles.create('docs-toc', {
     [belowTocBp]: {
       display: 'none',
     },
-  },
-  list: {
+  }),
+  list: styles.class('docs-toc-list', {
     listStyle: 'none',
     padding: 0,
     margin: 0,
-  },
-  item: {
+  }),
+  item: styles.class('docs-toc-item', {
     margin: 0,
     marginBottom: '2px',
-  },
-  link: {
+  }),
+  link: styles.class('docs-toc-link', {
     display: 'block',
     fontSize: t.fontSize.sm,
     lineHeight: 1.35,
@@ -51,8 +51,8 @@ export const toc = styles.create('docs-toc', {
         backgroundColor: t.color.accent.subtle,
       },
     },
-  },
-  root: {
+  }),
+  root: styles.class('docs-toc-root', {
     marginBottom: t.space[5],
     border: `1px solid ${t.color.border.default}`,
     borderRadius: t.radius.md,
@@ -71,11 +71,11 @@ export const toc = styles.create('docs-toc', {
       top: 'auto',
       zIndex: 'auto',
     },
-  },
-  details: {
+  }),
+  details: styles.class('docs-toc-details', {
     margin: 0,
-  },
-  summary: {
+  }),
+  summary: styles.class('docs-toc-summary', {
     listStyle: 'none',
     cursor: 'pointer',
     fontSize: t.fontSize.sm,
@@ -88,13 +88,13 @@ export const toc = styles.create('docs-toc', {
     [tocBp]: {
       display: 'none',
     },
-  },
-  panel: {
+  }),
+  panel: styles.class('docs-toc-panel', {
     padding: `0 ${t.space[4]} ${t.space[4]}`,
     borderTop: `1px solid ${t.color.border.default}`,
     [tocBp]: {
       padding: 0,
       borderTop: 'none',
     },
-  },
-});
+  }),
+};
