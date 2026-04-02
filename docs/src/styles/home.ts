@@ -3,12 +3,12 @@ import { styles } from 'typestyles';
 
 const bp = '@media (max-width: 768px)';
 
-export const home = styles.create('docs-home', {
-  hero: {
+export const home = {
+  hero: styles.class('docs-home-hero', {
     paddingTop: t.space[8],
     paddingBottom: t.space[8],
-  },
-  title: {
+  }),
+  title: styles.class('docs-home-title', {
     fontSize: '44px',
     fontWeight: t.fontWeight.bold,
     letterSpacing: '-0.035em',
@@ -18,23 +18,23 @@ export const home = styles.create('docs-home', {
     [bp]: {
       fontSize: '32px',
     },
-  },
-  titleAccent: {
+  }),
+  titleAccent: styles.class('docs-home-titleAccent', {
     color: t.color.accent.default,
-  },
-  subtitle: {
+  }),
+  subtitle: styles.class('docs-home-subtitle', {
     fontSize: '18px',
     color: t.color.text.secondary,
     lineHeight: t.lineHeight.relaxed,
     maxWidth: '540px',
     marginBottom: t.space[6],
-  },
-  actions: {
+  }),
+  actions: styles.class('docs-home-actions', {
     display: 'flex',
     alignItems: 'center',
     gap: t.space[4],
-  },
-  cta: {
+  }),
+  cta: styles.class('docs-home-cta', {
     display: 'inline-flex',
     alignItems: 'center',
     gap: t.space[2],
@@ -50,8 +50,8 @@ export const home = styles.create('docs-home', {
     border: 'none',
     cursor: 'pointer',
     '&:hover': { backgroundColor: t.color.accent.hover },
-  },
-  ctaSecondary: {
+  }),
+  ctaSecondary: styles.class('docs-home-ctaSecondary', {
     display: 'inline-flex',
     alignItems: 'center',
     gap: t.space[2],
@@ -70,5 +70,5 @@ export const home = styles.create('docs-home', {
       borderColor: t.color.text.secondary,
       backgroundColor: t.color.background.subtle,
     },
-  },
-});
+  }),
+};
