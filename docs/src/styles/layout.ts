@@ -4,36 +4,36 @@ import { styles } from 'typestyles';
 const bp = '@media (max-width: 768px)';
 const tocBp = '@media (min-width: 1024px)';
 
-const layoutBase = styles.create('docs-layout', {
-  root: {
+const layoutBase = {
+  root: styles.class('docs-layout-root', {
     display: 'flex',
     minHeight: '100vh',
     fontFamily: t.fontFamily.sans,
     color: t.color.text.primary,
     backgroundColor: t.color.background.app,
     transition: 'background-color 0.2s ease, color 0.2s ease',
-  },
-  content: {
+  }),
+  content: styles.class('docs-layout-content', {
     flex: 1,
     minWidth: 0,
     [bp]: {
       paddingTop: '56px',
     },
-  },
-  main: {
+  }),
+  main: styles.class('docs-layout-main', {
     maxWidth: '768px',
     padding: t.space[8],
     [bp]: {
       padding: `${t.space[5]} ${t.space[4]}`,
     },
-  },
+  }),
   /** Grid wrapper when `tocHeadings` are present (desktop TOC column). */
-  docPageWrap: {
+  docPageWrap: styles.class('docs-layout-docPageWrap', {
     maxWidth: '1100px',
     margin: '0 auto',
     width: '100%',
-  },
-  docPageWrapWithToc: {
+  }),
+  docPageWrapWithToc: styles.class('docs-layout-docPageWrapWithToc', {
     display: 'grid',
     gridTemplateColumns: '1fr',
     gridTemplateAreas: '"toc" "main"',
@@ -43,12 +43,12 @@ const layoutBase = styles.create('docs-layout', {
       gap: t.space[8],
       alignItems: 'start',
     },
-  },
-  mainColumn: {
+  }),
+  mainColumn: styles.class('docs-layout-mainColumn', {
     gridArea: 'main',
     minWidth: 0,
-  },
-  tocAside: {
+  }),
+  tocAside: styles.class('docs-layout-tocAside', {
     gridArea: 'toc',
     minWidth: 0,
     [tocBp]: {
@@ -61,7 +61,7 @@ const layoutBase = styles.create('docs-layout', {
       paddingTop: t.space[2],
       paddingRight: t.space[1],
     },
-  },
-});
+  }),
+};
 
 export const layout = layoutBase;

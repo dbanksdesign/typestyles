@@ -3,8 +3,8 @@ import { styles } from 'typestyles';
 
 const bp = '@media (max-width: 768px)';
 
-const sidebarBase = styles.create('docs-sidebar', {
-  root: {
+const sidebarBase = {
+  root: styles.class('docs-sidebar-root', {
     width: '280px',
     flexShrink: 0,
     height: '100vh',
@@ -27,14 +27,14 @@ const sidebarBase = styles.create('docs-sidebar', {
       transition:
         'transform 0.25s ease, visibility 0.25s ease, background-color 0.2s ease, border-color 0.2s ease',
     },
-  },
-  rootOpen: {
+  }),
+  rootOpen: styles.class('docs-sidebar-rootOpen', {
     [bp]: {
       transform: 'translateX(0)',
       visibility: 'visible',
     },
-  },
-  backdrop: {
+  }),
+  backdrop: styles.class('docs-sidebar-backdrop', {
     display: 'none',
     [bp]: {
       display: 'block',
@@ -46,19 +46,19 @@ const sidebarBase = styles.create('docs-sidebar', {
       visibility: 'hidden',
       transition: 'opacity 0.25s ease, visibility 0.25s ease',
     },
-  },
-  backdropVisible: {
+  }),
+  backdropVisible: styles.class('docs-sidebar-backdropVisible', {
     [bp]: {
       opacity: 1,
       visibility: 'visible',
     },
-  },
-  header: {
+  }),
+  header: styles.class('docs-sidebar-header', {
     display: 'flex',
     alignItems: 'center',
     padding: `${t.space[5]} ${t.space[5]} ${t.space[4]}`,
-  },
-  logo: {
+  }),
+  logo: styles.class('docs-sidebar-logo', {
     fontSize: t.fontSize.xl,
     fontWeight: t.fontWeight.bold,
     color: t.color.text.primary,
@@ -66,11 +66,11 @@ const sidebarBase = styles.create('docs-sidebar', {
     letterSpacing: '-0.03em',
     transition: 'color 0.15s ease',
     '&:hover': { color: t.color.accent.default },
-  },
-  logoAccent: {
+  }),
+  logoAccent: styles.class('docs-sidebar-logoAccent', {
     color: t.color.accent.default,
-  },
-  search: {
+  }),
+  search: styles.class('docs-sidebar-search', {
     margin: `0 ${t.space[4]} ${t.space[4]}`,
     padding: `${t.space[2]} ${t.space[4]}`,
     fontSize: t.fontSize.sm,
@@ -83,12 +83,12 @@ const sidebarBase = styles.create('docs-sidebar', {
     transition: 'border-color 0.15s ease, background-color 0.2s ease',
     '&:focus': { borderColor: t.color.accent.default },
     '&::placeholder': { color: t.color.text.placeholder },
-  },
-  searchWrapper: {
+  }),
+  searchWrapper: styles.class('docs-sidebar-searchWrapper', {
     position: 'relative',
     margin: `0 ${t.space[4]} ${t.space[4]}`,
-  },
-  searchIcon: {
+  }),
+  searchIcon: styles.class('docs-sidebar-searchIcon', {
     position: 'absolute',
     left: '10px',
     top: '50%',
@@ -99,8 +99,8 @@ const sidebarBase = styles.create('docs-sidebar', {
     color: t.color.text.placeholder,
     pointerEvents: 'none',
     lineHeight: 0,
-  },
-  searchInput: {
+  }),
+  searchInput: styles.class('docs-sidebar-searchInput', {
     width: '100%',
     padding: `${t.space[2]} ${t.space[4]} ${t.space[2]} 32px`,
     fontSize: t.fontSize.sm,
@@ -113,8 +113,8 @@ const sidebarBase = styles.create('docs-sidebar', {
     transition: 'border-color 0.15s ease, background-color 0.2s ease',
     '&:focus': { borderColor: t.color.accent.default },
     '&::placeholder': { color: t.color.text.placeholder },
-  },
-  searchKbd: {
+  }),
+  searchKbd: styles.class('docs-sidebar-searchKbd', {
     position: 'absolute',
     right: '10px',
     top: '50%',
@@ -128,8 +128,8 @@ const sidebarBase = styles.create('docs-sidebar', {
     fontFamily: t.fontFamily.sans,
     lineHeight: '16px',
     pointerEvents: 'none',
-  },
-  searchTrigger: {
+  }),
+  searchTrigger: styles.class('docs-sidebar-searchTrigger', {
     width: '100%',
     display: 'flex',
     alignItems: 'center',
@@ -154,16 +154,16 @@ const sidebarBase = styles.create('docs-sidebar', {
       outline: `2px solid ${t.color.accent.default}`,
       outlineOffset: '2px',
     },
-  },
-  nav: {
+  }),
+  nav: styles.class('docs-sidebar-nav', {
     flex: 1,
     overflowY: 'auto',
     padding: `0 ${t.space[4]}`,
-  },
-  section: {
+  }),
+  section: styles.class('docs-sidebar-section', {
     marginBottom: t.space[2],
-  },
-  sectionTitle: {
+  }),
+  sectionTitle: styles.class('docs-sidebar-sectionTitle', {
     fontSize: t.fontSize.xs,
     fontWeight: t.fontWeight.semibold,
     textTransform: 'uppercase',
@@ -171,8 +171,8 @@ const sidebarBase = styles.create('docs-sidebar', {
     color: t.color.text.placeholder,
     padding: `${t.space[2]} ${t.space[2]}`,
     marginTop: t.space[2],
-  },
-  link: {
+  }),
+  link: styles.class('docs-sidebar-link', {
     display: 'block',
     fontSize: t.fontSize.md,
     color: t.color.text.secondary,
@@ -184,8 +184,8 @@ const sidebarBase = styles.create('docs-sidebar', {
       color: t.color.text.primary,
       backgroundColor: t.color.background.subtle,
     },
-  },
-  linkActive: {
+  }),
+  linkActive: styles.class('docs-sidebar-linkActive', {
     color: t.color.accent.default,
     fontWeight: t.fontWeight.medium,
     backgroundColor: t.color.accent.subtle,
@@ -193,23 +193,23 @@ const sidebarBase = styles.create('docs-sidebar', {
       color: t.color.accent.default,
       backgroundColor: t.color.accent.subtle,
     },
-  },
-  footer: {
+  }),
+  footer: styles.class('docs-sidebar-footer', {
     padding: `${t.space[4]} ${t.space[5]}`,
     borderTop: `1px solid ${t.color.border.default}`,
     transition: 'border-color 0.2s ease',
     display: 'flex',
     flexDirection: 'column',
     gap: t.space[2],
-  },
-  themeFieldLabel: {
+  }),
+  themeFieldLabel: styles.class('docs-sidebar-themeFieldLabel', {
     fontSize: t.fontSize.xs,
     fontWeight: t.fontWeight.semibold,
     textTransform: 'uppercase',
     letterSpacing: '0.06em',
     color: t.color.text.placeholder,
-  },
-  themeSelect: {
+  }),
+  themeSelect: styles.class('docs-sidebar-themeSelect', {
     width: '100%',
     padding: `${t.space[2]} ${t.space[4]}`,
     fontSize: t.fontSize.sm,
@@ -222,8 +222,8 @@ const sidebarBase = styles.create('docs-sidebar', {
     outline: 'none',
     transition: 'border-color 0.15s ease, background-color 0.2s ease',
     '&:focus': { borderColor: t.color.accent.default },
-  },
-  themeToggle: {
+  }),
+  themeToggle: styles.class('docs-sidebar-themeToggle', {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -242,7 +242,7 @@ const sidebarBase = styles.create('docs-sidebar', {
       color: t.color.text.primary,
       borderColor: t.color.text.secondary,
     },
-  },
-});
+  }),
+};
 
 export const sidebar = sidebarBase;
