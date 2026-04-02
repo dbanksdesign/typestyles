@@ -7,10 +7,10 @@ const bp = '@media (max-width: 768px)';
  * Long-form / markdown prose primitives: blockquote, kbd, inline badges, tables, dividers,
  * heading permalink anchors, lists, and a responsive vertical rhythm.
  *
- * Apply `proseContent('root')` on the wrapper around rendered markdown HTML.
+ * Apply `proseContent.root` on the wrapper around rendered markdown HTML.
  */
-export const proseContent = styles.create('docs-prose', {
-  root: {
+export const proseContent = {
+  root: styles.class('docs-prose-root', {
     fontSize: t.fontSize.md,
     lineHeight: 1.75,
     color: t.color.text.primary,
@@ -254,13 +254,13 @@ export const proseContent = styles.create('docs-prose', {
       outlineOffset: '2px',
       borderRadius: t.radius.sm,
     },
-  },
+  }),
   /** Scroll container for wide GFM tables (wrap HTML manually). */
-  tableWrap: {
+  tableWrap: styles.class('docs-prose-tableWrap', {
     overflowX: 'auto',
     marginBottom: t.space[3],
     WebkitOverflowScrolling: 'touch',
-  },
+  }),
   /** Applied with `data-prose-heading-anchor`; visual rules live on `root`. */
-  headingAnchor: {},
-});
+  headingAnchor: styles.class('docs-prose-headingAnchor', {}),
+};
