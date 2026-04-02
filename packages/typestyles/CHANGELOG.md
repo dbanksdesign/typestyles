@@ -27,7 +27,7 @@
   Naming update for slot mode:
   - Slot base classes now use `{namespace}-{slot}` (without `-base`).
 
-- 4f29bb7: Add `styles.class()` for single-class definitions and a three-argument `styles.create(name, base, variants)` API that automatically includes base styles, then updated the Next.js example to use the new DX without affecting published packages.
+- 4f29bb7: Add `styles.class()` for single-class definitions and a three-argument `styles.component(name, base, variants)` API that automatically includes base styles, then updated the Next.js example to use the new DX without affecting published packages.
 - 8f0e9a3: feat: styles.recipe()
 
 ## 0.3.0
@@ -37,7 +37,7 @@
 - 5b08816: Add support for attribute selectors in nested styles. You can now use `[data-variant]`, `[disabled]`, `[data-size="lg"]` and other attribute selectors directly in style definitions:
 
   ```typescript
-  styles.create('button', {
+  styles.component('button', {
     padding: '8px',
     '[data-variant="primary"]': { backgroundColor: 'blue' },
     '[disabled]': { opacity: 0.5 },

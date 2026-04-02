@@ -142,9 +142,9 @@ The `modules` array should list files that register styles either directly or by
 ```ts
 // src/styles/index.ts
 export * from './tokens'; // tokens.create(...)
-export * from './button'; // styles.create(...)
-export * from './card'; // styles.create(...)
-export * from './typography'; // styles.create(...)
+export * from './button'; // styles.component(...)
+export * from './card'; // styles.component(...)
+export * from './typography'; // styles.component(...)
 ```
 
 ```ts

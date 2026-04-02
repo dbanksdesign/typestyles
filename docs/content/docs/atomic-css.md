@@ -279,7 +279,7 @@ const atoms = createProps(
   }),
 );
 
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: {
     borderRadius: '8px',
     border: '1px solid #e5e5e5',

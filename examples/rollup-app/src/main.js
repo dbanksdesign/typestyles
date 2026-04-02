@@ -1,4 +1,12 @@
-import { button, card, layout, spinner } from './styles.js';
+import {
+  button,
+  card,
+  layoutPage,
+  layoutTitle,
+  layoutSubtitle,
+  layoutRow,
+  spinner,
+} from './styles.js';
 
 const app = globalThis.document.getElementById('app');
 
@@ -7,18 +15,18 @@ if (!app) {
 }
 
 app.innerHTML = `
-  <div class="${layout('page')}">
-    <h1 class="${layout('title')}">typestyles + Rollup</h1>
-    <p class="${layout('subtitle')}">
+  <div class="${layoutPage}">
+    <h1 class="${layoutTitle}">typestyles + Rollup</h1>
+    <p class="${layoutSubtitle}">
       Build mode emits static CSS with no runtime style insertion.
     </p>
 
-    <div class="${layout('row')}">
-      <button class="${button('base', 'hover')}">Primary button</button>
-      <div class="${spinner('base')}" title="Loading"></div>
+    <div class="${layoutRow}">
+      <button class="${button({ variant: 'hover' })}">Primary button</button>
+      <div class="${spinner}" title="Loading"></div>
     </div>
 
-    <div class="${card('base')}">
+    <div class="${card}">
       This card is animated using keyframes emitted to <code>typestyles.css</code>.
     </div>
   </div>

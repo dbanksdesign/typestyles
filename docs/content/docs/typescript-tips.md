@@ -17,7 +17,7 @@ TypeStyles automatically infers types from your definitions:
 import { styles } from 'typestyles';
 
 // Types are inferred automatically
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     backgroundColor: '#0066ff',
@@ -118,7 +118,7 @@ Make your component props type-safe:
 ```ts
 import { styles } from 'typestyles';
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: { ... },
   primary: { ... },
   secondary: { ... },
@@ -159,7 +159,7 @@ You can add `as const` to **nested values** when you want literal types preserve
 ```ts
 import { styles } from 'typestyles';
 
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: { ... },
   elevated: { ... },
 });
@@ -284,7 +284,7 @@ function StyledBox<T extends string>({
 }
 
 // Usage
-const box = styles.create('box', {
+const box = styles.component('box', {
   base: { padding: '16px' },
   elevated: { boxShadow: '0 4px 6px rgba(0,0,0,0.1)' },
 });
@@ -382,7 +382,7 @@ interface StyleConfig<V extends string> {
 }
 
 function createStrictStyles<V extends string>(config: StyleConfig<V>) {
-  return styles.create(config.namespace, config.variants);
+  return styles.component(config.namespace, config.variants);
 }
 
 // Usage with full type safety
@@ -441,7 +441,7 @@ This can happen with very complex nested styles. Solution: simplify nesting or a
 
 ```ts
 // If you get deep type errors, add explicit return type
-const complex = styles.create('complex', {
+const complex = styles.component('complex', {
   base: {
     // very deep nesting
   },
@@ -466,16 +466,16 @@ Break complex styles into smaller pieces:
 
 ```ts
 // ❌ Avoid very complex single definitions
-const complex = styles.create('complex', {
+const complex = styles.component('complex', {
   base: {
     // hundreds of lines
   },
 });
 
 // ✅ Break into logical groups
-const header = styles.create('header', { ... });
-const content = styles.create('content', { ... });
-const footer = styles.create('footer', { ... });
+const header = styles.component('header', { ... });
+const content = styles.component('content', { ... });
+const footer = styles.component('footer', { ... });
 ```
 
 ## Summary

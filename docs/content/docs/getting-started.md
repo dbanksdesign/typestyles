@@ -17,12 +17,12 @@ npm install typestyles
 
 ## Basic usage
 
-Create styles with `styles.create()` and apply them with the returned selector function:
+Create styles with `styles.component()` and apply them with the returned selector function:
 
 ```ts
 import { styles } from 'typestyles';
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: { padding: '8px 16px', borderRadius: '6px' },
   primary: { backgroundColor: '#0066ff', color: '#fff' },
 });

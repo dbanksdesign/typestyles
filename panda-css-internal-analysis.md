@@ -22,7 +22,7 @@ Internal planning notes for product/docs strategy. This file is intentionally ou
 
 ## Panda Migration Plan (Internal)
 
-1. Replace Panda `css()` usage with either `styles.class()` or `styles.create()` namespaces.
+1. Replace Panda `css()` usage with either `styles.class()` or `styles.component()` namespaces.
 2. Convert `cva`/`defineRecipe` to `styles.component` one component at a time.
 3. Move token values from `panda.config.ts` into `tokens.create()` files.
 4. Translate semantic/dark token behavior into `tokens.createTheme()` theme classes.

@@ -13,7 +13,7 @@ If you are adopting the new variant API, start with [Components](/docs/component
 
 Panda and typestyles share many concepts (component variants, tokens, utilities), so migration is mostly API shape changes rather than a full styling rewrite.
 
-### `css()` to `styles.class()` or `styles.create()`
+### `css()` to `styles.class()` or `styles.component()`
 
 **Before (Panda CSS):**
 
@@ -39,7 +39,7 @@ const className = styles.class('card', {
 });
 ```
 
-For reusable variant families, prefer `styles.create()` instead of a single class.
+For reusable variant families, prefer `styles.component()` instead of a single class.
 
 ### `cva()` / `defineRecipe()` to `styles.component()`
 
@@ -180,7 +180,7 @@ import { styles, tokens } from 'typestyles';
 
 const color = tokens.use('color');
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     borderRadius: '6px',
@@ -222,7 +222,7 @@ const Box = styled.div`
 **After:**
 
 ```tsx
-const box = styles.create('box', {
+const box = styles.component('box', {
   base: {
     display: 'inline-block',
   },
@@ -274,7 +274,7 @@ function Button({ children }) {
 ```tsx
 import { styles } from 'typestyles';
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     backgroundColor: '#0066ff',
@@ -309,7 +309,7 @@ className={cx(base, isPrimary && primary, isLarge && large)}
 ```tsx
 import { styles } from 'typestyles';
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: { padding: '8px' },
   primary: { backgroundColor: 'blue' },
   large: { fontSize: '18px' },
@@ -564,7 +564,7 @@ const color = tokens.create('color', {
   secondaryHover: '#4b5563',
 });
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     borderRadius: '6px',
@@ -638,7 +638,7 @@ You can use Tailwind and typestyles together during migration:
 ```tsx
 import { styles } from 'typestyles';
 
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: {
     // New styles with typestyles
     boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
@@ -693,7 +693,7 @@ function Button({ variant, children }) {
 ```ts
 import { styles } from 'typestyles';
 
-export const button = styles.create('button', {
+export const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     borderRadius: '6px',
@@ -734,7 +734,7 @@ CSS Modules `:global` becomes typestyles without nesting:
 **After:**
 
 ```ts
-const tooltip = styles.create('tooltip', {
+const tooltip = styles.component('tooltip', {
   base: {
     position: 'absolute',
   },
@@ -777,7 +777,7 @@ Migrating from plain CSS gives you type safety and better organization.
 
    ```ts
    // After
-   const button = styles.create('button', {
+   const button = styles.component('button', {
      base: {
        padding: '8px 16px',
        backgroundColor: color.primary,
@@ -834,7 +834,7 @@ After migration, your JavaScript bundle may be slightly smaller (no CSS parsing 
 
 | Pattern            | styled-components            | Emotion                   | Tailwind            | typestyles            |
 | ------------------ | ---------------------------- | ------------------------- | ------------------- | --------------------- |
-| **Basic styling**  | `styled.div`...`             | `css`...`                 | `className="p-4"`   | `styles.create()`     |
+| **Basic styling**  | `styled.div`...`             | `css`...`                 | `className="p-4"`   | `styles.component()`  |
 | **Variants**       | Props + template literals    | Props + template literals | Conditional strings | Multiple variant args |
 | **Pseudo-classes** | `&:hover` in template        | `&:hover` in template     | `hover:` prefix     | `&:hover` in object   |
 | **Media queries**  | `@media` in template         | `@media` in template      | Responsive prefixes | `@media` in object    |
@@ -880,7 +880,7 @@ Useful options:
 
 ### Styles not applying
 
-- Check that the namespace in `styles.create()` is unique
+- Check that the namespace in `styles.component()` is unique
 - Verify the component is being rendered (lazy injection means CSS only appears when used)
 - Use DevTools to confirm class names are being applied
 

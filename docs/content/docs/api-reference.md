@@ -15,7 +15,7 @@ Style creation and composition API.
 
 **Methods:**
 
-- `styles.create(namespace, definitions)`: Creates style variants (flat named keys)
+- `styles.component(namespace, definitions)`: Creates style variants (flat named keys)
 - `styles.class(name, style)`: Creates a single registered class from one style object
 - `styles.hashClass(styles, label?)`: Emits a hashed class from a style object (see [Class naming](/docs/class-naming))
 - `styles.withUtils(utils)`: Returns utility-aware `create`, `class`, and `hashClass` helpers
@@ -78,7 +78,7 @@ Keyframe animation API.
 ```ts
 import { styles } from 'typestyles';
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: { padding: '8px 16px' },
   primary: { backgroundColor: '#0066ff' },
 });
@@ -118,11 +118,11 @@ animation: `${fadeIn} 300ms ease`;
 ```ts
 import { styles } from 'typestyles';
 
-const base = styles.create('base', {
+const base = styles.component('base', {
   root: { padding: '8px' },
 });
 
-const primary = styles.create('primary', {
+const primary = styles.component('primary', {
   root: { color: 'blue' },
 });
 

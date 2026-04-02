@@ -521,7 +521,7 @@ body,
 Or with typestyles:
 
 ```ts
-const global = styles.create('global', {
+const global = styles.component('global', {
   root: {
     transition: 'background-color 0.3s ease, color 0.3s ease',
   },

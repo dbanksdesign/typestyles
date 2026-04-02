@@ -16,7 +16,7 @@ TypeStyles works seamlessly with React. This guide shows common patterns for int
 import { styles } from 'typestyles';
 import { color, space } from '../../tokens';
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -125,7 +125,7 @@ import { styles } from 'typestyles';
 import { space } from '../../tokens';
 import type { ElementType, ComponentPropsWithoutRef } from 'react';
 
-const box = styles.create('box', {
+const box = styles.component('box', {
   base: {},
   flex: { display: 'flex' },
   block: { display: 'block' },
@@ -230,7 +230,7 @@ import { styles } from 'typestyles';
 import { color, space } from '../../tokens';
 import { createContext, useContext, type ReactNode } from 'react';
 
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: {
     borderRadius: '8px',
     backgroundColor: color.surface,
@@ -249,20 +249,20 @@ const card = styles.create('card', {
   },
 });
 
-const cardHeader = styles.create('card-header', {
+const cardHeader = styles.component('card-header', {
   base: {
     padding: `${space.md} ${space.lg}`,
     borderBottom: `1px solid ${color.border}`,
   },
 });
 
-const cardBody = styles.create('card-body', {
+const cardBody = styles.component('card-body', {
   base: {
     padding: space.lg,
   },
 });
 
-const cardFooter = styles.create('card-footer', {
+const cardFooter = styles.component('card-footer', {
   base: {
     padding: `${space.md} ${space.lg}`,
     borderTop: `1px solid ${color.border}`,
@@ -348,7 +348,7 @@ import { styles } from 'typestyles';
 import { color, space } from '../../tokens';
 import { forwardRef } from 'react';
 
-const input = styles.create('input', {
+const input = styles.component('input', {
   base: {
     width: '100%',
     padding: `${space.sm} ${space.md}`,
@@ -423,7 +423,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = 'Input';
 
 // Additional styles for the wrapper, label, and helper
-const inputWrapper = styles.create('input-wrapper', {
+const inputWrapper = styles.component('input-wrapper', {
   base: {
     display: 'flex',
     flexDirection: 'column',
@@ -431,7 +431,7 @@ const inputWrapper = styles.create('input-wrapper', {
   },
 });
 
-const inputLabel = styles.create('input-label', {
+const inputLabel = styles.component('input-label', {
   base: {
     fontSize: '14px',
     fontWeight: 500,
@@ -439,7 +439,7 @@ const inputLabel = styles.create('input-label', {
   },
 });
 
-const inputHelper = styles.create('input-helper', {
+const inputHelper = styles.component('input-helper', {
   base: {
     fontSize: '12px',
     color: color.textMuted,
@@ -463,7 +463,7 @@ import { styles } from 'typestyles';
 import { space } from '../../tokens';
 import type { ReactNode } from 'react';
 
-const grid = styles.create('grid', {
+const grid = styles.component('grid', {
   base: {
     display: 'grid',
     gap: space.md,

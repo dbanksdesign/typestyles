@@ -31,7 +31,7 @@ const color = tokens.create('color', {
 });
 
 // Create styles — class names match what you write
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     borderRadius: '6px',
@@ -80,7 +80,7 @@ function Button({ variant, size, children }) {
 TypeStyles generates class names that mirror your authored style names. If you write a style called `card.header`, you get a class name `card-header` in the DOM. What you see in your code is what you see in DevTools.
 
 ```tsx
-const card = styles.create('card', {
+const card = styles.component('card', {
   root: { /* ... */ },
   header: { /* ... */ },
   body: { /* ... */ },
@@ -108,7 +108,7 @@ const spacing = tokens.create('spacing', {
 });
 
 // Use in TypeStyles — fully typed, autocomplete works
-const layout = styles.create('layout', {
+const layout = styles.component('layout', {
   container: {
     padding: spacing.md, // var(--spacing-md)
     gap: spacing.lg, // var(--spacing-lg)
@@ -146,7 +146,7 @@ TypeStyles works alongside existing CSS. Adopt it one component at a time.
 import './legacy-styles.css';
 import { styles } from 'typestyles';
 
-const newComponent = styles.create('new-component', {
+const newComponent = styles.component('new-component', {
   root: {
     /* ... */
   },
@@ -166,7 +166,7 @@ function MyComponent() {
 Styles compose naturally through multiple arguments or with plain CSS classes.
 
 ```tsx
-const text = styles.create('text', {
+const text = styles.component('text', {
   base: { fontFamily: 'system-ui' },
   bold: { fontWeight: 700 },
   muted: { color: color.secondary },
@@ -189,7 +189,7 @@ const text = styles.create('text', {
 Write CSS selectors naturally. Media queries, pseudo-classes, combinators — it all works.
 
 ```tsx
-const nav = styles.create('nav', {
+const nav = styles.component('nav', {
   root: {
     display: 'flex',
     gap: spacing.md,
@@ -228,7 +228,7 @@ import { styles, tokens } from 'typestyles';
 
 const color = tokens.use('color'); // Reference tokens defined elsewhere
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     backgroundColor: color.primary,
@@ -245,7 +245,7 @@ Or keep styles separate:
 ```tsx
 // button.styles.ts
 import { styles } from 'typestyles';
-export const button = styles.create('button', {
+export const button = styles.component('button', {
   /* ... */
 });
 
@@ -260,7 +260,7 @@ export function Button({ children }) {
 
 TypeStyles operates at runtime with minimal overhead:
 
-1. **`styles.create()`** registers style definitions and returns a selector function
+1. **`styles.component()`** registers style definitions and returns a selector function
 2. **The selector function** composes class names from the variants you pass in
 3. **CSS is injected** into a `<style>` element on first use (lazy injection)
 4. **Class names** are deterministic and human-readable — derived from the names you author
@@ -281,12 +281,12 @@ const { html, css } = collectStyles(() => renderToString(<App />));
 
 ## API Reference
 
-### `styles.create(namespace, definitions)`
+### `styles.component(namespace, definitions)`
 
 Creates a style group and returns a selector function.
 
 ```tsx
-const card = styles.create('card', {
+const card = styles.component('card', {
   root: {
     /* CSSProperties */
   },

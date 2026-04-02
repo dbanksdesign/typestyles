@@ -225,7 +225,7 @@ export { fontSize, fontWeight, lineHeight } from './typography';
 import { styles } from 'typestyles';
 import { semanticColors, spacing, fontSize, fontWeight } from '../../tokens';
 
-export const button = styles.create('button', {
+export const button = styles.component('button', {
   base: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -557,7 +557,7 @@ import { Button } from '@myorg/ui-library';
 import { semanticColors, spacing } from '@myorg/ui-library/tokens';
 import { styles } from 'typestyles';
 
-const customCard = styles.create('custom-card', {
+const customCard = styles.component('custom-card', {
   base: {
     padding: spacing[6],
     border: `2px solid ${semanticColors.primary}`,

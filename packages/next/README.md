@@ -204,7 +204,7 @@ import { TypestylesStylesheet } from '@typestyles/next';
 // app/page.tsx
 import { styles } from 'typestyles';
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     padding: '12px 24px',
     backgroundColor: '#0066ff',
@@ -245,7 +245,7 @@ export const spacing = tokens.create('space', {
 import { styles } from 'typestyles';
 import { colors, spacing } from './tokens';
 
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: {
     padding: spacing.md,
     backgroundColor: colors.primary,

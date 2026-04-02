@@ -17,7 +17,7 @@ Since typestyles returns regular class names, test your components the same way 
 // Button.tsx
 import { styles } from 'typestyles';
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: { padding: '8px 16px' },
   primary: { backgroundColor: '#0066ff' },
   large: { fontSize: '18px' },
@@ -367,7 +367,7 @@ import { styles } from 'typestyles';
 
 describe('Button styles', () => {
   it('generates consistent class names', () => {
-    const button = styles.create('button', {
+    const button = styles.component('button', {
       base: { padding: '8px' },
       primary: { color: 'blue' },
     });

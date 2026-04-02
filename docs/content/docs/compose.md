@@ -14,11 +14,11 @@ Combine multiple style groups into one:
 ```ts
 import { styles } from 'typestyles';
 
-const base = styles.create('base', {
+const base = styles.component('base', {
   root: { padding: '8px', borderRadius: '4px' },
 });
 
-const primary = styles.create('primary', {
+const primary = styles.component('primary', {
   root: { backgroundColor: '#0066ff', color: 'white' },
 });
 
@@ -32,7 +32,7 @@ button('root'); // "base-root primary-root"
 Mix selector functions with static class strings:
 
 ```ts
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: { padding: '16px', borderRadius: '8px' },
 });
 
@@ -46,11 +46,11 @@ composed('base'); // "card-base shadow-lg hover:scale-105"
 Use falsy values for conditional composition:
 
 ```ts
-const base = styles.create('base', {
+const base = styles.component('base', {
   root: { padding: '8px' },
 });
 
-const elevated = styles.create('elevated', {
+const elevated = styles.component('elevated', {
   root: { boxShadow: '0 4px 8px rgba(0,0,0,0.1)' },
 });
 
@@ -67,12 +67,12 @@ composed('root'); // "base-root elevated-root"
 When multiple style groups share the same variant names, all matching classes are applied:
 
 ```ts
-const layout = styles.create('layout', {
+const layout = styles.component('layout', {
   flex: { display: 'flex' },
   block: { display: 'block' },
 });
 
-const spacing = styles.create('spacing', {
+const spacing = styles.component('spacing', {
   flex: { gap: '8px' },
   block: { marginBottom: '8px' },
 });
@@ -103,7 +103,7 @@ const atoms = createProps(
   }),
 );
 
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: { borderRadius: '8px', border: '1px solid #e5e5e5' },
 });
 
@@ -120,7 +120,7 @@ flexCard('base'); // "card-base atom-display-flex atom-gap-2"
 Create base components and extend them:
 
 ```ts
-const baseButton = styles.create('btn-base', {
+const baseButton = styles.component('btn-base', {
   root: {
     padding: '8px 16px',
     borderRadius: '6px',
@@ -132,14 +132,14 @@ const baseButton = styles.create('btn-base', {
 
 const primaryButton = styles.compose(
   baseButton,
-  styles.create('btn-primary', {
+  styles.component('btn-primary', {
     root: { backgroundColor: '#0066ff', color: 'white' },
   }),
 );
 
 const secondaryButton = styles.compose(
   baseButton,
-  styles.create('btn-secondary', {
+  styles.component('btn-secondary', {
     root: { backgroundColor: '#e5e7eb', color: '#1f2937' },
   }),
 );
@@ -150,7 +150,7 @@ const secondaryButton = styles.compose(
 Build components with a mix of custom styles and utilities:
 
 ```ts
-const customCard = styles.create('custom-card', {
+const customCard = styles.component('custom-card', {
   feature: {
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     color: 'white',
@@ -165,9 +165,9 @@ const featureCard = styles.compose(customCard, atoms({ padding: 3, borderRadius:
 Compose multiple concerns separately:
 
 ```ts
-const layout = styles.create('layout', { container: { maxWidth: '1200px' } });
-const spacing = styles.create('spacing', { container: { padding: '0 16px' } });
-const responsive = styles.create('responsive', {
+const layout = styles.component('layout', { container: { maxWidth: '1200px' } });
+const spacing = styles.component('spacing', { container: { padding: '0 16px' } });
+const responsive = styles.component('responsive', {
   container: {
     '@media (max-width: 768px)': { padding: '0 8px' },
   },
@@ -184,8 +184,8 @@ container('container');
 The composed function maintains full type safety. If you compose functions with different variant names, you'll get autocomplete for all variants:
 
 ```ts
-const a = styles.create('a', { variant1: { color: 'red' } });
-const b = styles.create('b', { variant2: { color: 'blue' } });
+const a = styles.component('a', { variant1: { color: 'red' } });
+const b = styles.component('b', { variant2: { color: 'blue' } });
 
 const composed = styles.compose(a, b);
 

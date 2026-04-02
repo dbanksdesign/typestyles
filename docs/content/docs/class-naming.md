@@ -57,7 +57,7 @@ Restores defaults. Intended for **tests** so one suite cannot leak naming mode i
 
 Human-readable, stable names derived from the namespace and variant segment:
 
-- `styles.create('card', { base: { … } })` → `card-base`
+- `styles.component('card', { base: { … } })` → `card-base`
 - `styles.component('button', { … })` → `button-base`, `button-intent-primary`, etc.
 - Components with `slots` → `{namespace}-{slot}`, `{namespace}-{slot}-{dimension}-{option}`, etc.
 
@@ -81,7 +81,7 @@ When `scopeId` is the default empty string, the hash input matches the previous 
 
 ## Monorepos and `scopeId`
 
-Two packages might both use `styles.create('button', …)` or `styles.component('button', …)`. With **`semantic`** mode, you rely on distinct namespaces. With **`hashed`** / **`atomic`**, set a different **`scopeId`** per package (for example the npm package name) so identical style objects in different packages do not map to the same class string.
+Two packages might both use `styles.component('button', …)` or `styles.component('button', …)`. With **`semantic`** mode, you rely on distinct namespaces. With **`hashed`** / **`atomic`**, set a different **`scopeId`** per package (for example the npm package name) so identical style objects in different packages do not map to the same class string.
 
 ## SSR and entry order
 

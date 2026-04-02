@@ -1,39 +1,31 @@
 ---
 title: Styles
-description: Create and compose style variants with styles.create
+description: Create standalone classes and compose styles with the styles API
 ---
 
 # Styles
 
-The `styles` API lets you define named style variants and compose them at the call site.
+The `styles` API provides several ways to define CSS-in-TypeScript styles:
 
-For typed variant dimensions (`variants`, `compoundVariants`, `defaultVariants`), see [Components](/docs/components).
+- **`styles.class`** — a single named class with CSS properties
+- **`styles.component`** — multi-variant component styles with typed dimensions ([Components](/docs/components))
+- **`styles.hashClass`** — a content-hashed class for deduplication
+- **`styles.compose`** — combine multiple style functions or class strings
 
-Use `styles.create` when your variants are a flat list of class names. If your component API is dimensioned (like `intent`, `size`, `tone`), use [Components](/docs/components).
+## Single classes
 
-## Creating styles
-
-Call `styles.create(namespace, definitions)` with a unique namespace and an object of variant names to style definitions:
+Use `styles.class(name, properties)` when you just need a standalone class with no variants:
 
 ```ts
 import { styles } from 'typestyles';
 
-const card = styles.create('card', {
-  base: {
-    padding: '16px',
-    borderRadius: '8px',
-    border: '1px solid #e5e5e5',
-  },
-  elevated: {
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-  },
+const card = styles.class('card', {
+  padding: '16px',
+  borderRadius: '8px',
+  border: '1px solid #e5e5e5',
 });
-```
 
-Class names are deterministic: `card-base`, `card-elevated`. Combine variants by passing multiple names to the selector function:
-
-```ts
-card('base', 'elevated'); // "card-base card-elevated"
+// card === "card"
 ```
 
 To use **hashed** or **hash-only** class strings instead (for example in a design system package), see [Class naming](/docs/class-naming).
@@ -43,12 +35,10 @@ To use **hashed** or **hash-only** class strings instead (for example in a desig
 Use the `&` prefix for pseudo-classes and nested selectors, just like in CSS:
 
 ```ts
-const button = styles.create('button', {
-  base: {
-    padding: '8px 16px',
-    '&:hover': { opacity: 0.9 },
-    '&:disabled': { opacity: 0.5, cursor: 'not-allowed' },
-  },
+const button = styles.class('button', {
+  padding: '8px 16px',
+  '&:hover': { opacity: 0.9 },
+  '&:disabled': { opacity: 0.5, cursor: 'not-allowed' },
 });
 ```
 
@@ -57,42 +47,40 @@ const button = styles.create('button', {
 Attribute selectors work with `&`-prefixed nested selectors, including all CSS attribute selector operators:
 
 ```ts
-const trigger = styles.create('trigger', {
-  base: {
-    // exact match
-    '&[data-state="open"]': { opacity: 1 },
+const trigger = styles.class('trigger', {
+  // exact match
+  '&[data-state="open"]': { opacity: 1 },
 
-    // starts with / ends with / contains
-    '&[data-side^="top"]': { marginTop: '4px' },
-    '&[data-size$="-lg"]': { padding: '12px' },
-    '&[data-name*="admin"]': { fontWeight: 700 },
+  // starts with / ends with / contains
+  '&[data-side^="top"]': { marginTop: '4px' },
+  '&[data-size$="-lg"]': { padding: '12px' },
+  '&[data-name*="admin"]': { fontWeight: 700 },
 
-    // whitespace-separated token / language-style match
-    '&[data-flags~="selected"]': { borderStyle: 'solid' },
-    '&[lang|="en"]': { fontFamily: 'system-ui' },
+  // whitespace-separated token / language-style match
+  '&[data-flags~="selected"]': { borderStyle: 'solid' },
+  '&[lang|="en"]': { fontFamily: 'system-ui' },
 
-    // accessibility state hooks
-    '&[aria-expanded="true"]': { backgroundColor: '#1d4ed8' },
-    '&[aria-selected="true"]': { color: 'white' },
-  },
+  // accessibility state hooks
+  '&[aria-expanded="true"]': { backgroundColor: '#1d4ed8' },
+  '&[aria-selected="true"]': { color: 'white' },
 });
 ```
 
 ## Composing styles
 
-Use `styles.compose()` to combine multiple selector functions or class strings:
+Use `styles.compose()` to combine multiple style functions or class strings:
 
 ```ts
-const base = styles.create('base', {
-  root: { padding: '8px', borderRadius: '4px' },
+const card = styles.class('card', { padding: '8px', borderRadius: '4px' });
+
+const button = styles.component('button', {
+  base: { cursor: 'pointer' },
+  variants: {
+    intent: { primary: { backgroundColor: '#0066ff', color: 'white' } },
+  },
 });
 
-const primary = styles.create('primary', {
-  root: { backgroundColor: '#0066ff', color: 'white' },
-});
-
-const button = styles.compose(base, primary);
-button('root'); // "base-root primary-root"
+const composed = styles.compose(card, button);
 ```
 
 See the [Style Composition](/docs/compose) guide for more details.
@@ -124,9 +112,11 @@ const avatar = s.class('avatar', {
   marginX: 8,
 });
 
-const button = s.create('button', {
+const button = s.component('button', {
   base: { paddingY: 8 },
-  compact: { paddingY: 4 },
+  variants: {
+    size: { compact: { paddingY: 4 } },
+  },
 });
 ```
 
