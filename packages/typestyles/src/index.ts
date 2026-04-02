@@ -1,5 +1,4 @@
 import {
-  createStyles,
   createClass,
   createHashClass,
   compose,
@@ -29,7 +28,9 @@ export type {
   StyleDefinitionsWithUtils,
   CSSPropertiesWithUtils,
   StyleUtils,
-  SelectorFunction,
+  FlatComponentConfig,
+  FlatComponentResult,
+  DimensionedComponentResult,
   TokenValues,
   TokenRef,
   ThemeOverrides,
@@ -55,18 +56,28 @@ export type { ColorMixSpace } from './color.js';
  *
  * @example
  * ```ts
- * const button = styles.create('button', {
- *   base: { padding: '8px 16px' },
- *   primary: { backgroundColor: '#0066ff' },
+ * // Flat variants (no `variants:` key) — boolean toggles
+ * const card = styles.component('card', {
+ *   base: { padding: '16px', borderRadius: '8px' },
+ *   elevated: { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
  * });
+ * card()                    // "card"
+ * card({ elevated: true })  // "card card-elevated"
+ * const { base, elevated } = card;
  *
- * const hashed = styles.hashClass({ display: 'inline-flex' }, 'button');
- *
- * <button className={`${button('base', 'primary')} ${hashed}`}>
+ * // Dimensioned variants (with `variants:` key) — CVA style
+ * const button = styles.component('button', {
+ *   base: { padding: '8px 16px' },
+ *   variants: {
+ *     intent: { primary: { backgroundColor: '#0066ff' }, ghost: { backgroundColor: 'transparent' } },
+ *   },
+ *   defaultVariants: { intent: 'primary' },
+ * });
+ * button({ intent: 'ghost' }) // "button button-intent-ghost"
+ * const { base: btnBase, primary, ghost } = button;
  * ```
  */
 export const styles = {
-  create: createStyles,
   class: createClass,
   hashClass: createHashClass,
   component: createComponent,

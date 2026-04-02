@@ -5,16 +5,36 @@ description: Build typed variant APIs with styles.component
 
 # Components
 
-`styles.component()` is the first-class API for variant-driven component styling.
+`styles.component()` is the unified API for all component styling in typestyles. It handles both flat variants and dimensioned variants — you no longer need a separate API for each.
 
-If you need flat named variants (without a dimensioned `variants` config), see [Styles](/docs/styles).
+Use it when you want:
 
-Use it when you want a typed interface with:
+- `base` styles applied automatically on every call
+- Flat named variants (elevated, compact, etc.)
+- Typed `variants` dimensions (`intent`, `size`, `tone`) with defaults and compounds
+- Destructuring support for individual class strings
+- Full TypeScript autocomplete on both call and destructure
 
-- `base` styles
-- `variants` dimensions
-- `compoundVariants` for combinations
-- `defaultVariants`
+## Flat variants
+
+When your config has no `variants` key, all non-`base` keys are flat variants:
+
+```ts
+import { styles } from 'typestyles';
+
+const card = styles.component('card', {
+  base: { padding: '16px', borderRadius: '8px' },
+  elevated: { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
+  compact: { padding: '8px' },
+});
+
+card()                    // "card"              (base always applied)
+card({ elevated: true })  // "card card-elevated"
+card({ compact: true })   // "card card-compact"
+
+const { base, elevated, compact } = card;
+// base = "card", elevated = "card-elevated", compact = "card-compact"
+```
 
 ## Basic component
 
@@ -46,12 +66,21 @@ export const button = styles.component('button', {
   },
 });
 
-button(); // "button-base button-intent-primary button-size-sm"
-button({ size: 'lg' }); // "button-base button-intent-primary button-size-lg"
-button({ intent: 'ghost', size: 'lg' }); // "button-base button-intent-ghost button-size-lg"
+button()                              // "button button-intent-primary button-size-sm"
+button({ size: 'lg' })                // "button button-intent-primary button-size-lg"
+button({ intent: 'ghost', size: 'lg' }) // "button button-intent-ghost button-size-lg"
 ```
 
 Class strings follow the global [class naming](/docs/class-naming) configuration (`semantic` by default).
+
+Destructure to get individual class strings:
+
+```ts
+const { base, primary, ghost, sm, lg } = button;
+// base = "button"
+// primary = "button-intent-primary", ghost = "button-intent-ghost"
+// sm = "button-size-sm", lg = "button-size-lg"
+```
 
 ## Compound variants
 
@@ -105,8 +134,8 @@ const input = styles.component('input', {
   },
 });
 
-input(); // "input-base input-invalid-false"
-input({ invalid: true }); // "input-base input-invalid-true"
+input()                  // "input input-invalid-false"
+input({ invalid: true }) // "input input-invalid-true"
 ```
 
 ## Multipart `slots`
@@ -142,8 +171,6 @@ c.content;
 ```
 
 ## Data and ARIA selectors
-
-`styles.component` uses the same selector model as `styles.create`.
 
 ```ts
 const accordionTrigger = styles.component('accordion-trigger', {

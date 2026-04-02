@@ -81,7 +81,7 @@ export default defineConfig({
 
 When you save a file that imports from `typestyles`, the plugin:
 
-1. **Extracts namespaces**: Parses your code to find all `styles.create()`, `tokens.create()`, `createTheme()`, and `keyframes.create()` calls
+1. **Extracts namespaces**: Parses your code to find all `styles.component()`, `tokens.create()`, `createTheme()`, and `keyframes.create()` calls
 
 2. **Injects HMR code**: Adds Vite's `import.meta.hot` handlers to the module
 
@@ -109,7 +109,7 @@ export const color = tokens.create('color', {
 import { styles } from 'typestyles';
 import { color } from './tokens';
 
-export const button = styles.create('button', {
+export const button = styles.component('button', {
   base: {
     backgroundColor: color.primary,
     padding: '8px 16px',
@@ -120,7 +120,7 @@ export const button = styles.create('button', {
 import { button } from './styles';
 
 document.getElementById('app').innerHTML = `
-  <button class="${button('base')}">Click me</button>
+  <button class="${button()}">Click me</button>
 `;
 ```
 

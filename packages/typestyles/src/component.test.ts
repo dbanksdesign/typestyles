@@ -4,24 +4,119 @@ import { resetClassNaming } from './class-naming.js';
 import { reset, flushSync, getRegisteredCss } from './sheet.js';
 import { registeredNamespaces } from './registry.js';
 
-describe('createComponent', () => {
+describe('createComponent — flat variants', () => {
   beforeEach(() => {
     reset();
     registeredNamespaces.clear();
     resetClassNaming();
   });
 
-  it('returns a function', () => {
-    const btn = createComponent('btn', {});
+  it('returns a callable function', () => {
+    const card = createComponent('card', { base: { padding: '16px' } });
+    expect(typeof card).toBe('function');
+  });
+
+  it('base class is the namespace itself (not namespace-base)', () => {
+    const card = createComponent('card', { base: { padding: '16px' } });
+    expect(card()).toBe('card');
+    expect(card({})).toBe('card');
+  });
+
+  it('returns empty string when no base is defined and no variants active', () => {
+    const card = createComponent('nobase', { elevated: { boxShadow: '0 4px 12px' } });
+    expect(card()).toBe('');
+  });
+
+  it('applies boolean variant when true', () => {
+    const card = createComponent('card', {
+      base: { padding: '16px' },
+      elevated: { boxShadow: '0 4px 12px' },
+      compact: { padding: '8px' },
+    });
+    expect(card({ elevated: true })).toBe('card card-elevated');
+    expect(card({ compact: true })).toBe('card card-compact');
+    expect(card({ elevated: true, compact: true })).toBe('card card-elevated card-compact');
+  });
+
+  it('does not apply variant when false/null/undefined', () => {
+    const card = createComponent('card', {
+      base: { padding: '16px' },
+      elevated: { boxShadow: '0 4px 12px' },
+    });
+    expect(card({ elevated: false })).toBe('card');
+    expect(card({ elevated: null })).toBe('card');
+    expect(card({ elevated: undefined })).toBe('card');
+  });
+
+  it('exposes base as a destructurable property', () => {
+    const card = createComponent('card', {
+      base: { padding: '16px' },
+      elevated: { boxShadow: '0 4px 12px' },
+    });
+    expect(card.base).toBe('card');
+    expect(card.elevated).toBe('card-elevated');
+  });
+
+  it('exposes all flat variant keys as properties', () => {
+    const card = createComponent('card', {
+      base: { padding: '16px' },
+      elevated: { boxShadow: '0 4px 12px' },
+      compact: { padding: '8px' },
+    });
+    expect(card.base).toBe('card');
+    expect(card.elevated).toBe('card-elevated');
+    expect(card.compact).toBe('card-compact');
+  });
+
+  it('base property is empty string when no base CSS defined', () => {
+    const card = createComponent('nobase2', {
+      elevated: { boxShadow: '0 4px 12px' },
+    });
+    expect(card.base).toBe('');
+  });
+
+  it('injects CSS into the stylesheet', () => {
+    createComponent('flat-test', {
+      base: { display: 'flex' },
+      elevated: { boxShadow: '0 2px 4px' },
+    });
+    flushSync();
+    const css = getRegisteredCss();
+    expect(css).toContain('.flat-test');
+    expect(css).toContain('.flat-test-elevated');
+  });
+
+  it('handles structural keys (non-boolean use via destructuring)', () => {
+    const card = createComponent('ds-card', {
+      root: { display: 'flex', flexDirection: 'column' },
+      title: { fontSize: '1.25rem', fontWeight: 700 },
+      body: { color: '#6b7280' },
+    });
+    expect(card.root).toBe('ds-card-root');
+    expect(card.title).toBe('ds-card-title');
+    expect(card.body).toBe('ds-card-body');
+  });
+});
+
+describe('createComponent — dimensioned variants', () => {
+  beforeEach(() => {
+    reset();
+    registeredNamespaces.clear();
+    resetClassNaming();
+  });
+
+  it('returns a callable function', () => {
+    const btn = createComponent('btn', { variants: {} });
     expect(typeof btn).toBe('function');
   });
 
-  it('includes base class when base is defined', () => {
+  it('base class is the namespace (not namespace-base)', () => {
     const btn = createComponent('btn', {
       base: { padding: '8px' },
+      variants: {},
     });
-    expect(btn()).toBe('btn-base');
-    expect(btn({})).toBe('btn-base');
+    expect(btn()).toBe('btn');
+    expect(btn({})).toBe('btn');
   });
 
   it('does not include base class when base is not defined', () => {
@@ -50,10 +145,8 @@ describe('createComponent', () => {
       },
     });
 
-    expect(btn({ intent: 'primary', size: 'sm' })).toBe(
-      'vbtn-base vbtn-intent-primary vbtn-size-sm',
-    );
-    expect(btn({ intent: 'ghost', size: 'lg' })).toBe('vbtn-base vbtn-intent-ghost vbtn-size-lg');
+    expect(btn({ intent: 'primary', size: 'sm' })).toBe('vbtn vbtn-intent-primary vbtn-size-sm');
+    expect(btn({ intent: 'ghost', size: 'lg' })).toBe('vbtn vbtn-intent-ghost vbtn-size-lg');
   });
 
   it('applies defaultVariants when selection is omitted', () => {
@@ -72,9 +165,9 @@ describe('createComponent', () => {
       defaultVariants: { intent: 'primary', size: 'sm' },
     });
 
-    expect(btn()).toBe('dbtn-base dbtn-intent-primary dbtn-size-sm');
-    expect(btn({})).toBe('dbtn-base dbtn-intent-primary dbtn-size-sm');
-    expect(btn({ size: 'lg' })).toBe('dbtn-base dbtn-intent-primary dbtn-size-lg');
+    expect(btn()).toBe('dbtn dbtn-intent-primary dbtn-size-sm');
+    expect(btn({})).toBe('dbtn dbtn-intent-primary dbtn-size-sm');
+    expect(btn({ size: 'lg' })).toBe('dbtn dbtn-intent-primary dbtn-size-lg');
   });
 
   it('explicit selection overrides defaultVariants', () => {
@@ -120,7 +213,7 @@ describe('createComponent', () => {
     // Compound match
     const withCompound = btn({ intent: 'primary', size: 'lg' });
     expect(withCompound).toContain('cbtn-compound-0');
-    expect(withCompound).toContain('cbtn-base');
+    expect(withCompound).toContain('cbtn');
     expect(withCompound).toContain('cbtn-intent-primary');
     expect(withCompound).toContain('cbtn-size-lg');
   });
@@ -162,7 +255,7 @@ describe('createComponent', () => {
     flushSync();
 
     const css = getRegisteredCss();
-    expect(css).toContain('.style-test-base');
+    expect(css).toContain('.style-test {');
     expect(css).toContain('.style-test-intent-primary');
   });
 
@@ -223,6 +316,49 @@ describe('createComponent', () => {
     expect(btn()).toBe('boolbtn-outlined-false');
     expect(btn({ outlined: true })).toBe('boolbtn-outlined-true');
     expect(btn({ outlined: false })).toBe('boolbtn-outlined-false');
+  });
+
+  it('exposes base as a destructurable property returning namespace class', () => {
+    const btn = createComponent('dbtn2', {
+      base: { padding: '8px' },
+      variants: {
+        intent: {
+          primary: { color: 'blue' },
+          ghost: { color: 'black' },
+        },
+      },
+    });
+    expect(btn.base).toBe('dbtn2');
+  });
+
+  it('exposes empty string for base when no base CSS', () => {
+    const btn = createComponent('nobase3', {
+      variants: {
+        intent: { primary: { color: 'blue' } },
+      },
+    });
+    expect(btn.base).toBe('');
+  });
+
+  it('exposes each variant option as a destructurable property', () => {
+    const btn = createComponent('destbtn', {
+      base: { padding: '8px' },
+      variants: {
+        intent: {
+          primary: { backgroundColor: 'blue' },
+          ghost: { backgroundColor: 'transparent' },
+        },
+        size: {
+          sm: { fontSize: '12px' },
+          lg: { fontSize: '18px' },
+        },
+      },
+    });
+
+    expect(btn.primary).toBe('destbtn-intent-primary');
+    expect(btn.ghost).toBe('destbtn-intent-ghost');
+    expect(btn.sm).toBe('destbtn-size-sm');
+    expect(btn.lg).toBe('destbtn-size-lg');
   });
 });
 

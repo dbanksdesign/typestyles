@@ -15,16 +15,15 @@ Style creation and composition API.
 
 **Methods:**
 
-- `styles.create(namespace, definitions)`: Creates style variants (flat named keys)
 - `styles.class(name, style)`: Creates a single registered class from one style object
 - `styles.hashClass(styles, label?)`: Emits a hashed class from a style object (see [Class naming](/docs/class-naming))
-- `styles.withUtils(utils)`: Returns utility-aware `create`, `class`, and `hashClass` helpers
+- `styles.withUtils(utils)`: Returns utility-aware `component`, `class`, and `hashClass` helpers
 - `styles.compose(...selectors)`: Combines multiple selector functions or class strings
-- `styles.component(namespace, config)`: Creates variant-based component styles
+- `styles.component(namespace, config)`: Creates component styles (flat variants or dimensioned variants)
 
 ### Class naming
 
-Global options for emitted class strings (used by `styles.create`, `styles.class`, and `styles.component`):
+Global options for emitted class strings (used by `styles.class` and `styles.component`):
 
 - `configureClassNaming(options)`: Set `mode` (`'semantic' | 'hashed' | 'atomic'`), optional `prefix`, optional `scopeId`
 - `getClassNamingConfig()`: Read current config
@@ -78,12 +77,16 @@ Keyframe animation API.
 ```ts
 import { styles } from 'typestyles';
 
-const button = styles.create('button', {
-  base: { padding: '8px 16px' },
-  primary: { backgroundColor: '#0066ff' },
+const card = styles.component('card', {
+  base: { padding: '16px', borderRadius: '8px' },
+  elevated: { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
 });
 
-button('base', 'primary'); // "button-base button-primary"
+card()                   // "card"
+card({ elevated: true }) // "card card-elevated"
+
+const { base, elevated } = card;
+// base = "card", elevated = "card-elevated"
 ```
 
 ### Creating Tokens
@@ -118,11 +121,11 @@ animation: `${fadeIn} 300ms ease`;
 ```ts
 import { styles } from 'typestyles';
 
-const base = styles.create('base', {
+const base = styles.component('base', {
   root: { padding: '8px' },
 });
 
-const primary = styles.create('primary', {
+const primary = styles.component('primary', {
   root: { color: 'blue' },
 });
 
@@ -148,8 +151,8 @@ const button = styles.component('button', {
   },
 });
 
-button(); // "button-base button-intent-primary"
-button({ intent: 'ghost' }); // "button-base button-intent-ghost"
+button()               // "button button-intent-primary"
+button({ intent: 'ghost' }) // "button button-intent-ghost"
 ```
 
 ## @typestyles/props

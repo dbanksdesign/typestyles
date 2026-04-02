@@ -1,25 +1,25 @@
 import { styles } from 'typestyles';
 import { colors, borderRadius, spacing, fontSize } from '../styles/tokens';
 
-export const button = styles.create(
+export const button = styles.component(
   'button',
   {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    whiteSpace: 'nowrap',
-    borderRadius: borderRadius.md,
-    fontSize: fontSize.sm,
-    fontWeight: '500',
-    height: '2.25rem',
-    padding: `0 ${spacing[4]}`,
-    transition:
-      'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease',
-    cursor: 'pointer',
-    border: '1px solid transparent',
-    gap: spacing[2],
-  },
-  {
+    base: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      whiteSpace: 'nowrap',
+      borderRadius: borderRadius.md,
+      fontSize: fontSize.sm,
+      fontWeight: '500',
+      height: '2.25rem',
+      padding: `0 ${spacing[4]}`,
+      transition:
+        'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease',
+      cursor: 'pointer',
+      border: '1px solid transparent',
+      gap: spacing[2],
+    },
     default: {
       backgroundColor: colors.primary,
       color: colors.primaryForeground,

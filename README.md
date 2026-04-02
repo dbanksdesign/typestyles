@@ -31,7 +31,7 @@ const color = tokens.create('color', {
 });
 
 // Create styles — class names match what you write
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     borderRadius: '6px',
@@ -66,11 +66,11 @@ const button = styles.create('button', {
 });
 
 // Use in JSX — clean, readable class names in the DOM
-function Button({ variant, size, children }) {
-  return <button className={button('base', variant, size)}>{children}</button>;
+function Button({ outlined, small, children }) {
+  return <button className={button({ outlined, small })}>{children}</button>;
 }
 
-// Renders: <button class="button-base button-outlined button-small">
+// Renders: <button class="button button-outlined button-small">
 ```
 
 ## Core Concepts
@@ -80,15 +80,16 @@ function Button({ variant, size, children }) {
 TypeStyles generates class names that mirror your authored style names. If you write a style called `card.header`, you get a class name `card-header` in the DOM. What you see in your code is what you see in DevTools.
 
 ```tsx
-const card = styles.create('card', {
+const card = styles.component('card', {
   root: { /* ... */ },
   header: { /* ... */ },
   body: { /* ... */ },
 });
 
-<div className={card('root')}>         {/* class="card-root" */}
-  <div className={card('header')}>     {/* class="card-header" */}
-  <div className={card('body')}>       {/* class="card-body" */}
+const { root, header, body } = card;
+<div className={root}>             {/* class="card-root" */}
+  <div className={header}>         {/* class="card-header" */}
+  <div className={body}>           {/* class="card-body" */}
 ```
 
 ### Design Tokens via CSS Custom Properties
@@ -108,7 +109,7 @@ const spacing = tokens.create('spacing', {
 });
 
 // Use in TypeStyles — fully typed, autocomplete works
-const layout = styles.create('layout', {
+const layout = styles.component('layout', {
   container: {
     padding: spacing.md, // var(--spacing-md)
     gap: spacing.lg, // var(--spacing-lg)
@@ -146,7 +147,7 @@ TypeStyles works alongside existing CSS. Adopt it one component at a time.
 import './legacy-styles.css';
 import { styles } from 'typestyles';
 
-const newComponent = styles.create('new-component', {
+const newComponent = styles.component('new-component', {
   root: {
     /* ... */
   },
@@ -155,7 +156,7 @@ const newComponent = styles.create('new-component', {
 function MyComponent() {
   return (
     <div className="legacy-class">
-      <div className={newComponent('root')}>{/* New component using TypeStyles */}</div>
+      <div className={newComponent()}>{/* New component using TypeStyles */}</div>
     </div>
   );
 }
@@ -163,10 +164,10 @@ function MyComponent() {
 
 ### Composing Styles
 
-Styles compose naturally through multiple arguments or with plain CSS classes.
+Styles compose naturally through the object call or with plain CSS classes.
 
 ```tsx
-const text = styles.create('text', {
+const text = styles.component('text', {
   base: { fontFamily: 'system-ui' },
   bold: { fontWeight: 700 },
   muted: { color: color.secondary },
@@ -174,13 +175,13 @@ const text = styles.create('text', {
 });
 
 // Compose multiple variants
-<h1 className={text('base', 'heading', 'bold')}>
-  {/* class="text-base text-heading text-bold" */}
+<h1 className={text({ heading: true, bold: true })}>
+  {/* class="text text-heading text-bold" */}
 </h1>
 
 // Mix with plain CSS classes
-<p className={text('base', 'muted') + ' legacy-margin'}>
-  {/* class="text-base text-muted legacy-margin" */}
+<p className={text({ muted: true }) + ' legacy-margin'}>
+  {/* class="text text-muted legacy-margin" */}
 </p>
 ```
 
@@ -189,7 +190,7 @@ const text = styles.create('text', {
 Write CSS selectors naturally. Media queries, pseudo-classes, combinators — it all works.
 
 ```tsx
-const nav = styles.create('nav', {
+const nav = styles.component('nav', {
   root: {
     display: 'flex',
     gap: spacing.md,
@@ -228,7 +229,7 @@ import { styles, tokens } from 'typestyles';
 
 const color = tokens.use('color'); // Reference tokens defined elsewhere
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     backgroundColor: color.primary,
@@ -236,7 +237,7 @@ const button = styles.create('button', {
 });
 
 export function Button({ children }) {
-  return <button className={button('base')}>{children}</button>;
+  return <button className={button()}>{children}</button>;
 }
 ```
 
@@ -245,14 +246,14 @@ Or keep styles separate:
 ```tsx
 // button.styles.ts
 import { styles } from 'typestyles';
-export const button = styles.create('button', {
+export const button = styles.component('button', {
   /* ... */
 });
 
 // Button.tsx
 import { button } from './button.styles';
 export function Button({ children }) {
-  return <button className={button('base')}>{children}</button>;
+  return <button className={button()}>{children}</button>;
 }
 ```
 
@@ -260,8 +261,8 @@ export function Button({ children }) {
 
 TypeStyles operates at runtime with minimal overhead:
 
-1. **`styles.create()`** registers style definitions and returns a selector function
-2. **The selector function** composes class names from the variants you pass in
+1. **`styles.component()`** registers style definitions and returns a callable with class strings
+2. **The callable** composes class names from the variant props you pass
 3. **CSS is injected** into a `<style>` element on first use (lazy injection)
 4. **Class names** are deterministic and human-readable — derived from the names you author
 5. **Tokens** are CSS custom properties, so they cascade naturally and work in plain CSS
@@ -281,23 +282,20 @@ const { html, css } = collectStyles(() => renderToString(<App />));
 
 ## API Reference
 
-### `styles.create(namespace, definitions)`
+### `styles.component(namespace, config)`
 
-Creates a style group and returns a selector function.
+Creates component styles (flat variants or dimensioned variants) and returns a callable.
 
 ```tsx
-const card = styles.create('card', {
-  root: {
-    /* CSSProperties */
-  },
-  title: {
-    /* CSSProperties */
-  },
+const card = styles.component('card', {
+  base: { padding: '16px', borderRadius: '8px' },
+  elevated: { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
 });
 
-card('root'); // "card-root"
-card('root', 'title'); // "card-root card-title"
-card('root', condition && 'title'); // conditional application
+card()                   // "card"
+card({ elevated: true }) // "card card-elevated"
+
+const { base, elevated } = card; // destructure individual class strings
 ```
 
 ### `tokens.create(namespace, values)`

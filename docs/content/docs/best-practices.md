@@ -15,14 +15,14 @@ Use kebab-case for namespaces. The namespace should describe the component or pa
 
 ```ts
 // ✅ Good - descriptive and consistent
-const button = styles.create('button', { ... });
-const card = styles.create('card', { ... });
-const navigationMenu = styles.create('navigation-menu', { ... });
+const button = styles.component('button', { ... });
+const card = styles.component('card', { ... });
+const navigationMenu = styles.component('navigation-menu', { ... });
 
 // ❌ Avoid - generic or single-letter names
-const b = styles.create('b', { ... });
-const x = styles.create('x', { ... });
-const component = styles.create('component', { ... });
+const b = styles.component('b', { ... });
+const x = styles.component('x', { ... });
+const component = styles.component('component', { ... });
 ```
 
 ### Variants
@@ -30,7 +30,7 @@ const component = styles.create('component', { ... });
 Use camelCase for variant names. Be descriptive about the style purpose, not just the visual appearance:
 
 ```ts
-const button = styles.create('button', {
+const button = styles.component('button', {
   // ✅ Good - describes the intent
   base: { ... },           // The foundation styles
   primary: { ... },        // The main action
@@ -179,13 +179,13 @@ Keep styles co-located with components or in a separate `.styles.ts` file:
 import { styles } from 'typestyles';
 import { color, space } from '../tokens';
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: { ... },
   primary: { ... },
 });
 
 export function Button({ variant, children }) {
-  return <button className={button('base', variant)}>{children}</button>;
+  return <button className={button({ [variant]: true })}>{children}</button>;
 }
 ```
 
@@ -196,7 +196,7 @@ export function Button({ variant, children }) {
 import { styles } from 'typestyles';
 import { color, space } from '../tokens';
 
-export const button = styles.create('button', {
+export const button = styles.component('button', {
   base: { ... },
   primary: { ... },
   secondary: { ... },
@@ -207,7 +207,7 @@ export const button = styles.create('button', {
 import { button } from './Button.styles';
 
 export function Button({ variant, children }) {
-  return <button className={button('base', variant)}>{children}</button>;
+  return <button className={button({ [variant]: true })}>{children}</button>;
 }
 ```
 
@@ -265,7 +265,7 @@ export const calendar = tokens.create('calendar', {
 // Usage in Calendar.styles.ts
 import { calendar } from './Calendar.tokens';
 
-const calendarStyles = styles.create('calendar', {
+const calendarStyles = styles.component('calendar', {
   day: {
     width: calendar.daySize,
     height: calendar.daySize,
@@ -302,26 +302,26 @@ const size = tokens.create('size', {
 For related components (like Form + Input + Label), use consistent namespacing:
 
 ```ts
-const form = styles.create('form', {
+const form = styles.component('form', {
   root: { ... },
   field: { ... },
 });
 
-const input = styles.create('input', {
+const input = styles.component('input', {
   base: { ... },
   error: { ... },
 });
 
-const label = styles.create('label', {
+const label = styles.component('label', {
   base: { ... },
   required: { ... },
 });
 
 // Usage
-<form className={form('root')}>
-  <div className={form('field')}>
-    <label className={label('base', 'required')}>Name</label>
-    <input className={input('base', error && 'error')} />
+<form className={form()}>
+  <div className={form.field}>
+    <label className={label({ required: true })}>Name</label>
+    <input className={input({ error: !!error })} />
   </div>
 </form>
 ```
@@ -331,7 +331,7 @@ const label = styles.create('label', {
 Compose variants from base to specific:
 
 ```ts
-const button = styles.create('button', {
+const button = styles.component('button', {
   // Base styles every button has
   base: {
     display: 'inline-flex',
@@ -359,9 +359,9 @@ const button = styles.create('button', {
 });
 
 // Usage
-button('base', 'primary', 'medium'); // Primary medium button
-button('base', 'primary', 'medium', 'disabled'); // Disabled primary medium
-button('base', 'ghost', 'small'); // Small ghost button
+button({ primary: true, medium: true }); // Primary medium button
+button({ primary: true, medium: true, disabled: true }); // Disabled primary medium
+button({ ghost: true, small: true }); // Small ghost button
 ```
 
 ### Layout components
@@ -369,7 +369,7 @@ button('base', 'ghost', 'small'); // Small ghost button
 Use layout components with flexible spacing:
 
 ```ts
-const stack = styles.create('stack', {
+const stack = styles.component('stack', {
   base: {
     display: 'flex',
     flexDirection: 'column',
@@ -381,7 +381,7 @@ const stack = styles.create('stack', {
   gap4: { gap: space[4] },
 });
 
-const row = styles.create('row', {
+const row = styles.component('row', {
   base: {
     display: 'flex',
     flexDirection: 'row',
@@ -400,7 +400,7 @@ const row = styles.create('row', {
 For simple on/off states:
 
 ```ts
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: { ... },
   elevated: {
     boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
@@ -414,7 +414,7 @@ const card = styles.create('card', {
 });
 
 // Usage
-card('base', isElevated && 'elevated', isInteractive && 'interactive');
+card({ elevated: isElevated, interactive: isInteractive });
 ```
 
 ### Complex state
@@ -473,7 +473,7 @@ const highContrast = tokens.createTheme('high-contrast', { ... });
 
 ```ts
 // ✅ Good - consistent structure
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: {
     padding: space[4],
     borderRadius: '8px',
@@ -494,7 +494,7 @@ const card = styles.create('card', {
 });
 
 // ❌ Avoid - inconsistent formatting
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: { padding: space[4], borderRadius: '8px', backgroundColor: color.surface },
   elevated: { boxShadow: shadow.md },
 });
@@ -531,15 +531,15 @@ import { useCardState } from './useCardState';
 ```tsx
 // Bad - creates new styles on every render
 function Button({ children }) {
-  const button = styles.create('button', { base: { ... } }); // ❌
-  return <button className={button('base')}>{children}</button>;
+  const button = styles.component('button', { base: { ... } }); // ❌
+  return <button className={button()}>{children}</button>;
 }
 
 // Good - define at module level
-const button = styles.create('button', { base: { ... } });
+const button = styles.component('button', { base: { ... } });
 
 function Button({ children }) {
-  return <button className={button('base')}>{children}</button>;
+  return <button className={button()}>{children}</button>;
 }
 ```
 
@@ -547,19 +547,19 @@ function Button({ children }) {
 
 ```tsx
 // Bad - creates styles for every possible value
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: { width: props.width }, // ❌ Don't do this
 });
 
 // Good - use inline styles for dynamic values
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: { display: 'inline-block' },
 });
 
 function Button({ width, children }) {
   return (
     <button
-      className={button('base')}
+      className={button()}
       style={{ width }} // ✅ Dynamic value here
     >
       {children}
@@ -572,14 +572,14 @@ function Button({ width, children }) {
 
 ```ts
 // File A
-const button = styles.create('button', { ... });
+const button = styles.component('button', { ... });
 
 // File B
-const button = styles.create('button', { ... }); // ❌ Collision!
+const button = styles.component('button', { ... }); // ❌ Collision!
 
 // Good - use descriptive names
-const iconButton = styles.create('icon-button', { ... });
-const textButton = styles.create('text-button', { ... });
+const iconButton = styles.component('icon-button', { ... });
+const textButton = styles.component('text-button', { ... });
 ```
 
 ## Summary

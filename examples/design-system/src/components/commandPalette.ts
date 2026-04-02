@@ -2,7 +2,7 @@ import { styles } from 'typestyles';
 import { designTokens as t } from '../tokens';
 
 /** Command / search palette overlay (⌘K-style). */
-export const commandPalette = styles.create('command-palette', {
+export const commandPalette = styles.component('command-palette', {
   root: {
     position: 'fixed',
     inset: 0,

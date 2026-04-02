@@ -1,13 +1,13 @@
 import { styles } from 'typestyles';
 import { designTokens as t } from '../tokens';
 
-export const layout = styles.create(
+export const layout = styles.component(
   'ds-layout',
   {
-    fontFamily: t.fontFamily.sans,
-    color: t.color.text.primary,
-  },
-  {
+    base: {
+      fontFamily: t.fontFamily.sans,
+      color: t.color.text.primary,
+    },
     stack: {
       display: 'grid',
       gap: t.space[5],
@@ -30,13 +30,13 @@ export const layout = styles.create(
   },
 );
 
-export const text = styles.create(
+export const text = styles.component(
   'ds-text',
   {
-    margin: 0,
-    color: t.color.text.primary,
-  },
-  {
+    base: {
+      margin: 0,
+      color: t.color.text.primary,
+    },
     title: {
       fontSize: '28px',
       fontWeight: t.fontWeight.semibold,
