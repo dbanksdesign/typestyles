@@ -34,22 +34,26 @@ describe('real-world example', () => {
     );
 
     // Define component styles
-    const button = styles.create('button', {
+    const button = styles.component('button', {
       base: {
         borderRadius: '0.375rem',
         cursor: 'pointer',
         transition: 'all 0.2s',
         '&:hover': { opacity: 0.9 },
       },
-      primary: {
-        backgroundColor: '#3b82f6',
-        color: 'white',
-        '&:hover': { backgroundColor: '#2563eb' },
-      },
-      secondary: {
-        backgroundColor: '#e5e7eb',
-        color: '#1f2937',
-        '&:hover': { backgroundColor: '#d1d5db' },
+      variants: {
+        variant: {
+          primary: {
+            backgroundColor: '#3b82f6',
+            color: 'white',
+            '&:hover': { backgroundColor: '#2563eb' },
+          },
+          secondary: {
+            backgroundColor: '#e5e7eb',
+            color: '#1f2937',
+            '&:hover': { backgroundColor: '#d1d5db' },
+          },
+        },
       },
     });
 
@@ -66,11 +70,11 @@ describe('real-world example', () => {
       }),
     );
 
-    const className = primaryButton('base', 'primary');
+    const className = primaryButton({ variant: 'primary' });
 
     // Verify class names are generated
-    expect(className).toContain('button-base');
-    expect(className).toContain('button-primary');
+    expect(className).toContain('button');
+    expect(className).toContain('button-variant-primary');
     expect(className).toContain('atoms-display-inline-flex');
     expect(className).toContain('atoms-alignItems-center');
     expect(className).toContain('atoms-gap-2');
@@ -79,7 +83,7 @@ describe('real-world example', () => {
 
     // Verify CSS is injected
     const css = getRegisteredCss();
-    expect(css).toContain('button-base');
+    expect(css).toContain('.button');
     expect(css).toContain('border-radius: 0.375rem');
     expect(css).toContain('atoms-display-inline-flex');
     expect(css).toContain('display: inline-flex');

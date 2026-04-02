@@ -8,10 +8,10 @@ import { flushSync, getRegisteredCss, reset } from 'typestyles';
 import { extractNamespaces } from './index.js';
 
 describe('extractNamespaces', () => {
-  it('extracts styles.create namespaces as prefixes', () => {
+  it('extracts styles.component namespaces as prefixes', () => {
     const code = `
       import { styles } from 'typestyles';
-      const button = styles.create('button', {
+      const button = styles.component('button', {
         base: { color: 'red' },
       });
     `;
@@ -66,8 +66,8 @@ describe('extractNamespaces', () => {
       import { styles, tokens, keyframes } from 'typestyles';
       const color = tokens.create('color', { primary: '#0066ff' });
       const fadeIn = keyframes.create('fadeIn', { from: { opacity: 0 }, to: { opacity: 1 } });
-      const button = styles.create('button', { base: { color: color.primary } });
-      const card = styles.create('card', { base: { animation: fadeIn } });
+      const button = styles.component('button', { base: { color: color.primary } });
+      const card = styles.component('card', { base: { animation: fadeIn } });
     `;
     const result = extractNamespaces(code);
     expect(result.keys).toEqual(['tokens:color', 'keyframes:fadeIn']);
@@ -76,7 +76,7 @@ describe('extractNamespaces', () => {
 
   it('handles double-quoted strings', () => {
     const code = `
-      const button = styles.create("button", { base: { color: 'red' } });
+      const button = styles.component("button", { base: { color: 'red' } });
     `;
     const result = extractNamespaces(code);
     expect(result.prefixes).toEqual(['.button-']);
@@ -162,7 +162,7 @@ styles.component('parity-button', {
     },
   },
   compoundVariants: [
-    { variants: { intent: ['primary', 'ghost'], outlined: true }, style: { fontWeight: 700 } },
+    { intent: ['primary', 'ghost'], outlined: true, css: { fontWeight: 700 } },
   ],
   defaultVariants: { intent: 'primary', outlined: false },
 });

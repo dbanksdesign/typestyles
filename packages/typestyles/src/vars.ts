@@ -17,12 +17,12 @@ export function __resetVarCounter(): void {
  * ```ts
  * const cardBg = createVar();
  *
- * const card = styles.create('card', {
+ * const card = styles.component('card', {
  *   base: { background: cardBg, padding: '16px' },
  * });
  *
  * // Consumer sets the variable per instance:
- * <div className={card('base')} style={assignVars({ [cardBg]: '#ff0099' })} />
+ * <div className={card()} style={assignVars({ [cardBg]: '#ff0099' })} />
  * ```
  */
 export function createVar(): CSSVarRef {
