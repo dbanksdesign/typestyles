@@ -52,10 +52,10 @@ export const pageStyles = {
     flexWrap: 'wrap',
   }),
 
-  section: styles.create(
+  section: styles.component(
     'section',
-    { padding: `${spacing[12]} 0` },
     {
+      base: { padding: `${spacing[12]} 0` },
       border: {
         borderTop: `1px solid ${colors.border}`,
       },
@@ -88,25 +88,25 @@ export const pageStyles = {
     flexWrap: 'wrap',
   }),
 
-  tab: styles.create(
+  tab: styles.component(
     'tab',
     {
-      fontSize: '0.875rem',
-      fontWeight: '500',
-      color: colors.mutedForeground,
-      padding: `${spacing[2]} ${spacing[3]}`,
-      borderRadius: borderRadius.md,
-      border: 'none',
-      backgroundColor: 'transparent',
-      cursor: 'pointer',
-      transition: 'color 0.15s ease, background-color 0.15s ease',
-      textDecoration: 'none',
-      '&:hover': {
-        color: colors.foreground,
-        backgroundColor: colors.muted,
+      base: {
+        fontSize: '0.875rem',
+        fontWeight: '500',
+        color: colors.mutedForeground,
+        padding: `${spacing[2]} ${spacing[3]}`,
+        borderRadius: borderRadius.md,
+        border: 'none',
+        backgroundColor: 'transparent',
+        cursor: 'pointer',
+        transition: 'color 0.15s ease, background-color 0.15s ease',
+        textDecoration: 'none',
+        '&:hover': {
+          color: colors.foreground,
+          backgroundColor: colors.muted,
+        },
       },
-    },
-    {
       active: {
         color: colors.foreground,
         backgroundColor: colors.muted,
@@ -156,21 +156,21 @@ export const pageStyles = {
     },
   }),
 
-  featureIcon: styles.create(
+  featureIcon: styles.component(
     'feature-icon',
     {
-      width: '2.5rem',
-      height: '2.5rem',
-      borderRadius: borderRadius.md,
-      backgroundColor: colors.muted,
-      color: colors.foreground,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '0.875rem',
-      fontWeight: '600',
-    },
-    {
+      base: {
+        width: '2.5rem',
+        height: '2.5rem',
+        borderRadius: borderRadius.md,
+        backgroundColor: colors.muted,
+        color: colors.foreground,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '0.875rem',
+        fontWeight: '600',
+      },
       accent: {
         backgroundColor: colors.primary,
         color: colors.primaryForeground,

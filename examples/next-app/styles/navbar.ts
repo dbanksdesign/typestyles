@@ -150,21 +150,21 @@ export const navStyles = {
     },
   }),
 
-  badge: styles.create(
+  badge: styles.component(
     'badge',
     {
-      display: 'inline-flex',
-      alignItems: 'center',
-      borderRadius: '9999px',
-      border: `1px solid ${colors.border}`,
-      padding: `${spacing[1]} ${spacing[2]}`,
-      fontSize: '0.75rem',
-      fontWeight: '500',
-      color: colors.mutedForeground,
-      backgroundColor: 'transparent',
-      transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease',
-    },
-    {
+      base: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        borderRadius: '9999px',
+        border: `1px solid ${colors.border}`,
+        padding: `${spacing[1]} ${spacing[2]}`,
+        fontSize: '0.75rem',
+        fontWeight: '500',
+        color: colors.mutedForeground,
+        backgroundColor: 'transparent',
+        transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease',
+      },
       secondary: {
         backgroundColor: colors.muted,
         color: colors.mutedForeground,
