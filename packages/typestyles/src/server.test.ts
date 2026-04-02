@@ -1,26 +1,28 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { collectStyles } from './server.js';
 import { resetClassNaming } from './class-naming.js';
-import { createStyles } from './styles.js';
+import { createComponent } from './component.js';
 import { createTokens } from './tokens.js';
 import { reset } from './sheet.js';
+import { registeredNamespaces } from './registry.js';
 
 describe('collectStyles', () => {
   beforeEach(() => {
     reset();
     resetClassNaming();
+    registeredNamespaces.clear();
   });
 
   it('collects CSS from styles created during render', () => {
     const { html, css } = collectStyles(() => {
-      createStyles('ssr-btn', {
+      createComponent('ssr-btn', {
         base: { color: 'red' },
       });
-      return '<button class="ssr-btn-base">Click</button>';
+      return '<button class="ssr-btn">Click</button>';
     });
 
-    expect(html).toBe('<button class="ssr-btn-base">Click</button>');
-    expect(css).toContain('.ssr-btn-base');
+    expect(html).toBe('<button class="ssr-btn">Click</button>');
+    expect(css).toContain('.ssr-btn');
     expect(css).toContain('color: red');
   });
 
@@ -37,13 +39,13 @@ describe('collectStyles', () => {
   it('collects both tokens and styles', () => {
     const { css } = collectStyles(() => {
       const color = createTokens('ssr-theme', { bg: '#fff' });
-      createStyles('ssr-card', {
-        root: { backgroundColor: color.bg },
+      createComponent('ssr-card', {
+        base: { backgroundColor: color.bg },
       });
       return '';
     });
 
     expect(css).toContain('--ssr-theme-bg');
-    expect(css).toContain('.ssr-card-root');
+    expect(css).toContain('.ssr-card');
   });
 });

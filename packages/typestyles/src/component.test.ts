@@ -20,8 +20,8 @@ describe('createComponent', () => {
     const btn = createComponent('btn', {
       base: { padding: '8px' },
     });
-    expect(btn()).toBe('btn-base');
-    expect(btn({})).toBe('btn-base');
+    expect(btn()).toBe('btn');
+    expect(btn({})).toBe('btn');
   });
 
   it('does not include base class when base is not defined', () => {
@@ -50,10 +50,8 @@ describe('createComponent', () => {
       },
     });
 
-    expect(btn({ intent: 'primary', size: 'sm' })).toBe(
-      'vbtn-base vbtn-intent-primary vbtn-size-sm',
-    );
-    expect(btn({ intent: 'ghost', size: 'lg' })).toBe('vbtn-base vbtn-intent-ghost vbtn-size-lg');
+    expect(btn({ intent: 'primary', size: 'sm' })).toBe('vbtn vbtn-intent-primary vbtn-size-sm');
+    expect(btn({ intent: 'ghost', size: 'lg' })).toBe('vbtn vbtn-intent-ghost vbtn-size-lg');
   });
 
   it('applies defaultVariants when selection is omitted', () => {
@@ -72,9 +70,9 @@ describe('createComponent', () => {
       defaultVariants: { intent: 'primary', size: 'sm' },
     });
 
-    expect(btn()).toBe('dbtn-base dbtn-intent-primary dbtn-size-sm');
-    expect(btn({})).toBe('dbtn-base dbtn-intent-primary dbtn-size-sm');
-    expect(btn({ size: 'lg' })).toBe('dbtn-base dbtn-intent-primary dbtn-size-lg');
+    expect(btn()).toBe('dbtn dbtn-intent-primary dbtn-size-sm');
+    expect(btn({})).toBe('dbtn dbtn-intent-primary dbtn-size-sm');
+    expect(btn({ size: 'lg' })).toBe('dbtn dbtn-intent-primary dbtn-size-lg');
   });
 
   it('explicit selection overrides defaultVariants', () => {
@@ -106,8 +104,9 @@ describe('createComponent', () => {
       },
       compoundVariants: [
         {
-          variants: { intent: 'primary', size: 'lg' },
-          style: { fontWeight: 700 },
+          intent: 'primary',
+          size: 'lg',
+          css: { fontWeight: 700 },
         },
       ],
       defaultVariants: { intent: 'primary', size: 'sm' },
@@ -120,7 +119,7 @@ describe('createComponent', () => {
     // Compound match
     const withCompound = btn({ intent: 'primary', size: 'lg' });
     expect(withCompound).toContain('cbtn-compound-0');
-    expect(withCompound).toContain('cbtn-base');
+    expect(withCompound).toContain('cbtn');
     expect(withCompound).toContain('cbtn-intent-primary');
     expect(withCompound).toContain('cbtn-size-lg');
   });
@@ -139,8 +138,9 @@ describe('createComponent', () => {
       },
       compoundVariants: [
         {
-          variants: { intent: 'primary', size: 'lg' },
-          style: { fontWeight: 700 },
+          intent: 'primary',
+          size: 'lg',
+          css: { fontWeight: 700 },
         },
       ],
     });
@@ -162,7 +162,7 @@ describe('createComponent', () => {
     flushSync();
 
     const css = getRegisteredCss();
-    expect(css).toContain('.style-test-base');
+    expect(css).toContain('.style-test');
     expect(css).toContain('.style-test-intent-primary');
   });
 
@@ -172,9 +172,7 @@ describe('createComponent', () => {
         intent: { primary: { color: 'blue' } },
         size: { lg: { fontSize: '18px' } },
       },
-      compoundVariants: [
-        { variants: { intent: 'primary', size: 'lg' }, style: { fontWeight: 700 } },
-      ],
+      compoundVariants: [{ intent: 'primary', size: 'lg', css: { fontWeight: 700 } }],
     });
 
     flushSync();
@@ -198,8 +196,9 @@ describe('createComponent', () => {
       },
       compoundVariants: [
         {
-          variants: { intent: ['primary', 'secondary'], size: 'lg' },
-          style: { textTransform: 'uppercase' },
+          intent: ['primary', 'secondary'],
+          size: 'lg',
+          css: { textTransform: 'uppercase' },
         },
       ],
     });
@@ -223,6 +222,13 @@ describe('createComponent', () => {
     expect(btn()).toBe('boolbtn-outlined-false');
     expect(btn({ outlined: true })).toBe('boolbtn-outlined-true');
     expect(btn({ outlined: false })).toBe('boolbtn-outlined-false');
+  });
+
+  it('simple case (no variants) returns just the namespace', () => {
+    const card = createComponent('card', {
+      base: { padding: '16px', borderRadius: '8px' },
+    });
+    expect(card()).toBe('card');
   });
 });
 
@@ -287,8 +293,9 @@ describe('createComponent with slots', () => {
       },
       compoundVariants: [
         {
-          variants: { intent: ['primary', 'ghost'], size: 'lg' },
-          style: {
+          intent: ['primary', 'ghost'],
+          size: 'lg',
+          css: {
             trigger: { fontWeight: 700 },
           },
         },
@@ -319,8 +326,8 @@ describe('createComponent with slots', () => {
       },
       compoundVariants: [
         {
-          variants: { intent: 'primary' },
-          style: {
+          intent: 'primary',
+          css: {
             trigger: { fontWeight: 600 },
           },
         },
