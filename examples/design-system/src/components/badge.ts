@@ -1,8 +1,8 @@
 import { styles } from 'typestyles';
 import { designTokens as t } from '../tokens';
 
-export const badge = styles.create('badge', {
-  root: {
+export const badge = {
+  root: styles.class('badge-root', {
     display: 'inline-flex',
     alignItems: 'center',
     fontSize: t.fontSize.sm,
@@ -13,35 +13,35 @@ export const badge = styles.create('badge', {
     border: `1px solid ${t.color.border.default}`,
     backgroundColor: t.color.background.subtle,
     color: t.color.text.secondary,
-  },
-  neutral: {
+  }),
+  neutral: styles.class('badge-neutral', {
     borderColor: t.color.border.default,
     backgroundColor: t.color.background.subtle,
     color: t.color.text.secondary,
-  },
-  accent: {
+  }),
+  accent: styles.class('badge-accent', {
     borderColor: `color-mix(in srgb, ${t.color.accent.default} 45%, ${t.color.border.default})`,
     backgroundColor: `color-mix(in srgb, ${t.color.accent.default} 14%, ${t.color.background.surface})`,
     color: t.color.accent.default,
-  },
-  success: {
+  }),
+  success: styles.class('badge-success', {
     borderColor: `color-mix(in srgb, ${t.color.success.default} 40%, ${t.color.border.default})`,
     backgroundColor: `color-mix(in srgb, ${t.color.success.default} 12%, ${t.color.background.surface})`,
     color: t.color.success.default,
-  },
-  warning: {
+  }),
+  warning: styles.class('badge-warning', {
     borderColor: `color-mix(in srgb, ${t.color.warning.default} 40%, ${t.color.border.default})`,
     backgroundColor: `color-mix(in srgb, ${t.color.warning.default} 14%, ${t.color.background.surface})`,
     color: t.color.warning.default,
-  },
-  danger: {
+  }),
+  danger: styles.class('badge-danger', {
     borderColor: `color-mix(in srgb, ${t.color.danger.default} 40%, ${t.color.border.default})`,
     backgroundColor: `color-mix(in srgb, ${t.color.danger.default} 12%, ${t.color.background.surface})`,
     color: t.color.danger.default,
-  },
-  tip: {
+  }),
+  tip: styles.class('badge-tip', {
     borderColor: `color-mix(in srgb, ${t.color.info.default} 40%, ${t.color.border.default})`,
     backgroundColor: `color-mix(in srgb, ${t.color.info.default} 12%, ${t.color.background.surface})`,
     color: t.color.info.default,
-  },
-});
+  }),
+};

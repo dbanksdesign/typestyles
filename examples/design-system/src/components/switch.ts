@@ -1,14 +1,14 @@
 import { styles } from 'typestyles';
 import { designTokens as t } from '../tokens';
 
-export const switchStyles = styles.create('switch', {
-  root: {
+export const switchStyles = {
+  root: styles.class('switch-root', {
     display: 'inline-flex',
     alignItems: 'center',
     gap: t.space[2],
     cursor: 'pointer',
-  },
-  track: {
+  }),
+  track: styles.class('switch-track', {
     position: 'relative',
     width: '40px',
     height: '24px',
@@ -18,8 +18,8 @@ export const switchStyles = styles.create('switch', {
     '&[data-selected]': {
       backgroundColor: t.color.accent.default,
     },
-  },
-  thumb: {
+  }),
+  thumb: styles.class('switch-thumb', {
     position: 'absolute',
     top: '3px',
     left: '3px',
@@ -31,8 +31,8 @@ export const switchStyles = styles.create('switch', {
     '&[data-selected]': {
       transform: 'translateX(16px)',
     },
-  },
-  label: {
+  }),
+  label: styles.class('switch-label', {
     fontSize: t.fontSize.md,
-  },
-});
+  }),
+};

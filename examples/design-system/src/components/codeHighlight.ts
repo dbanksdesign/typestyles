@@ -17,11 +17,11 @@ function scopeSelectorList(list: string): string {
  * Maps semantic `codeSyntax` tokens to highlight.js class names (see README).
  * Light values live on `:root`; dark is applied via `darkThemeClass` overrides.
  *
- * Compose **`codeHljsScope('root')`** on a page shell (e.g. docs layout root) so selectors apply
+ * Compose **`codeHljsScope.root`** on a page shell (e.g. docs layout root) so selectors apply
  * inside `[data-codeblock]` wrappers.
  */
-export const codeHljsScope = styles.create('ds-hljs', {
-  root: {
+export const codeHljsScope = {
+  root: styles.class('ds-hljs-root', {
     [`& ${cb} .hljs`]: {
       color: s.base,
       background: 'transparent',
@@ -81,5 +81,5 @@ export const codeHljsScope = styles.create('ds-hljs', {
       color: s.deletion,
       backgroundColor: s.deletionBackground,
     },
-  },
-});
+  }),
+};

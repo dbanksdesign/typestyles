@@ -2,48 +2,52 @@ import { styles } from 'typestyles';
 import { color, space } from './tokens';
 import { fadeIn, spin } from './animations';
 
-export const layout = styles.create('layout', {
-  page: {
-    maxWidth: '720px',
-    margin: '0 auto',
-    padding: `${space.xl} ${space.md}`,
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    color: color.text,
-    backgroundColor: color.surface,
-    minHeight: '100vh',
-    transition: 'background-color 200ms ease, color 200ms ease',
-  },
-  header: {
-    marginBottom: space.xl,
-  },
-  title: {
-    fontSize: '28px',
-    fontWeight: 700,
-    marginBottom: space.sm,
-  },
-  subtitle: {
-    fontSize: '14px',
-    color: color.textMuted,
-  },
-  section: {
-    marginBottom: space.xl,
-  },
-  sectionTitle: {
-    fontSize: '18px',
-    fontWeight: 600,
-    marginBottom: space.md,
-    paddingBottom: space.sm,
-    borderBottom: `1px solid ${color.border}`,
-  },
-  row: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: space.sm,
-    alignItems: 'center',
-  },
+export const layoutPage = styles.class('layout-page', {
+  maxWidth: '720px',
+  margin: '0 auto',
+  padding: `${space.xl} ${space.md}`,
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  color: color.text,
+  backgroundColor: color.surface,
+  minHeight: '100vh',
+  transition: 'background-color 200ms ease, color 200ms ease',
 });
 
-export const button = styles.create('button', {
+export const layoutHeader = styles.class('layout-header', {
+  marginBottom: space.xl,
+});
+
+export const layoutTitle = styles.class('layout-title', {
+  fontSize: '28px',
+  fontWeight: 700,
+  marginBottom: space.sm,
+});
+
+export const layoutSubtitle = styles.class('layout-subtitle', {
+  fontSize: '14px',
+  color: color.textMuted,
+});
+
+export const layoutSection = styles.class('layout-section', {
+  marginBottom: space.xl,
+});
+
+export const layoutSectionTitle = styles.class('layout-sectionTitle', {
+  fontSize: '18px',
+  fontWeight: 600,
+  marginBottom: space.md,
+  paddingBottom: space.sm,
+  borderBottom: `1px solid ${color.border}`,
+});
+
+export const layoutRow = styles.class('layout-row', {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: space.sm,
+  alignItems: 'center',
+});
+
+export const button = styles.component('button', {
   base: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -59,35 +63,41 @@ export const button = styles.create('button', {
       transform: 'scale(0.97)',
     },
   },
-  primary: {
-    backgroundColor: color.primary,
-    color: '#fff',
-    '&:hover': {
-      backgroundColor: color.primaryHover,
+  variants: {
+    variant: {
+      primary: {
+        backgroundColor: color.primary,
+        color: '#fff',
+        '&:hover': {
+          backgroundColor: color.primaryHover,
+        },
+      },
+      secondary: {
+        backgroundColor: color.secondary,
+        color: '#fff',
+        '&:hover': {
+          backgroundColor: color.secondaryHover,
+        },
+      },
+      outline: {
+        backgroundColor: 'transparent',
+        border: `1px solid ${color.border}`,
+        color: color.text,
+        '&:hover': {
+          backgroundColor: color.surfaceRaised,
+        },
+      },
     },
-  },
-  secondary: {
-    backgroundColor: color.secondary,
-    color: '#fff',
-    '&:hover': {
-      backgroundColor: color.secondaryHover,
+    size: {
+      large: {
+        padding: `${space.md} ${space.lg}`,
+        fontSize: '16px',
+      },
     },
-  },
-  outline: {
-    backgroundColor: 'transparent',
-    border: `1px solid ${color.border}`,
-    color: color.text,
-    '&:hover': {
-      backgroundColor: color.surfaceRaised,
-    },
-  },
-  large: {
-    padding: `${space.md} ${space.lg}`,
-    fontSize: '16px',
   },
 });
 
-export const card = styles.create('card', {
+export const card = styles.component('card', {
   base: {
     padding: space.lg,
     borderRadius: '8px',
@@ -95,25 +105,27 @@ export const card = styles.create('card', {
     backgroundColor: color.surfaceRaised,
     animation: `${fadeIn} 400ms ease`,
   },
-  highlighted: {
-    borderColor: color.primary,
-    boxShadow: `0 0 0 1px ${color.primary}`,
+  variants: {
+    variant: {
+      highlighted: {
+        borderColor: color.primary,
+        boxShadow: `0 0 0 1px ${color.primary}`,
+      },
+    },
   },
 });
 
-export const spinner = styles.create('spinner', {
-  base: {
-    display: 'inline-block',
-    width: '24px',
-    height: '24px',
-    border: `3px solid ${color.border}`,
-    borderTopColor: color.primary,
-    borderRadius: '50%',
-    animation: `${spin} 800ms linear infinite`,
-  },
+export const spinner = styles.class('spinner', {
+  display: 'inline-block',
+  width: '24px',
+  height: '24px',
+  border: `3px solid ${color.border}`,
+  borderTopColor: color.primary,
+  borderRadius: '50%',
+  animation: `${spin} 800ms linear infinite`,
 });
 
-export const badge = styles.create('badge', {
+export const badge = styles.component('badge', {
   base: {
     display: 'inline-block',
     padding: `${space.xs} ${space.sm}`,
@@ -121,17 +133,21 @@ export const badge = styles.create('badge', {
     fontSize: '12px',
     fontWeight: 600,
   },
-  success: {
-    backgroundColor: color.success,
-    color: '#fff',
-  },
-  danger: {
-    backgroundColor: color.danger,
-    color: '#fff',
+  variants: {
+    variant: {
+      success: {
+        backgroundColor: color.success,
+        color: '#fff',
+      },
+      danger: {
+        backgroundColor: color.danger,
+        color: '#fff',
+      },
+    },
   },
 });
 
-export const hint = styles.create('hint', {
+export const hint = styles.component('hint', {
   base: {
     marginTop: space.xl,
     padding: space.md,
@@ -142,11 +158,15 @@ export const hint = styles.create('hint', {
     color: color.textMuted,
     lineHeight: 1.6,
   },
-  code: {
-    fontFamily: 'monospace',
-    backgroundColor: color.border,
-    padding: `2px ${space.xs}`,
-    borderRadius: '3px',
-    fontSize: '12px',
+  variants: {
+    variant: {
+      code: {
+        fontFamily: 'monospace',
+        backgroundColor: color.border,
+        padding: `2px ${space.xs}`,
+        borderRadius: '3px',
+        fontSize: '12px',
+      },
+    },
   },
 });

@@ -1,18 +1,18 @@
 import { styles } from 'typestyles';
 import { designTokens as t } from '../tokens';
 
-export const textField = styles.create('text-field', {
-  root: {
+export const textField = {
+  root: styles.class('text-field-root', {
     display: 'grid',
     gap: t.space[1],
     minWidth: '240px',
-  },
-  label: {
+  }),
+  label: styles.class('text-field-label', {
     fontSize: t.fontSize.md,
     fontWeight: t.fontWeight.medium,
     color: t.color.text.primary,
-  },
-  input: {
+  }),
+  input: styles.class('text-field-input', {
     border: `1px solid ${t.color.border.default}`,
     borderRadius: t.radius.md,
     padding: `${t.space[2]} ${t.space[3]}`,
@@ -27,13 +27,13 @@ export const textField = styles.create('text-field', {
     '&::placeholder': {
       color: t.color.text.secondary,
     },
-  },
-  description: {
+  }),
+  description: styles.class('text-field-description', {
     fontSize: t.fontSize.sm,
     color: t.color.text.secondary,
-  },
-  error: {
+  }),
+  error: styles.class('text-field-error', {
     fontSize: t.fontSize.sm,
     color: t.color.danger.default,
-  },
-});
+  }),
+};

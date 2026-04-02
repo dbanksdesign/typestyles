@@ -1,17 +1,17 @@
 import { styles } from 'typestyles';
 import { designTokens as t } from '../tokens';
 
-export const tabs = styles.create('tabs', {
-  root: {
+export const tabs = {
+  root: styles.class('tabs-root', {
     display: 'grid',
     gap: t.space[3],
-  },
-  list: {
+  }),
+  list: styles.class('tabs-list', {
     display: 'inline-flex',
     gap: t.space[1],
     borderBottom: `1px solid ${t.color.border.default}`,
-  },
-  tab: {
+  }),
+  tab: styles.class('tabs-tab', {
     border: 'none',
     borderBottom: '2px solid transparent',
     backgroundColor: 'transparent',
@@ -24,11 +24,11 @@ export const tabs = styles.create('tabs', {
       borderBottomColor: t.color.accent.default,
       fontWeight: t.fontWeight.semibold,
     },
-  },
-  panel: {
+  }),
+  panel: styles.class('tabs-panel', {
     padding: t.space[3],
     backgroundColor: t.color.background.subtle,
     borderRadius: t.radius.md,
     border: `1px solid ${t.color.border.default}`,
-  },
-});
+  }),
+};

@@ -1,99 +1,99 @@
 import { styles } from 'typestyles';
 import { designTokens as t } from '../tokens';
 
-export const alert = styles.create('alert', {
-  root: {
+export const alert = {
+  root: styles.class('alert-root', {
     display: 'flex',
     alignItems: 'flex-start',
     gap: t.space[3],
     padding: t.space[4],
     borderRadius: t.radius.md,
     lineHeight: 1.55,
-  },
-  subtleInfo: {
+  }),
+  subtleInfo: styles.class('alert-subtleInfo', {
     backgroundColor: `color-mix(in srgb, ${t.color.accent.default} 12%, ${t.color.background.surface})`,
     border: `1px solid color-mix(in srgb, ${t.color.accent.default} 38%, ${t.color.border.default})`,
     color: t.color.text.primary,
-  },
-  subtleSuccess: {
+  }),
+  subtleSuccess: styles.class('alert-subtleSuccess', {
     backgroundColor: `color-mix(in srgb, ${t.color.success.default} 14%, ${t.color.background.surface})`,
     border: `1px solid color-mix(in srgb, ${t.color.success.default} 40%, ${t.color.border.default})`,
     color: t.color.text.primary,
-  },
-  subtleWarning: {
+  }),
+  subtleWarning: styles.class('alert-subtleWarning', {
     backgroundColor: `color-mix(in srgb, ${t.color.warning.default} 16%, ${t.color.background.surface})`,
     border: `1px solid color-mix(in srgb, ${t.color.warning.default} 42%, ${t.color.border.default})`,
     color: t.color.text.primary,
-  },
-  subtleDanger: {
+  }),
+  subtleDanger: styles.class('alert-subtleDanger', {
     backgroundColor: `color-mix(in srgb, ${t.color.danger.default} 12%, ${t.color.background.surface})`,
     border: `1px solid color-mix(in srgb, ${t.color.danger.default} 38%, ${t.color.border.default})`,
     color: t.color.text.primary,
-  },
-  subtleTip: {
+  }),
+  subtleTip: styles.class('alert-subtleTip', {
     backgroundColor: `color-mix(in srgb, ${t.color.info.default} 12%, ${t.color.background.surface})`,
     border: `1px solid color-mix(in srgb, ${t.color.info.default} 38%, ${t.color.border.default})`,
     color: t.color.text.primary,
-  },
-  solidInfo: {
+  }),
+  solidInfo: styles.class('alert-solidInfo', {
     backgroundColor: t.color.accent.default,
     border: `1px solid ${t.color.accent.default}`,
     color: t.color.text.onAccent,
-  },
-  solidSuccess: {
+  }),
+  solidSuccess: styles.class('alert-solidSuccess', {
     backgroundColor: t.color.success.solid,
     border: `1px solid ${t.color.success.solid}`,
     color: '#ffffff',
-  },
-  solidDanger: {
+  }),
+  solidDanger: styles.class('alert-solidDanger', {
     backgroundColor: t.color.danger.solid,
     border: `1px solid ${t.color.danger.solid}`,
     color: '#ffffff',
-  },
-  solidWarning: {
+  }),
+  solidWarning: styles.class('alert-solidWarning', {
     backgroundColor: t.color.warning.default,
     border: `1px solid ${t.color.warning.default}`,
     color: t.color.warning.onSolid,
-  },
-  solidTip: {
+  }),
+  solidTip: styles.class('alert-solidTip', {
     backgroundColor: t.color.info.default,
     border: `1px solid ${t.color.info.default}`,
     color: t.color.info.onSolid,
-  },
-  icon: {
+  }),
+  icon: styles.class('alert-icon', {
     flexShrink: 0,
     display: 'inline-flex',
     marginTop: '2px',
     fontSize: t.fontSize.lg,
     lineHeight: 1,
-  },
-  body: {
+  }),
+  body: styles.class('alert-body', {
     flex: 1,
     minWidth: 0,
-  },
-  title: {
+  }),
+  title: styles.class('alert-title', {
     fontSize: t.fontSize.md,
     fontWeight: t.fontWeight.semibold,
     margin: 0,
-  },
-  titleAccentInfo: { color: t.color.accent.default },
-  titleAccentSuccess: { color: t.color.success.default },
-  titleAccentWarning: { color: t.color.warning.default },
-  titleAccentDanger: { color: t.color.danger.default },
-  titleAccentTip: { color: t.color.info.default },
-  content: {
+  }),
+  titleAccentInfo: styles.class('alert-titleAccentInfo', { color: t.color.accent.default }),
+  titleAccentSuccess: styles.class('alert-titleAccentSuccess', { color: t.color.success.default }),
+  titleAccentWarning: styles.class('alert-titleAccentWarning', { color: t.color.warning.default }),
+  titleAccentDanger: styles.class('alert-titleAccentDanger', { color: t.color.danger.default }),
+  titleAccentTip: styles.class('alert-titleAccentTip', { color: t.color.info.default }),
+  content: styles.class('alert-content', {
     fontSize: t.fontSize.md,
     margin: 0,
     marginTop: t.space[1],
     color: 'inherit',
-  },
-  contentFlush: {
+  }),
+  contentFlush: styles.class('alert-contentFlush', {
     marginTop: 0,
-  },
-  action: {
+  }),
+  action: styles.class('alert-action', {
     marginTop: t.space[2],
-  },
-  actionLink: {
+  }),
+  actionLink: styles.class('alert-actionLink', {
     fontSize: t.fontSize.md,
     fontWeight: t.fontWeight.medium,
     color: 'inherit',
@@ -107,5 +107,5 @@ export const alert = styles.create('alert', {
       outlineOffset: '2px',
       borderRadius: t.radius.sm,
     },
-  },
-});
+  }),
+};

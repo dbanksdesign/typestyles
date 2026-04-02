@@ -4,7 +4,7 @@ import type { JSX } from 'react';
 import { styles } from 'typestyles';
 import { useTheme } from './ThemeProvider';
 
-const toggle = styles.create('theme-toggle', {
+const toggle = styles.component('theme-toggle', {
   base: {
     display: 'flex',
     alignItems: 'center',
@@ -18,7 +18,7 @@ const toggle = styles.create('theme-toggle', {
   },
 });
 
-const option = styles.create('theme-option', {
+const option = styles.component('theme-option', {
   base: {
     padding: '4px 16px',
     borderRadius: '9999px',
@@ -30,10 +30,13 @@ const option = styles.create('theme-option', {
     color: 'var(--color-textMuted)',
     cursor: 'pointer',
   },
-
-  active: {
-    backgroundColor: 'var(--color-primary)',
-    color: '#ffffff',
+  variants: {
+    variant: {
+      active: {
+        backgroundColor: 'var(--color-primary)',
+        color: '#ffffff',
+      },
+    },
   },
 });
 
@@ -41,9 +44,9 @@ export function ThemeToggle(): JSX.Element {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <button className={toggle('base')} onClick={toggleTheme}>
-      <span className={option('base', theme === 'light' ? 'active' : undefined)}>Light</span>
-      <span className={option('base', theme === 'dark' ? 'active' : undefined)}>Dark</span>
+    <button className={toggle()} onClick={toggleTheme}>
+      <span className={option(theme === 'light' ? { variant: 'active' } : {})}>Light</span>
+      <span className={option(theme === 'dark' ? { variant: 'active' } : {})}>Dark</span>
     </button>
   );
 }

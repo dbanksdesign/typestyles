@@ -1,9 +1,9 @@
 import { styles } from 'typestyles';
 import { designTokens as t } from '../tokens';
 
-export const steps = styles.create('steps', {
-  /** Use with `<ol class={steps('root')}><li>…</li></ol>` (see `Steps.astro`). */
-  root: {
+export const steps = {
+  /** Use with `<ol class={steps.root}><li>…</li></ol>` (see `Steps.astro`). */
+  root: styles.class('steps-root', {
     listStyle: 'none',
     padding: 0,
     margin: `${t.space[4]} 0`,
@@ -44,5 +44,5 @@ export const steps = styles.create('steps', {
         marginBottom: 0,
       },
     },
-  },
-});
+  }),
+};

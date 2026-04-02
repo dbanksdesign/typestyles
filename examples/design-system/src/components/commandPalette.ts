@@ -2,8 +2,8 @@ import { styles } from 'typestyles';
 import { designTokens as t } from '../tokens';
 
 /** Command / search palette overlay (⌘K-style). */
-export const commandPalette = styles.create('command-palette', {
-  root: {
+export const commandPalette = {
+  root: styles.class('command-palette-root', {
     position: 'fixed',
     inset: 0,
     zIndex: 450,
@@ -15,13 +15,13 @@ export const commandPalette = styles.create('command-palette', {
     opacity: 0,
     visibility: 'hidden',
     transition: t.transition.overlayFade,
-  },
-  rootOpen: {
+  }),
+  rootOpen: styles.class('command-palette-rootOpen', {
     pointerEvents: 'auto',
     opacity: 1,
     visibility: 'visible',
-  },
-  backdrop: {
+  }),
+  backdrop: styles.class('command-palette-backdrop', {
     position: 'absolute',
     inset: 0,
     backgroundColor: t.color.overlay.backdrop,
@@ -29,8 +29,8 @@ export const commandPalette = styles.create('command-palette', {
     '@supports (backdrop-filter: blur(1px))': {
       backdropFilter: 'blur(10px)',
     },
-  },
-  dialog: {
+  }),
+  dialog: styles.class('command-palette-dialog', {
     position: 'relative',
     zIndex: 1,
     width: 'min(560px, 100%)',
@@ -45,26 +45,26 @@ export const commandPalette = styles.create('command-palette', {
     overflow: 'hidden',
     opacity: 0,
     transition: t.transition.panelEnter,
-  },
-  dialogOpen: {
+  }),
+  dialogOpen: styles.class('command-palette-dialogOpen', {
     opacity: 1,
-  },
-  inputRow: {
+  }),
+  inputRow: styles.class('command-palette-inputRow', {
     flexShrink: 0,
     display: 'flex',
     alignItems: 'center',
     gap: t.space[2],
     padding: `${t.space[3]} ${t.space[4]}`,
     borderBottom: `1px solid ${t.color.border.default}`,
-  },
-  inputIcon: {
+  }),
+  inputIcon: styles.class('command-palette-inputIcon', {
     flexShrink: 0,
     display: 'inline-flex',
     alignItems: 'center',
     color: t.color.text.placeholder,
     lineHeight: 0,
-  },
-  input: {
+  }),
+  input: styles.class('command-palette-input', {
     flex: 1,
     minWidth: 0,
     border: 'none',
@@ -76,19 +76,19 @@ export const commandPalette = styles.create('command-palette', {
     color: t.color.text.primary,
     outline: 'none',
     '&::placeholder': { color: t.color.text.placeholder },
-  },
-  results: {
+  }),
+  results: styles.class('command-palette-results', {
     flex: 1,
     minHeight: 0,
     overflowY: 'auto',
     margin: 0,
     padding: `${t.space[1]} 0 ${t.space[2]}`,
     listStyle: 'none',
-  },
-  result: {
+  }),
+  result: styles.class('command-palette-result', {
     margin: 0,
-  },
-  resultLink: {
+  }),
+  resultLink: styles.class('command-palette-resultLink', {
     display: 'block',
     padding: `${t.space[2]} ${t.space[4]}`,
     textDecoration: 'none',
@@ -97,34 +97,34 @@ export const commandPalette = styles.create('command-palette', {
     '&:hover': {
       backgroundColor: t.color.accent.subtle,
     },
-  },
-  resultLinkActive: {
+  }),
+  resultLinkActive: styles.class('command-palette-resultLinkActive', {
     backgroundColor: t.color.accent.subtle,
-  },
-  resultTitle: {
+  }),
+  resultTitle: styles.class('command-palette-resultTitle', {
     display: 'block',
     fontSize: t.fontSize.md,
     fontWeight: t.fontWeight.semibold,
     lineHeight: 1.35,
     marginBottom: t.space[1],
-  },
-  resultMeta: {
+  }),
+  resultMeta: styles.class('command-palette-resultMeta', {
     display: 'block',
     fontSize: t.fontSize.sm,
     color: t.color.text.secondary,
     lineHeight: 1.35,
-  },
-  mark: {
+  }),
+  mark: styles.class('command-palette-mark', {
     fontFamily: 'inherit',
     backgroundColor: t.color.accent.subtle,
     color: t.color.text.primary,
     borderRadius: t.radius.sm,
     padding: `0 ${t.space[1]}`,
-  },
-  empty: {
+  }),
+  empty: styles.class('command-palette-empty', {
     padding: `${t.space[4]} ${t.space[4]}`,
     fontSize: t.fontSize.sm,
     color: t.color.text.secondary,
     lineHeight: 1.5,
-  },
-});
+  }),
+};

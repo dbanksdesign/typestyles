@@ -1,18 +1,18 @@
 import { styles } from 'typestyles';
 import { designTokens as t } from '../tokens';
 
-export const select = styles.create('select', {
-  root: {
+export const select = {
+  root: styles.class('select-root', {
     display: 'grid',
     gap: t.space[1],
     minWidth: '240px',
-  },
-  label: {
+  }),
+  label: styles.class('select-label', {
     fontSize: t.fontSize.md,
     fontWeight: t.fontWeight.medium,
     color: t.color.text.primary,
-  },
-  trigger: {
+  }),
+  trigger: styles.class('select-trigger', {
     textAlign: 'left',
     border: `1px solid ${t.color.border.default}`,
     borderRadius: t.radius.md,
@@ -26,15 +26,15 @@ export const select = styles.create('select', {
       outlineOffset: '1px',
       borderColor: t.color.border.focus,
     },
-  },
-  popover: {
+  }),
+  popover: styles.class('select-popover', {
     border: `1px solid ${t.color.border.default}`,
     borderRadius: t.radius.md,
     backgroundColor: t.color.background.surface,
     boxShadow: t.shadow.md,
     padding: t.space[1],
-  },
-  item: {
+  }),
+  item: styles.class('select-item', {
     fontSize: t.fontSize.md,
     padding: `${t.space[2]} ${t.space[3]}`,
     borderRadius: t.radius.sm,
@@ -46,5 +46,5 @@ export const select = styles.create('select', {
       color: t.color.accent.default,
       fontWeight: t.fontWeight.semibold,
     },
-  },
-});
+  }),
+};
