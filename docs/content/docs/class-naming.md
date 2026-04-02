@@ -1,17 +1,16 @@
 ---
 title: Class naming
-description: Configure semantic, hashed, or atomic-style class names for styles.create, styles.class, and styles.component
+description: Configure semantic, hashed, or atomic-style class names for styles.class and styles.component
 ---
 
 # Class naming
 
-By default, typestyles emits **readable semantic** class names: `button-base`, `card-elevated`, `button-intent-primary`. You can switch to **hashed** or **hash-only** names for smaller strings, fewer accidental collisions across packages, or closer parity with CSS-in-JS tools that minify class names.
+By default, typestyles emits **readable semantic** class names: `card`, `card-elevated`, `button-intent-primary`. You can switch to **hashed** or **hash-only** names for smaller strings, fewer accidental collisions across packages, or closer parity with CSS-in-JS tools that minify class names.
 
 Naming applies to:
 
-- [`styles.create`](/docs/styles)
+- [`styles.component`](/docs/components) (flat variants, dimensioned variants, and [multipart `slots`](/docs/components))
 - [`styles.class`](/docs/styles)
-- [`styles.component`](/docs/components) (single-part components and [multipart `slots`](/docs/components))
 
 It does **not** change [`@typestyles/props`](/docs/atomic-css) utility naming; that package uses its own `createProps` namespace pattern.
 
@@ -29,7 +28,7 @@ configureClassNaming({
 });
 ```
 
-Then existing `styles.create` / `styles.component` calls keep the same TypeScript API; only the emitted `class` strings and generated selectors change.
+Then existing `styles.component` / `styles.class` calls keep the same TypeScript API; only the emitted `class` strings and generated selectors change.
 
 ## API
 
@@ -57,8 +56,8 @@ Restores defaults. Intended for **tests** so one suite cannot leak naming mode i
 
 Human-readable, stable names derived from the namespace and variant segment:
 
-- `styles.create('card', { base: { … } })` → `card-base`
-- `styles.component('button', { … })` → `button-base`, `button-intent-primary`, etc.
+- `styles.component('card', { base: { … } })` → `card` (base class is just the namespace)
+- `styles.component('button', { … })` → `button`, `button-intent-primary`, etc.
 - Components with `slots` → `{namespace}-{slot}`, `{namespace}-{slot}-{dimension}-{option}`, etc.
 
 ### `hashed`
@@ -81,11 +80,11 @@ When `scopeId` is the default empty string, the hash input matches the previous 
 
 ## Monorepos and `scopeId`
 
-Two packages might both use `styles.create('button', …)` or `styles.component('button', …)`. With **`semantic`** mode, you rely on distinct namespaces. With **`hashed`** / **`atomic`**, set a different **`scopeId`** per package (for example the npm package name) so identical style objects in different packages do not map to the same class string.
+Two packages might both use `styles.component('button', …)`. With **`semantic`** mode, you rely on distinct namespaces. With **`hashed`** / **`atomic`**, set a different **`scopeId`** per package (for example the npm package name) so identical style objects in different packages do not map to the same class string.
 
 ## SSR and entry order
 
-Naming is **global** for the loaded bundle. Ensure **`configureClassNaming`** runs before any module that calls `styles.create`, `styles.class`, or `styles.component` during that load. In SSR, the server bundle should apply the same configuration as the client so class names and injected CSS match.
+Naming is **global** for the loaded bundle. Ensure **`configureClassNaming`** runs before any module that calls `styles.component` or `styles.class` during that load. In SSR, the server bundle should apply the same configuration as the client so class names and injected CSS match.
 
 ## Testing
 
@@ -107,7 +106,7 @@ See also [Testing](/docs/testing).
 
 ## Related
 
-- [Styles](/docs/styles) — `styles.create`, `styles.class`, `compose`, `withUtils`
+- [Styles](/docs/styles) — `styles.component`, `styles.class`, `compose`, `withUtils`
 - [Components](/docs/components) — `styles.component` and `slots`
 - [Atomic CSS Utilities](/docs/atomic-css) — `@typestyles/props` (separate naming scheme)
 - [API Reference](/docs/api-reference) — export list

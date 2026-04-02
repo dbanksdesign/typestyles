@@ -17,14 +17,14 @@ Since typestyles returns regular class names, test your components the same way 
 // Button.tsx
 import { styles } from 'typestyles';
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: { padding: '8px 16px' },
   primary: { backgroundColor: '#0066ff' },
   large: { fontSize: '18px' },
 });
 
 export function Button({ variant, size, children }) {
-  return <button className={button('base', variant, size)}>{children}</button>;
+  return <button className={button({ [variant]: true, [size]: true })}>{children}</button>;
 }
 
 // Button.test.tsx
@@ -36,14 +36,14 @@ describe('Button', () => {
     render(<Button>Click me</Button>);
     const button = screen.getByRole('button');
 
-    expect(button).toHaveClass('button-base');
+    expect(button).toHaveClass('button');
   });
 
   it('applies variant classes', () => {
     render(<Button variant="primary">Click me</Button>);
     const button = screen.getByRole('button');
 
-    expect(button).toHaveClass('button-base');
+    expect(button).toHaveClass('button');
     expect(button).toHaveClass('button-primary');
   });
 
@@ -55,7 +55,7 @@ describe('Button', () => {
     );
     const button = screen.getByRole('button');
 
-    expect(button).toHaveClass('button-base');
+    expect(button).toHaveClass('button');
     expect(button).toHaveClass('button-primary');
     expect(button).toHaveClass('button-large');
   });
@@ -69,7 +69,7 @@ When variants are applied conditionally, test both states:
 ```tsx
 function Button({ isLoading, children }) {
   return (
-    <button className={button('base', isLoading && 'loading')}>
+    <button className={button({ loading: isLoading })}>
       {isLoading ? 'Loading...' : children}
     </button>
   );
@@ -80,7 +80,7 @@ it('applies loading state', () => {
   render(<Button isLoading>Click me</Button>);
   const button = screen.getByRole('button');
 
-  expect(button).toHaveClass('button-base');
+  expect(button).toHaveClass('button');
   expect(button).toHaveClass('button-loading');
 });
 
@@ -88,7 +88,7 @@ it('does not apply loading class when not loading', () => {
   render(<Button>Click me</Button>);
   const button = screen.getByRole('button');
 
-  expect(button).toHaveClass('button-base');
+  expect(button).toHaveClass('button');
   expect(button).not.toHaveClass('button-loading');
 });
 ```
@@ -127,7 +127,7 @@ If you want to ensure class names don't change unexpectedly, use snapshots:
 it('matches snapshot', () => {
   const { container } = render(<Button variant="primary">Click me</Button>);
   expect(container.firstChild).toMatchSnapshot();
-  // Snapshot: <button class="button-base button-primary">Click me</button>
+  // Snapshot: <button class="button button-primary">Click me</button>
 });
 ```
 
@@ -286,7 +286,7 @@ test('button has correct styles', async ({ page }) => {
   await expect(button).toHaveCSS('background-color', 'rgb(0, 102, 255)');
 
   // Check class names
-  await expect(button).toHaveClass(/button-base/);
+  await expect(button).toHaveClass(/button/);
   await expect(button).toHaveClass(/button-primary/);
 });
 
@@ -311,7 +311,7 @@ describe('Button', () => {
 
     cy.get('button')
       .first()
-      .should('have.class', 'button-base')
+      .should('have.class', 'button')
       .and('have.class', 'button-primary');
   });
 
@@ -341,10 +341,10 @@ describe('SSR', () => {
     const { html, css } = collectStyles(() => renderToString(<App />));
 
     // HTML should contain class names
-    expect(html).toContain('button-base');
+    expect(html).toContain('button');
 
     // CSS should contain the styles
-    expect(css).toContain('.button-base');
+    expect(css).toContain('.button');
     expect(css).toContain('padding');
   });
 
@@ -367,13 +367,13 @@ import { styles } from 'typestyles';
 
 describe('Button styles', () => {
   it('generates consistent class names', () => {
-    const button = styles.create('button', {
+    const button = styles.component('button', {
       base: { padding: '8px' },
       primary: { color: 'blue' },
     });
 
-    expect(button('base')).toMatchInlineSnapshot(`"button-base"`);
-    expect(button('base', 'primary')).toMatchInlineSnapshot(`"button-base button-primary"`);
+    expect(button()).toMatchInlineSnapshot(`"button"`);
+    expect(button({ primary: true })).toMatchInlineSnapshot(`"button button-primary"`);
   });
 });
 ```
@@ -448,7 +448,7 @@ describe('Card', () => {
     render(<Card elevated>Content</Card>);
     const card = screen.getByRole('article');
 
-    expect(card).toHaveClass('card-base');
+    expect(card).toHaveClass('card');
     expect(card).toHaveClass('card-elevated');
   });
 
@@ -456,7 +456,7 @@ describe('Card', () => {
     render(<Card interactive>Content</Card>);
     const card = screen.getByRole('article');
 
-    expect(card).toHaveClass('card-base');
+    expect(card).toHaveClass('card');
     expect(card).toHaveClass('card-interactive');
   });
 
@@ -468,7 +468,7 @@ describe('Card', () => {
     );
     const card = screen.getByRole('article');
 
-    expect(card).toHaveClass('card-base');
+    expect(card).toHaveClass('card');
     expect(card).toHaveClass('card-elevated');
     expect(card).toHaveClass('card-interactive');
   });

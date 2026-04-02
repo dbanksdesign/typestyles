@@ -59,13 +59,34 @@ export type StyleDefinitionsWithUtils<U extends StyleUtils> = Record<
 export type StyleDefinitions = Record<string, CSSProperties>;
 
 /**
- * A selector function returned by styles.create().
- * Accepts variant names (or falsy values for conditional application)
- * and returns a composed class name string.
+ * Config for a flat component: `base` plus any number of boolean variant keys.
+ * Use this with `styles.component` when you don't need dimensioned variants.
  */
-export interface SelectorFunction<K extends string = string> {
-  (...variants: (K | false | null | undefined)[]): string;
-}
+export type FlatComponentConfig<K extends string> = {
+  base?: CSSProperties;
+} & Record<K, CSSProperties>;
+
+/**
+ * The callable + destructurable result of `styles.component` for flat variants.
+ *
+ * - Call it to get `base` + all `true` variants: `card({ elevated: true })`
+ * - Destructure individual class strings: `const { base, elevated } = card`
+ */
+export type FlatComponentResult<K extends string> = ((selections?: {
+  readonly [key in K]?: boolean | null | undefined;
+}) => string) & { readonly base: string } & { readonly [key in K]: string };
+
+/**
+ * The callable + destructurable result of `styles.component` for dimensioned variants.
+ *
+ * - Call it to get `base` + resolved variants: `button({ intent: 'primary' })`
+ * - Destructure individual variant class strings: `const { base, primary, ghost } = button`
+ */
+export type DimensionedComponentResult<V extends VariantDefinitions> = ((
+  selections?: ComponentSelections<V>,
+) => string) & { readonly base: string } & {
+  readonly [K in keyof V as Extract<keyof V[K], string>]: string;
+};
 
 /**
  * A flat map of token names to their values.
@@ -130,10 +151,9 @@ export type ComponentConfig<V extends VariantDefinitions> = {
 
 /**
  * The function returned by styles.component().
+ * @deprecated Use `DimensionedComponentResult<V>` instead — it is both callable and destructurable.
  */
-export type ComponentFunction<V extends VariantDefinitions> = (
-  selections?: ComponentSelections<V>,
-) => string;
+export type ComponentFunction<V extends VariantDefinitions> = DimensionedComponentResult<V>;
 
 export type SlotComponentConfig<S extends string, V extends SlotVariantDefinitions<S>> = {
   slots: readonly S[];
@@ -158,7 +178,7 @@ export type SlotComponentFunction<S extends string, V extends SlotVariantDefinit
 export type CSSVarRef = `var(--${string})`;
 
 /**
- * Extract the variant prop types from a ComponentFunction.
+ * Extract the variant prop types from a `DimensionedComponentResult` or `ComponentFunction`.
  *
  * @example
  * ```ts

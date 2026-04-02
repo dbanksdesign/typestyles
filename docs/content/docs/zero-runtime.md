@@ -13,7 +13,7 @@ Typestyles supports an optional **build extraction** mode through its bundler in
 - The typestyles runtime is replaced with a no-op stub (`~0 bytes` when tree-shaken).
 - No `<style>` injection happens in the browser — the CSS file is served directly.
 
-The same `styles.create`, `tokens.create`, and `keyframes.create` APIs work identically in both modes.
+The same `styles.component`, `tokens.create`, and `keyframes.create` APIs work identically in both modes.
 
 ---
 
@@ -142,9 +142,9 @@ The `modules` array should list files that register styles either directly or by
 ```ts
 // src/styles/index.ts
 export * from './tokens'; // tokens.create(...)
-export * from './button'; // styles.create(...)
-export * from './card'; // styles.create(...)
-export * from './typography'; // styles.create(...)
+export * from './button'; // styles.component(...)
+export * from './card'; // styles.component(...)
+export * from './typography'; // styles.component(...)
 ```
 
 ```ts

@@ -7,13 +7,82 @@ description: Migrate to typestyles from other CSS-in-JS libraries
 
 Switching to typestyles from other styling solutions is straightforward. This guide covers the most common migration paths.
 
-If you are adopting the new variant API, start with [Components](/docs/components).
+If you are adopting the variant API, start with [Components](/docs/components).
+
+## Migrating from styles.create to styles.component
+
+`styles.create` has been replaced by `styles.component`, which handles both flat and dimensioned variants.
+
+### Flat variants (before and after)
+
+**Before:**
+```ts
+const card = styles.create('card', {
+  base: { padding: '16px', borderRadius: '8px' },
+  elevated: { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
+});
+
+card('base');           // "card-base"
+card('base', 'elevated'); // "card-base card-elevated"
+```
+
+**After:**
+```ts
+const card = styles.component('card', {
+  base: { padding: '16px', borderRadius: '8px' },
+  elevated: { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
+});
+
+card()                   // "card"             (base always applied)
+card({ elevated: true }) // "card card-elevated"
+
+const { base, elevated } = card; // "card", "card-elevated"
+```
+
+### Dimensioned variants (before and after)
+
+The `styles.component` API now handles both flat and dimensioned variants — it is the only API you need.
+
+**Before:**
+```ts
+const button = styles.create('button', {
+  base: { padding: '8px 16px' },
+  primary: { backgroundColor: '#0066ff' },
+});
+
+button('base', 'primary'); // "button-base button-primary"
+```
+
+**After:**
+```ts
+const button = styles.component('button', {
+  base: { padding: '8px 16px' },
+  variants: {
+    intent: {
+      primary: { backgroundColor: '#0066ff' },
+    },
+  },
+  defaultVariants: { intent: 'primary' },
+});
+
+button()                      // "button button-intent-primary"
+button({ intent: 'primary' }) // "button button-intent-primary"
+```
+
+### Key differences
+
+| Old (`styles.create`)              | New (`styles.component`)             |
+| ---------------------------------- | ------------------------------------ |
+| `card('base')`                     | `card()` or `card.base`              |
+| `card('base', 'elevated')`         | `card({ elevated: true })` or compose `card.base + ' ' + card.elevated` |
+| Class `card-base`                  | Class `card` (namespace only)        |
+| Class `card-elevated`              | Class `card-elevated` (unchanged)    |
 
 ## From Panda CSS
 
 Panda and typestyles share many concepts (component variants, tokens, utilities), so migration is mostly API shape changes rather than a full styling rewrite.
 
-### `css()` to `styles.class()` or `styles.create()`
+### `css()` to `styles.class()` or `styles.component()`
 
 **Before (Panda CSS):**
 
@@ -39,7 +108,7 @@ const className = styles.class('card', {
 });
 ```
 
-For reusable variant families, prefer `styles.create()` instead of a single class.
+For reusable variant families, prefer `styles.component()` instead of a single class.
 
 ### `cva()` / `defineRecipe()` to `styles.component()`
 
@@ -180,7 +249,7 @@ import { styles, tokens } from 'typestyles';
 
 const color = tokens.use('color');
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     borderRadius: '6px',
@@ -197,7 +266,7 @@ const button = styles.create('button', {
 });
 
 function Button({ primary, children }) {
-  return <button className={button('base', primary && 'primary')}>{children}</button>;
+  return <button className={button({ primary: !!primary })}>{children}</button>;
 }
 ```
 
@@ -222,7 +291,7 @@ const Box = styled.div`
 **After:**
 
 ```tsx
-const box = styles.create('box', {
+const box = styles.component('box', {
   base: {
     display: 'inline-block',
   },
@@ -230,7 +299,7 @@ const box = styles.create('box', {
 
 function Box({ width, height, children }) {
   return (
-    <div className={box('base')} style={{ width, height }}>
+    <div className={box()} style={{ width, height }}>
       {children}
     </div>
   );
@@ -274,7 +343,7 @@ function Button({ children }) {
 ```tsx
 import { styles } from 'typestyles';
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     backgroundColor: '#0066ff',
@@ -286,7 +355,7 @@ const button = styles.create('button', {
 });
 
 function Button({ children }) {
-  return <button className={button('base')}>{children}</button>;
+  return <button className={button()}>{children}</button>;
 }
 ```
 
@@ -309,13 +378,13 @@ className={cx(base, isPrimary && primary, isLarge && large)}
 ```tsx
 import { styles } from 'typestyles';
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: { padding: '8px' },
   primary: { backgroundColor: 'blue' },
   large: { fontSize: '18px' },
 });
 
-className={button('base', isPrimary && 'primary', isLarge && 'large')}
+className={button({ primary: isPrimary, large: isLarge })}
 ```
 
 typestyles' selector function already handles conditional class names, so you don't need a separate `cx` utility.
@@ -564,7 +633,7 @@ const color = tokens.create('color', {
   secondaryHover: '#4b5563',
 });
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     borderRadius: '6px',
@@ -588,7 +657,7 @@ const button = styles.create('button', {
 });
 
 function Button({ primary, children }) {
-  return <button className={button('base', primary ? 'primary' : 'secondary')}>{children}</button>;
+  return <button className={button({ primary: !!primary, secondary: !primary })}>{children}</button>;
 }
 ```
 
@@ -638,7 +707,7 @@ You can use Tailwind and typestyles together during migration:
 ```tsx
 import { styles } from 'typestyles';
 
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: {
     // New styles with typestyles
     boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
@@ -647,7 +716,7 @@ const card = styles.create('card', {
 
 function Card({ children }) {
   return (
-    <div className={card('base') + ' p-4 bg-white rounded'}>
+    <div className={card() + ' p-4 bg-white rounded'}>
       {/*                 ^ Tailwind classes still work */}
       {children}
     </div>
@@ -693,7 +762,7 @@ function Button({ variant, children }) {
 ```ts
 import { styles } from 'typestyles';
 
-export const button = styles.create('button', {
+export const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     borderRadius: '6px',
@@ -715,7 +784,7 @@ export const button = styles.create('button', {
 import { button } from './button.styles';
 
 function Button({ variant, children }) {
-  return <button className={button('base', variant)}>{children}</button>;
+  return <button className={button({ [variant]: true })}>{children}</button>;
 }
 ```
 
@@ -734,13 +803,13 @@ CSS Modules `:global` becomes typestyles without nesting:
 **After:**
 
 ```ts
-const tooltip = styles.create('tooltip', {
+const tooltip = styles.component('tooltip', {
   base: {
     position: 'absolute',
   },
 });
 
-// Use: tooltip('base')
+// Use: tooltip()
 ```
 
 ## From plain CSS
@@ -777,7 +846,7 @@ Migrating from plain CSS gives you type safety and better organization.
 
    ```ts
    // After
-   const button = styles.create('button', {
+   const button = styles.component('button', {
      base: {
        padding: '8px 16px',
        backgroundColor: color.primary,
@@ -819,7 +888,7 @@ expect(screen.getByRole('button')).toHaveClass('button-primary');
 **After:**
 
 ```ts
-expect(screen.getByRole('button')).toHaveClass('button-base', 'button-primary');
+expect(screen.getByRole('button')).toHaveClass('button', 'button-intent-primary');
 ```
 
 ### 5. DevTools familiarity
@@ -834,8 +903,8 @@ After migration, your JavaScript bundle may be slightly smaller (no CSS parsing 
 
 | Pattern            | styled-components            | Emotion                   | Tailwind            | typestyles            |
 | ------------------ | ---------------------------- | ------------------------- | ------------------- | --------------------- |
-| **Basic styling**  | `styled.div`...`             | `css`...`                 | `className="p-4"`   | `styles.create()`     |
-| **Variants**       | Props + template literals    | Props + template literals | Conditional strings | Multiple variant args |
+| **Basic styling**  | `styled.div`...`             | `css`...`                 | `className="p-4"`   | `styles.component()`  |
+| **Variants**       | Props + template literals    | Props + template literals | Conditional strings | Object props or destructure |
 | **Pseudo-classes** | `&:hover` in template        | `&:hover` in template     | `hover:` prefix     | `&:hover` in object   |
 | **Media queries**  | `@media` in template         | `@media` in template      | Responsive prefixes | `@media` in object    |
 | **Theme values**   | `${props => props.theme...}` | `${theme...}`             | Config-based        | Token references      |
@@ -880,7 +949,7 @@ Useful options:
 
 ### Styles not applying
 
-- Check that the namespace in `styles.create()` is unique
+- Check that the namespace in `styles.component()` is unique
 - Verify the component is being rendered (lazy injection means CSS only appears when used)
 - Use DevTools to confirm class names are being applied
 

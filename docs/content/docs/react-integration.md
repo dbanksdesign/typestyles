@@ -16,7 +16,7 @@ TypeStyles works seamlessly with React. This guide shows common patterns for int
 import { styles } from 'typestyles';
 import { color, space } from '../../tokens';
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -125,7 +125,7 @@ import { styles } from 'typestyles';
 import { space } from '../../tokens';
 import type { ElementType, ComponentPropsWithoutRef } from 'react';
 
-const box = styles.create('box', {
+const box = styles.component('box', {
   base: {},
   flex: { display: 'flex' },
   block: { display: 'block' },
@@ -230,7 +230,7 @@ import { styles } from 'typestyles';
 import { color, space } from '../../tokens';
 import { createContext, useContext, type ReactNode } from 'react';
 
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: {
     borderRadius: '8px',
     backgroundColor: color.surface,
@@ -249,20 +249,20 @@ const card = styles.create('card', {
   },
 });
 
-const cardHeader = styles.create('card-header', {
+const cardHeader = styles.component('card-header', {
   base: {
     padding: `${space.md} ${space.lg}`,
     borderBottom: `1px solid ${color.border}`,
   },
 });
 
-const cardBody = styles.create('card-body', {
+const cardBody = styles.component('card-body', {
   base: {
     padding: space.lg,
   },
 });
 
-const cardFooter = styles.create('card-footer', {
+const cardFooter = styles.component('card-footer', {
   base: {
     padding: `${space.md} ${space.lg}`,
     borderTop: `1px solid ${color.border}`,
@@ -289,7 +289,7 @@ export function Card({ elevated = false, interactive = false, onClick, children 
   return (
     <CardContext.Provider value={{ isInteractive: interactive }}>
       <div
-        className={card('base', elevated && 'elevated', interactive && 'interactive')}
+        className={card({ elevated, interactive })}
         onClick={onClick}
         role={interactive ? 'button' : undefined}
         tabIndex={interactive ? 0 : undefined}
@@ -302,17 +302,17 @@ export function Card({ elevated = false, interactive = false, onClick, children 
 
 // Card.Header
 Card.Header = function CardHeader({ children }: { children: ReactNode }) {
-  return <div className={cardHeader('base')}>{children}</div>;
+  return <div className={cardHeader()}>{children}</div>;
 };
 
 // Card.Body
 Card.Body = function CardBody({ children }: { children: ReactNode }) {
-  return <div className={cardBody('base')}>{children}</div>;
+  return <div className={cardBody()}>{children}</div>;
 };
 
 // Card.Footer
 Card.Footer = function CardFooter({ children }: { children: ReactNode }) {
-  return <div className={cardFooter('base')}>{children}</div>;
+  return <div className={cardFooter()}>{children}</div>;
 };
 ```
 
@@ -348,7 +348,7 @@ import { styles } from 'typestyles';
 import { color, space } from '../../tokens';
 import { forwardRef } from 'react';
 
-const input = styles.create('input', {
+const input = styles.component('input', {
   base: {
     width: '100%',
     padding: `${space.sm} ${space.md}`,
@@ -403,15 +403,15 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ error, success, label, helperText, className, ...props }, ref) => {
     return (
-      <div className={inputWrapper('base')}>
-        {label && <label className={inputLabel('base')}>{label}</label>}
+      <div className={inputWrapper()}>
+        {label && <label className={inputLabel()}>{label}</label>}
         <input
           ref={ref}
-          className={input('base', error && 'error', success && 'success', className)}
+          className={input({ error: !!error, success: !!success, [className]: !!className })}
           {...props}
         />
         {helperText && (
-          <span className={inputHelper('base', error && 'error', success && 'success')}>
+          <span className={inputHelper({ error: !!error, success: !!success })}>
             {helperText}
           </span>
         )}
@@ -423,7 +423,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = 'Input';
 
 // Additional styles for the wrapper, label, and helper
-const inputWrapper = styles.create('input-wrapper', {
+const inputWrapper = styles.component('input-wrapper', {
   base: {
     display: 'flex',
     flexDirection: 'column',
@@ -431,7 +431,7 @@ const inputWrapper = styles.create('input-wrapper', {
   },
 });
 
-const inputLabel = styles.create('input-label', {
+const inputLabel = styles.component('input-label', {
   base: {
     fontSize: '14px',
     fontWeight: 500,
@@ -439,7 +439,7 @@ const inputLabel = styles.create('input-label', {
   },
 });
 
-const inputHelper = styles.create('input-helper', {
+const inputHelper = styles.component('input-helper', {
   base: {
     fontSize: '12px',
     color: color.textMuted,
@@ -463,7 +463,7 @@ import { styles } from 'typestyles';
 import { space } from '../../tokens';
 import type { ReactNode } from 'react';
 
-const grid = styles.create('grid', {
+const grid = styles.component('grid', {
   base: {
     display: 'grid',
     gap: space.md,
@@ -612,7 +612,7 @@ import { button } from './button.styles';
 
 function OptimizedButton({ variant, size, disabled }) {
   const className = useMemo(
-    () => button('base', variant, size, disabled && 'disabled'),
+    () => button({ [variant]: true, [size]: true, disabled }),
     [variant, size, disabled],
   );
 

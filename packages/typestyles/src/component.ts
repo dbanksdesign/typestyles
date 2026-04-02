@@ -2,7 +2,8 @@ import type {
   CSSProperties,
   VariantDefinitions,
   ComponentConfig,
-  ComponentFunction,
+  DimensionedComponentResult,
+  FlatComponentResult,
   SlotComponentConfig,
   SlotComponentFunction,
   SlotVariantDefinitions,
@@ -10,24 +11,34 @@ import type {
 import { serializeStyle } from './css.js';
 import { insertRules } from './sheet.js';
 import { registeredNamespaces } from './registry.js';
-import { buildComponentClassName } from './class-naming.js';
+import { buildComponentClassName, buildSingleClassName } from './class-naming.js';
 
 /**
- * Create a multi-variant component style and return a selector function.
+ * Create a component style and return a result that is both callable and destructurable.
  *
- * Class naming convention (default `semantic` mode; see `configureClassNaming`):
- *   base                         → `{namespace}-base`
- *   variants.intent.primary      → `{namespace}-intent-primary`
- *   compoundVariants[0]          → `{namespace}-compound-0`
+ * **Flat variants** (no `variants:` key) — each key is a boolean toggle:
+ * ```ts
+ * const card = styles.component('card', {
+ *   base: { padding: '16px', borderRadius: '8px' },
+ *   elevated: { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
+ *   compact: { padding: '8px' },
+ * });
  *
- * @example
+ * card()                    // "card"
+ * card({ elevated: true })  // "card card-elevated"
+ *
+ * const { base, elevated, compact } = card;
+ * cx(base, isElevated && elevated)
+ * ```
+ *
+ * **Dimensioned variants** (with `variants:` key) — CVA-style:
  * ```ts
  * const button = styles.component('button', {
  *   base: { padding: '8px 16px' },
  *   variants: {
  *     intent: {
  *       primary: { backgroundColor: '#0066ff', color: '#fff' },
- *       ghost:   { backgroundColor: 'transparent', border: '1px solid currentColor' },
+ *       ghost:   { backgroundColor: 'transparent' },
  *     },
  *     size: {
  *       sm: { fontSize: '12px' },
@@ -35,32 +46,47 @@ import { buildComponentClassName } from './class-naming.js';
  *     },
  *   },
  *   compoundVariants: [
- *     { variants: { intent: 'primary', size: 'lg' }, style: { fontWeight: 700 } },
+ *     { intent: 'primary', size: 'lg', css: { fontWeight: 700 } },
  *   ],
  *   defaultVariants: { intent: 'primary', size: 'sm' },
  * });
  *
- * button()                        // "button-base button-intent-primary button-size-sm"
- * button({ intent: 'ghost' })     // "button-base button-intent-ghost button-size-sm"
- * button({ intent: 'primary', size: 'lg' }) // includes compound class
+ * button()                        // "button button-intent-primary button-size-sm"
+ * button({ intent: 'ghost' })     // "button button-intent-ghost button-size-sm"
+ *
+ * const { base, primary, ghost, sm, lg } = button;
  * ```
+ *
+ * Class naming convention (default `semantic` mode):
+ *   base                         → `{namespace}`
+ *   flat variant `elevated`      → `{namespace}-elevated`
+ *   variants.intent.primary      → `{namespace}-intent-primary`
+ *   compoundVariants[0]          → `{namespace}-compound-0`
  */
-export function createComponent<V extends VariantDefinitions>(
-  namespace: string,
-  config: ComponentConfig<V>,
-): ComponentFunction<V>;
-
 export function createComponent<S extends string, V extends SlotVariantDefinitions<S>>(
   namespace: string,
   config: SlotComponentConfig<S, V>,
 ): SlotComponentFunction<S, V>;
+
+export function createComponent<V extends VariantDefinitions>(
+  namespace: string,
+  config: Omit<ComponentConfig<V>, 'variants'> & { variants: V },
+): DimensionedComponentResult<V>;
+
+export function createComponent<K extends string>(
+  namespace: string,
+  config: { base?: CSSProperties; variants?: never } & Record<K, CSSProperties>,
+): FlatComponentResult<K>;
+
 export function createComponent(
   namespace: string,
   config:
     | ComponentConfig<VariantDefinitions>
-    | SlotComponentConfig<string, SlotVariantDefinitions<string>>,
+    | SlotComponentConfig<string, SlotVariantDefinitions<string>>
+    | Record<string, CSSProperties>,
 ):
-  | ComponentFunction<VariantDefinitions>
+  | DimensionedComponentResult<VariantDefinitions>
+  | FlatComponentResult<string>
   | SlotComponentFunction<string, SlotVariantDefinitions<string>> {
   if ('slots' in config) {
     return createSlotComponent(
@@ -68,39 +94,105 @@ export function createComponent(
       config as SlotComponentConfig<string, SlotVariantDefinitions<string>>,
     );
   }
-  return createSingleComponent(namespace, config as ComponentConfig<VariantDefinitions>);
+  if ('variants' in config) {
+    return createDimensionedComponent(namespace, config as ComponentConfig<VariantDefinitions>);
+  }
+  return createFlatComponent(namespace, config as Record<string, CSSProperties>);
 }
 
-function createSingleComponent<V extends VariantDefinitions>(
-  namespace: string,
-  config: ComponentConfig<V>,
-): ComponentFunction<V> {
-  const { base, variants = {} as V, compoundVariants = [], defaultVariants = {} } = config;
-
-  // Development-mode duplicate detection
+function registerNamespace(namespace: string, apiName: string): void {
   if (process.env.NODE_ENV !== 'production') {
     if (registeredNamespaces.has(namespace)) {
       console.warn(
-        `[typestyles] styles.component('${namespace}', ...) called more than once. ` +
+        `[typestyles] styles.component('${namespace}', ...) called more than once via ${apiName}. ` +
           `This will cause class name collisions. Each namespace should be unique.`,
       );
     }
   }
   registeredNamespaces.add(namespace);
+}
+
+/**
+ * Flat component: each key (except `base`) is a boolean variant.
+ * Base class = namespace itself. Variant classes = namespace-key.
+ */
+function createFlatComponent<K extends string>(
+  namespace: string,
+  config: { base?: CSSProperties } & Record<K, CSSProperties>,
+): FlatComponentResult<K> {
+  registerNamespace(namespace, 'createFlatComponent');
 
   const rules: Array<{ key: string; css: string }> = [];
 
-  let baseClassName: string | undefined;
-  const variantClassByKey: Record<string, string> = {};
-  const compoundClassByIndex: string[] = [];
+  // Base class is the namespace itself
+  let baseClassName = '';
+  if (config.base) {
+    baseClassName = buildSingleClassName(namespace, config.base);
+    rules.push(...serializeStyle(`.${baseClassName}`, config.base));
+  }
 
-  // 1. Inject CSS for base
+  // Each non-base key maps to namespace-key
+  const variantToClass: Record<string, string> = {};
+  for (const [key, properties] of Object.entries(config as Record<string, CSSProperties>)) {
+    if (key === 'base') continue;
+    const className = buildComponentClassName(namespace, key, properties);
+    variantToClass[key] = className;
+    rules.push(...serializeStyle(`.${className}`, properties));
+  }
+
+  insertRules(rules);
+
+  const fn = function (
+    selections: { readonly [key in K]?: boolean | null | undefined } = {} as {
+      readonly [key in K]?: boolean | null | undefined;
+    },
+  ): string {
+    const classes: string[] = [];
+    if (baseClassName) classes.push(baseClassName);
+    for (const [key, active] of Object.entries(selections as Record<string, unknown>)) {
+      if (active) {
+        const cn = variantToClass[key];
+        if (cn) classes.push(cn);
+      }
+    }
+    return classes.join(' ');
+  };
+
+  // Assign destructurable properties
+  const props: Record<string, string> = { base: baseClassName };
+  for (const [key, cn] of Object.entries(variantToClass)) {
+    props[key] = cn;
+  }
+  Object.assign(fn, props);
+
+  return fn as FlatComponentResult<K>;
+}
+
+/**
+ * Dimensioned component: CVA-style with `variants`, `compoundVariants`, `defaultVariants`.
+ * Base class = namespace itself. Variant classes = namespace-dimension-option.
+ */
+function createDimensionedComponent<V extends VariantDefinitions>(
+  namespace: string,
+  config: ComponentConfig<V>,
+): DimensionedComponentResult<V> {
+  const { base, variants = {} as V, compoundVariants = [], defaultVariants = {} } = config;
+
+  registerNamespace(namespace, 'createDimensionedComponent');
+
+  const rules: Array<{ key: string; css: string }> = [];
+
+  // Base class is the namespace itself (not namespace-base)
+  let baseClassName = '';
   if (base) {
-    baseClassName = buildComponentClassName(namespace, 'base', base);
+    baseClassName = buildSingleClassName(namespace, base);
     rules.push(...serializeStyle(`.${baseClassName}`, base));
   }
 
-  // 2. Inject CSS for each variant option
+  const variantClassByKey: Record<string, string> = {};
+  const compoundClassByIndex: string[] = [];
+
+  // Inject CSS for each variant option
   for (const [dimension, options] of Object.entries(variants)) {
     for (const [option, properties] of Object.entries(options as Record<string, CSSProperties>)) {
       const segment = `${dimension}-${option}`;
@@ -110,7 +202,7 @@ function createSingleComponent<V extends VariantDefinitions>(
     }
   }
 
-  // 3. Inject CSS for each compound variant
+  // Inject CSS for each compound variant
   (compoundVariants as Array<{ variants: Record<string, unknown>; style: CSSProperties }>).forEach(
     (cv, index) => {
       const className = buildComponentClassName(namespace, `compound-${index}`, cv.style);
@@ -121,11 +213,11 @@ function createSingleComponent<V extends VariantDefinitions>(
 
   insertRules(rules);
 
-  // 4. Return the selector function
-  return ((selections: Record<string, unknown> = {}) => {
+  // Build the callable function
+  const fn = function (selections: Record<string, unknown> = {}): string {
     const classes: string[] = [];
 
-    if (base && baseClassName) classes.push(baseClassName);
+    if (baseClassName) classes.push(baseClassName);
 
     // Resolve final selections (explicit overrides defaultVariants)
     const resolvedSelections: Record<string, unknown> = {};
@@ -172,7 +264,19 @@ function createSingleComponent<V extends VariantDefinitions>(
     });
 
     return classes.join(' ');
-  }) as ComponentFunction<V>;
+  };
+
+  // Assign destructurable properties: base + each variant option
+  const props: Record<string, string> = { base: baseClassName };
+  for (const [dimension, options] of Object.entries(variants)) {
+    for (const option of Object.keys(options as Record<string, CSSProperties>)) {
+      const segment = `${dimension}-${option}`;
+      props[option] = variantClassByKey[segment] ?? '';
+    }
+  }
+  Object.assign(fn, props);
+
+  return fn as DimensionedComponentResult<V>;
 }
 
 function normalizeSelection(value: unknown, options: Record<string, unknown>): string | undefined {
@@ -201,16 +305,7 @@ function createSlotComponent<S extends string, V extends SlotVariantDefinitions<
     defaultVariants = {},
   } = config;
 
-  // Development-mode duplicate detection
-  if (process.env.NODE_ENV !== 'production') {
-    if (registeredNamespaces.has(namespace)) {
-      console.warn(
-        `[typestyles] styles.component('${namespace}', ...) called more than once. ` +
-          `This will cause class name collisions. Each namespace should be unique.`,
-      );
-    }
-  }
-  registeredNamespaces.add(namespace);
+  registerNamespace(namespace, 'createSlotComponent');
 
   const rules: Array<{ key: string; css: string }> = [];
 

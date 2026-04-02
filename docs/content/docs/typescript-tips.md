@@ -17,7 +17,7 @@ TypeStyles automatically infers types from your definitions:
 import { styles } from 'typestyles';
 
 // Types are inferred automatically
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     backgroundColor: '#0066ff',
@@ -28,7 +28,7 @@ const button = styles.create('button', {
 });
 
 // selector function is typed
-const classes = button('base', 'primary');
+const classes = button({ primary: true });
 //     ^? string
 ```
 
@@ -118,7 +118,7 @@ Make your component props type-safe:
 ```ts
 import { styles } from 'typestyles';
 
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: { ... },
   primary: { ... },
   secondary: { ... },
@@ -129,8 +129,8 @@ const button = styles.create('button', {
 });
 
 // Extract variant types
-type ButtonVariants = Parameters<typeof button>;
-//   ^? ('base' | 'primary' | 'secondary' | 'ghost' | 'small' | 'medium' | 'large' | false | null | undefined)[]
+type ButtonVariants = Parameters<typeof button>[0];
+//   ^? { primary?: boolean; secondary?: boolean; ghost?: boolean; small?: boolean; medium?: boolean; large?: boolean } | undefined
 
 // Or define explicitly
 interface ButtonProps {
@@ -141,7 +141,7 @@ interface ButtonProps {
 
 function Button({ variant = 'primary', size = 'medium', children }: ButtonProps) {
   return (
-    <button className={button('base', variant, size)}>
+    <button className={button({ [variant]: true, [size]: true })}>
       {children}
     </button>
   );
@@ -150,7 +150,7 @@ function Button({ variant = 'primary', size = 'medium', children }: ButtonProps)
 
 ### Stricter object literals
 
-You can add `as const` to **nested values** when you want literal types preserved (for example token-like maps). Variant keys for `styles.create` are already inferred from the definitions object; use explicit component prop types when you need a narrower public API than the style keys alone.
+You can add `as const` to **nested values** when you want literal types preserved (for example token-like maps). Variant keys for `styles.component` are already inferred from the definitions object; use explicit component prop types when you need a narrower public API than the style keys alone.
 
 ## Utility types
 
@@ -159,7 +159,7 @@ You can add `as const` to **nested values** when you want literal types preserve
 ```ts
 import { styles } from 'typestyles';
 
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: { ... },
   elevated: { ... },
 });
@@ -280,11 +280,11 @@ function StyledBox<T extends string>({
   variant?: T;
   children: React.ReactNode;
 }) {
-  return <div className={styleSet('base', variant)}>{children}</div>;
+  return <div className={styleSet({ [variant]: true })}>{children}</div>;
 }
 
 // Usage
-const box = styles.create('box', {
+const box = styles.component('box', {
   base: { padding: '16px' },
   elevated: { boxShadow: '0 4px 6px rgba(0,0,0,0.1)' },
 });
@@ -364,7 +364,7 @@ function isValidVariant(
 function Button({ variant }: { variant?: string }) {
   const safeVariant = variant && isValidVariant(variant) ? variant : 'primary';
 
-  return <button className={button('base', safeVariant)}>Click</button>;
+  return <button className={button({ [safeVariant]: true })}>Click</button>;
 }
 ```
 
@@ -382,7 +382,7 @@ interface StyleConfig<V extends string> {
 }
 
 function createStrictStyles<V extends string>(config: StyleConfig<V>) {
-  return styles.create(config.namespace, config.variants);
+  return styles.component(config.namespace, config.variants);
 }
 
 // Usage with full type safety
@@ -395,8 +395,8 @@ const button = createStrictStyles({
 });
 
 // TypeScript knows these are the only valid variants
-button('base', 'primary'); // ✓
-button('invalid'); // ✗ Type error
+button({ primary: true }); // ✓
+button({ invalid: true }); // ✗ Type error
 ```
 
 ## Type narrowing
@@ -418,7 +418,7 @@ function Button({ variant: variantProp }: { variant?: string }) {
     ? variantProp
     : 'primary';
 
-  return <button className={button('base', variant)}>Click</button>;
+  return <button className={button({ [variant]: true })}>Click</button>;
 }
 ```
 
@@ -441,7 +441,7 @@ This can happen with very complex nested styles. Solution: simplify nesting or a
 
 ```ts
 // If you get deep type errors, add explicit return type
-const complex = styles.create('complex', {
+const complex = styles.component('complex', {
   base: {
     // very deep nesting
   },
@@ -466,16 +466,16 @@ Break complex styles into smaller pieces:
 
 ```ts
 // ❌ Avoid very complex single definitions
-const complex = styles.create('complex', {
+const complex = styles.component('complex', {
   base: {
     // hundreds of lines
   },
 });
 
 // ✅ Break into logical groups
-const header = styles.create('header', { ... });
-const content = styles.create('content', { ... });
-const footer = styles.create('footer', { ... });
+const header = styles.component('header', { ... });
+const content = styles.component('content', { ... });
+const footer = styles.component('footer', { ... });
 ```
 
 ## Summary

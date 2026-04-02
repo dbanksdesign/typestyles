@@ -15,7 +15,7 @@ First, verify the class name is being applied:
 
 ```tsx
 function Button() {
-  return <button className={button('base')}>Click me</button>;
+  return <button className={button()}>Click me</button>;
 }
 ```
 
@@ -23,7 +23,7 @@ Open DevTools and check that the element has the expected class:
 
 ```html
 <!-- Should see something like this -->
-<button class="button-base">Click me</button>
+<button class="button">Click me</button>
 ```
 
 **If no class is present:**
@@ -45,7 +45,7 @@ Styles are injected lazily. Open DevTools and look for a `<style>` tag with type
 ```html
 <head>
   <style id="typestyles">
-    .button-base {
+    .button {
       padding: 8px 16px;
     }
   </style>
@@ -77,10 +77,10 @@ This means you've created two different styles with the same namespace:
 
 ```ts
 // File A
-const button = styles.create('button', { ... });
+const button = styles.component('button', { ... });
 
 // File B
-const button = styles.create('button', { ... }); // Same namespace!
+const button = styles.component('button', { ... }); // Same namespace!
 ```
 
 ### How to fix
@@ -89,13 +89,13 @@ Use unique, descriptive namespaces:
 
 ```ts
 // ✅ Good - descriptive names
-const iconButton = styles.create('icon-button', { ... });
-const textButton = styles.create('text-button', { ... });
-const submitButton = styles.create('submit-button', { ... });
+const iconButton = styles.component('icon-button', { ... });
+const textButton = styles.component('text-button', { ... });
+const submitButton = styles.component('submit-button', { ... });
 
 // ❌ Bad - generic names that collide
-const button = styles.create('button', { ... });
-const button2 = styles.create('button', { ... }); // Collision!
+const button = styles.component('button', { ... });
+const button2 = styles.component('button', { ... }); // Collision!
 ```
 
 ## TypeScript errors
@@ -130,12 +130,12 @@ No overload matches this call.
 You're passing an invalid variant:
 
 ```ts
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: { ... },
   primary: { ... },
 });
 
-button('base', 'secondary'); // Error! 'secondary' is not a valid variant
+button({ secondary: true }); // Error! 'secondary' is not a valid variant
 ```
 
 **Fix:** Use only defined variants.
@@ -334,7 +334,7 @@ Your styles are being overridden by other CSS:
 
 ```css
 /* Your typestyles class */
-.button-base {
+.button {
   color: blue;
 }
 
@@ -349,11 +349,11 @@ button {
 1. Use more specific selectors:
 
    ```ts
-   const button = styles.create('button', {
+   const button = styles.component('button', {
      base: {
        color: 'blue',
        // Increase specificity
-       '&.button-base': {
+       '&.button': {
          color: 'blue',
        },
      },
@@ -374,7 +374,7 @@ button {
 Styles from parent components affecting children:
 
 ```ts
-const parent = styles.create('parent', {
+const parent = styles.component('parent', {
   base: {
     '& button': { color: 'red' }, // Affects ALL buttons inside
   },
@@ -384,13 +384,13 @@ const parent = styles.create('parent', {
 **Fix:** Be more specific or avoid nesting:
 
 ```ts
-const parent = styles.create('parent', {
+const parent = styles.component('parent', {
   base: {
     // Don't use & button, style specific class instead
   },
 });
 
-const childButton = styles.create('child-button', {
+const childButton = styles.component('child-button', {
   base: {
     color: 'red',
   },
@@ -400,7 +400,7 @@ const childButton = styles.create('child-button', {
 ### Media queries not working
 
 ```ts
-const responsive = styles.create('responsive', {
+const responsive = styles.component('responsive', {
   base: {
     '@media (max-width: 768px)': {
       display: 'none',

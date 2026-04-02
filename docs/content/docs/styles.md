@@ -1,24 +1,20 @@
 ---
 title: Styles
-description: Create and compose style variants with styles.create
+description: Component styles with styles.component
 ---
 
 # Styles
 
-The `styles` API lets you define named style variants and compose them at the call site.
+`styles.component` is the unified API for all component styling in typestyles. It handles both flat variants and dimensioned variants with full TypeScript support.
 
-For typed variant dimensions (`variants`, `compoundVariants`, `defaultVariants`), see [Components](/docs/components).
+## Flat variants
 
-Use `styles.create` when your variants are a flat list of class names. If your component API is dimensioned (like `intent`, `size`, `tone`), use [Components](/docs/components).
-
-## Creating styles
-
-Call `styles.create(namespace, definitions)` with a unique namespace and an object of variant names to style definitions:
+Call `styles.component(namespace, definitions)` with a namespace and an object of variant names to style definitions. Any key that is not `variants`, `compoundVariants`, or `defaultVariants` is treated as a flat variant:
 
 ```ts
 import { styles } from 'typestyles';
 
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: {
     padding: '16px',
     borderRadius: '8px',
@@ -27,23 +23,78 @@ const card = styles.create('card', {
   elevated: {
     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
   },
+  compact: {
+    padding: '8px',
+  },
 });
 ```
 
-Class names are deterministic: `card-base`, `card-elevated`. Combine variants by passing multiple names to the selector function:
+The base class is just the namespace: `card`. Flat variant classes follow the pattern `{namespace}-{variant}`: `card-elevated`, `card-compact`.
+
+Call the component as a function — base is always applied automatically:
 
 ```ts
-card('base', 'elevated'); // "card-base card-elevated"
+card()                    // "card"
+card({ elevated: true })  // "card card-elevated"
+card({ compact: true })   // "card card-compact"
+```
+
+Destructure to get individual class strings (without base):
+
+```ts
+const { base, elevated, compact } = card;
+// base = "card", elevated = "card-elevated", compact = "card-compact"
 ```
 
 To use **hashed** or **hash-only** class strings instead (for example in a design system package), see [Class naming](/docs/class-naming).
+
+## Dimensioned variants
+
+Use a `variants` key for typed variant dimensions with `compoundVariants` and `defaultVariants` support:
+
+```ts
+import { styles } from 'typestyles';
+
+const button = styles.component('button', {
+  base: {
+    padding: '8px 16px',
+    borderRadius: '6px',
+  },
+  variants: {
+    intent: {
+      primary: { backgroundColor: '#0066ff', color: '#fff' },
+      ghost: { backgroundColor: 'transparent' },
+    },
+    size: {
+      sm: { fontSize: '14px' },
+      lg: { fontSize: '18px', padding: '12px 24px' },
+    },
+  },
+  defaultVariants: { intent: 'primary', size: 'sm' },
+});
+
+button()                              // "button button-intent-primary button-size-sm"
+button({ intent: 'ghost' })           // "button button-intent-ghost button-size-sm"
+button({ intent: 'primary', size: 'lg' }) // "button button-intent-primary button-size-lg"
+```
+
+Destructure variant option classes by name:
+
+```ts
+const { base, primary, ghost, sm, lg } = button;
+// base = "button"
+// primary = "button-intent-primary", ghost = "button-intent-ghost"
+// sm = "button-size-sm", lg = "button-size-lg"
+```
+
+See [Components](/docs/components) for compound variants, boolean variants, and multipart slots.
 
 ## Selectors
 
 Use the `&` prefix for pseudo-classes and nested selectors, just like in CSS:
 
 ```ts
-const button = styles.create('button', {
+const button = styles.component('button', {
   base: {
     padding: '8px 16px',
     '&:hover': { opacity: 0.9 },
@@ -57,7 +108,7 @@ const button = styles.create('button', {
 Attribute selectors work with `&`-prefixed nested selectors, including all CSS attribute selector operators:
 
 ```ts
-const trigger = styles.create('trigger', {
+const trigger = styles.component('trigger', {
   base: {
     // exact match
     '&[data-state="open"]': { opacity: 1 },
@@ -80,14 +131,14 @@ const trigger = styles.create('trigger', {
 
 ## Composing styles
 
-Use `styles.compose()` to combine multiple selector functions or class strings:
+Use `styles.compose()` to combine multiple callable components or class strings:
 
 ```ts
-const base = styles.create('base', {
+const base = styles.component('base', {
   root: { padding: '8px', borderRadius: '4px' },
 });
 
-const primary = styles.create('primary', {
+const primary = styles.component('primary', {
   root: { backgroundColor: '#0066ff', color: 'white' },
 });
 
@@ -124,7 +175,7 @@ const avatar = s.class('avatar', {
   marginX: 8,
 });
 
-const button = s.create('button', {
+const button = s.component('button', {
   base: { paddingY: 8 },
   compact: { paddingY: 4 },
 });
