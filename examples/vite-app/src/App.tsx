@@ -17,12 +17,14 @@ import {
 } from '@examples/react-design-system';
 import { tokens } from 'typestyles';
 
-const oceanThemeClass = tokens.createTheme('ds-ocean', {
-  color: {
-    accent: '#0284c7',
-    accentHover: '#0369a1',
-    accentForeground: '#f0f9ff',
-    focusRing: '#38bdf8',
+const oceanTheme = tokens.createTheme('ds-ocean', {
+  base: {
+    color: {
+      accent: '#0284c7',
+      accentHover: '#0369a1',
+      accentForeground: '#f0f9ff',
+      focusRing: '#38bdf8',
+    },
   },
 });
 
@@ -36,7 +38,7 @@ export function App(): JSX.Element {
   const [role, setRole] = useState('designer');
   const [tabId, setTabId] = useState('overview');
 
-  const customThemeClassName = themeMode === 'ocean' ? oceanThemeClass : undefined;
+  const customThemeClassName = themeMode === 'ocean' ? oceanTheme.className : undefined;
   const providerTheme = themeMode === 'dark' ? 'dark' : 'light';
 
   const tabs = useMemo(

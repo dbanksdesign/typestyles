@@ -40,14 +40,14 @@ export function ThemeProvider({ children }: ThemeProviderProps): JSX.Element {
 
   useEffect(() => {
     if (!mounted) return;
-    const className = theme === 'dark' ? darkTheme : lightTheme;
+    const className = theme === 'dark' ? darkTheme.className : lightTheme.className;
     document.documentElement.className = className;
     localStorage.setItem('theme', theme);
   }, [theme, mounted]);
 
   const toggleTheme = (): void => setTheme((t) => (t === 'light' ? 'dark' : 'light'));
 
-  const themeClass = theme === 'dark' ? darkTheme : lightTheme;
+  const themeClass = theme === 'dark' ? darkTheme.className : lightTheme.className;
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>

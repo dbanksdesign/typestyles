@@ -10,7 +10,7 @@ export function App(): JSX.Element {
     u.py8,
     u.px4,
     u.transitionColors,
-    dark ? darkShell : undefined,
+    dark ? darkShell.className : undefined,
     dark ? u.bgSlate900 : u.bgSlate50,
   );
 

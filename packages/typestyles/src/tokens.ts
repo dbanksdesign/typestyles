@@ -1,4 +1,4 @@
-import type { TokenValues, TokenRef, ThemeOverrides } from './types.js';
+import type { TokenValues, TokenRef } from './types.js';
 import { flattenTokenEntries } from './types.js';
 import { insertRule } from './sheet.js';
 
@@ -150,41 +150,4 @@ export function useTokens<T extends TokenValues = TokenValues>(namespace: string
   return createTokenProxy(namespace, '', allKeys) as TokenRef<T>;
 }
 
-/**
- * Create a theme class that overrides token values.
- *
- * Returns a class name string. Apply it to any element to override
- * token values for that subtree via CSS custom property cascading.
- * Supports nested structures that mirror the token organization.
- *
- * @example
- * ```ts
- * const dark = createTheme('dark', {
- *   color: {
- *     text: { primary: '#e0e0e0', secondary: '#a1a1aa' },
- *     background: { surface: '#1a1a2e', subtle: '#262640' },
- *   },
- * });
- *
- * <div className={dark}>  // class="theme-dark"
- * ```
- */
-export function createTheme(name: string, overrides: ThemeOverrides): string {
-  const className = `theme-${name}`;
-
-  const declarations: string[] = [];
-
-  for (const [namespace, values] of Object.entries(overrides)) {
-    if (values === null || values === undefined) continue;
-
-    const flatEntries = flattenTokenEntries(values);
-    for (const [key, value] of flatEntries) {
-      declarations.push(`--${namespace}-${key}: ${value}`);
-    }
-  }
-
-  const css = `.${className} { ${declarations.join('; ')}; }`;
-  insertRule(`theme:${name}`, css);
-
-  return className;
-}
+// createTheme has moved to theme.ts — re-exported via index.ts on the tokens namespace.

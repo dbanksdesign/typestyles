@@ -24,15 +24,17 @@ export const space = tokens.create('space', {
 });
 
 export const darkTheme = tokens.createTheme('dark', {
-  color: {
-    primary: '#66b3ff',
-    primaryHover: '#3399ff',
-    secondary: '#9ca3af',
-    secondaryHover: '#d1d5db',
-    surface: '#1a1a2e',
-    surfaceRaised: '#25253e',
-    text: '#e0e0e0',
-    textMuted: '#9ca3af',
-    border: '#3f3f5c',
+  base: {
+    color: {
+      primary: '#66b3ff',
+      primaryHover: '#3399ff',
+      secondary: '#9ca3af',
+      secondaryHover: '#d1d5db',
+      surface: '#1a1a2e',
+      surfaceRaised: '#25253e',
+      text: '#e0e0e0',
+      textMuted: '#9ca3af',
+      border: '#3f3f5c',
+    },
   },
 });

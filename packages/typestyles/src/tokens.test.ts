@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createTokens, useTokens, createTheme } from './tokens.js';
+import { createTokens, useTokens } from './tokens.js';
+import { createTheme } from './theme.js';
 import { reset, flushSync } from './sheet.js';
 
 describe('createTokens', () => {
@@ -125,19 +126,32 @@ describe('createTheme', () => {
     reset();
   });
 
-  it('returns a theme class name', () => {
+  it('returns a ThemeSurface with className and name', () => {
     const dark = createTheme('dark', {
-      color: { primary: '#66b3ff' },
+      base: { color: { primary: '#66b3ff' } },
     });
 
-    expect(dark).toBe('theme-dark');
+    expect(dark.className).toBe('theme-dark');
+    expect(dark.name).toBe('dark');
+  });
+
+  it('coerces to className via toString and Symbol.toPrimitive', () => {
+    const acme = createTheme('acme', {
+      base: { color: { primary: '#111' } },
+    });
+
+    expect(String(acme)).toBe('theme-acme');
+    expect(`wrapper ${acme}`).toBe('wrapper theme-acme');
+    expect(acme.toString()).toBe('theme-acme');
   });
 
   it('injects a CSS rule with custom property overrides', () => {
     createTheme('high-contrast', {
-      color: {
-        primary: '#0000ff',
-        text: '#000000',
+      base: {
+        color: {
+          primary: '#0000ff',
+          text: '#000000',
+        },
       },
     });
 
@@ -156,9 +170,11 @@ describe('createTheme', () => {
 
   it('supports nested structures in createTheme', () => {
     createTheme('dark', {
-      color: {
-        text: { primary: '#e0e0e0', secondary: '#a1a1aa' },
-        background: { surface: '#1a1a2e', subtle: '#262640' },
+      base: {
+        color: {
+          text: { primary: '#e0e0e0', secondary: '#a1a1aa' },
+          background: { surface: '#1a1a2e', subtle: '#262640' },
+        },
       },
     });
 

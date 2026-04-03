@@ -1,5 +1,6 @@
 import { createClass, createHashClass, compose, createStylesWithUtils } from './styles.js';
-import { createTokens, useTokens, createTheme } from './tokens.js';
+import { createTokens, useTokens } from './tokens.js';
+import { createTheme, createDarkMode, when, colorMode } from './theme.js';
 import { createKeyframes } from './keyframes.js';
 import * as colorFns from './color.js';
 import {
@@ -43,6 +44,18 @@ export type {
   FontFaceProps,
   CSSVarRef,
   ComponentVariants,
+  ThemeCondition,
+  ThemeConditionMedia,
+  ThemeConditionAttr,
+  ThemeConditionClass,
+  ThemeConditionSelector,
+  ThemeConditionAnd,
+  ThemeConditionOr,
+  ThemeConditionNot,
+  ThemeModeDefinition,
+  ThemeConfig,
+  ThemeSurface,
+  DeepPartialTokenValues,
 } from './types.js';
 
 export { flattenTokenEntries } from './types.js';
@@ -103,17 +116,23 @@ export const global = {
  *
  * @example
  * ```ts
- * const color = tokens.create('color', {
- *   primary: '#0066ff',
- * });
- *
+ * const color = tokens.create('color', { primary: '#0066ff' });
  * color.primary // "var(--color-primary)"
+ *
+ * const acme = tokens.createTheme('acme', {
+ *   base: { color: { primary: '#ff6600' } },
+ *   colorMode: tokens.colorMode.mediaOnly({ dark: darkOverrides }),
+ * });
+ * // acme.className === 'theme-acme'
  * ```
  */
 export const tokens = {
   create: createTokens,
   use: useTokens,
   createTheme,
+  createDarkMode,
+  when,
+  colorMode,
 } as const;
 
 /**

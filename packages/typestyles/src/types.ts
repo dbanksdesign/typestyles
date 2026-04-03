@@ -120,17 +120,131 @@ export type TokenRef<T extends TokenValues> = T extends string | number
     };
 
 /**
- * Theme overrides: a map of token namespaces to partial value overrides.
- * Supports nested structures that mirror the token organization.
+ * Nested token values where any object level may omit keys (for mode layers that
+ * only tweak a subtree of `base`).
+ */
+export type DeepPartialTokenValues =
+  | string
+  | number
+  | {
+      [key: string]: DeepPartialTokenValues | undefined;
+    };
+
+/**
+ * Theme overrides: namespaces map to full or deeply partial token trees.
+ * Aligns with `tokens.create` namespaces; mode `overrides` often only set a subset of keys.
  */
 export type ThemeOverrides = {
-  [namespace: string]: TokenValues;
+  [namespace: string]: DeepPartialTokenValues | undefined;
 };
 
 /**
  * Keyframe stops: 'from', 'to', or percentage strings mapped to CSS properties.
  */
 export type KeyframeStops = Record<string, CSSProperties>;
+
+// ---------------------------------------------------------------------------
+// Theme condition types (discriminated union)
+// ---------------------------------------------------------------------------
+
+/** Match a media query (e.g. `(prefers-color-scheme: dark)`). */
+export type ThemeConditionMedia = {
+  readonly type: 'media';
+  readonly query: string;
+};
+
+/** Match an attribute on the themed element (`self`) or an ancestor (`ancestor`). */
+export type ThemeConditionAttr = {
+  readonly type: 'attr';
+  readonly name: string;
+  readonly value: string;
+  readonly scope: 'self' | 'ancestor';
+};
+
+/** Match a class on the themed element (`self`) or an ancestor (`ancestor`). */
+export type ThemeConditionClass = {
+  readonly type: 'class';
+  readonly name: string;
+  readonly scope: 'self' | 'ancestor';
+};
+
+/** Raw selector escape hatch — the selector is used as an ancestor context for the theme class. */
+export type ThemeConditionSelector = {
+  readonly type: 'selector';
+  readonly selector: string;
+};
+
+/** All child conditions must hold. */
+export type ThemeConditionAnd = {
+  readonly type: 'and';
+  readonly conditions: readonly ThemeCondition[];
+};
+
+/** Any child condition must hold (emits separate rules per branch). */
+export type ThemeConditionOr = {
+  readonly type: 'or';
+  readonly conditions: readonly ThemeCondition[];
+};
+
+/** Negate a single-branch condition (see `tokens.when.not` JSDoc for limits). */
+export type ThemeConditionNot = {
+  readonly type: 'not';
+  readonly condition: ThemeCondition;
+};
+
+/**
+ * A condition that determines **when** a set of token overrides applies.
+ * Conditions compile to media queries, selector prefixes/suffixes, or combinations.
+ */
+export type ThemeCondition =
+  | ThemeConditionMedia
+  | ThemeConditionAttr
+  | ThemeConditionClass
+  | ThemeConditionSelector
+  | ThemeConditionAnd
+  | ThemeConditionOr
+  | ThemeConditionNot;
+
+// ---------------------------------------------------------------------------
+// Theme mode / config / surface
+// ---------------------------------------------------------------------------
+
+/**
+ * A single mode layer within a theme surface.
+ * Applies `overrides` when `when` is satisfied.
+ */
+export type ThemeModeDefinition = {
+  readonly id: string;
+  readonly overrides: ThemeOverrides;
+  readonly when: ThemeCondition;
+};
+
+/**
+ * Configuration for `tokens.createTheme()`.
+ * Provide `modes` (manual) **or** `colorMode` (preset), not both.
+ */
+export type ThemeConfig = {
+  /** Base token overrides — emitted as `.theme-{name} { … }`. */
+  base?: ThemeOverrides;
+  /** Manual mode layers with explicit conditions. Mutually exclusive with `colorMode`. */
+  modes?: ThemeModeDefinition[];
+  /** Preset mode layers from `tokens.colorMode.*`. Mutually exclusive with `modes`. */
+  colorMode?: ThemeModeDefinition[];
+};
+
+/**
+ * The object returned by `tokens.createTheme()`.
+ *
+ * - `surface.className` — the generated class name (e.g. `"theme-acme"`)
+ * - `surface.name` — the theme name (e.g. `"acme"`)
+ * - `String(surface)` / template interpolation — coerces to `className`
+ */
+export interface ThemeSurface {
+  readonly className: string;
+  readonly name: string;
+  toString(): string;
+  [Symbol.toPrimitive](hint: string): string;
+}
 
 // ---------------------------------------------------------------------------
 // Component API types
