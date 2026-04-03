@@ -33,7 +33,7 @@ describe('extractNamespaces', () => {
   it('extracts createTheme as theme keys', () => {
     const code = `
       import { tokens } from 'typestyles';
-      const dark = tokens.createTheme('dark', { color: { primary: '#fff' } });
+      const dark = tokens.createTheme('dark', { base: { color: { primary: '#fff' } } });
     `;
     const result = extractNamespaces(code);
     expect(result.keys).toEqual(['theme:dark']);
@@ -42,7 +42,7 @@ describe('extractNamespaces', () => {
   it('extracts standalone createTheme calls', () => {
     const code = `
       import { createTheme } from 'typestyles';
-      const dark = createTheme('dark', { color: { primary: '#fff' } });
+      const dark = createTheme('dark', { base: { color: { primary: '#fff' } } });
     `;
     const result = extractNamespaces(code);
     expect(result.keys).toEqual(['theme:dark']);

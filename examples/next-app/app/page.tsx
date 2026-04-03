@@ -19,12 +19,14 @@ import {
 } from '@examples/react-design-system';
 import { tokens } from 'typestyles';
 
-const sunsetThemeClass = tokens.createTheme('ds-sunset', {
-  color: {
-    accent: '#ea580c',
-    accentHover: '#c2410c',
-    accentForeground: '#fff7ed',
-    focusRing: '#fb923c',
+const sunsetTheme = tokens.createTheme('ds-sunset', {
+  base: {
+    color: {
+      accent: '#ea580c',
+      accentHover: '#c2410c',
+      accentForeground: '#fff7ed',
+      focusRing: '#fb923c',
+    },
   },
 });
 
@@ -59,7 +61,7 @@ export default function Home(): JSX.Element {
     [],
   );
 
-  const customThemeClassName = themeMode === 'sunset' ? sunsetThemeClass : undefined;
+  const customThemeClassName = themeMode === 'sunset' ? sunsetTheme.className : undefined;
   const providerTheme = themeMode === 'dark' ? 'dark' : 'light';
 
   return (

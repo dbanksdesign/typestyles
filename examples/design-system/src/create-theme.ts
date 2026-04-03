@@ -1,4 +1,4 @@
-import { flattenTokenEntries, insertRules, tokens, type TokenValues } from 'typestyles';
+import { tokens, type ThemeSurface, type TokenValues } from 'typestyles';
 import type {
   DeepPartial,
   DesignPrimitiveOverrides,
@@ -22,51 +22,28 @@ function flattenPrimitiveOverrides(primitives: DesignPrimitiveOverrides): ThemeO
   ) as ThemeOverrideMap;
 }
 
-function buildVarDeclString(overrides: ThemeOverrideMap): string {
-  const parts: string[] = [];
-  for (const [namespace, values] of Object.entries(overrides)) {
-    if (values === undefined || values === null) continue;
-    if (typeof values !== 'object') continue;
-    for (const [key, value] of flattenTokenEntries(values)) {
-      parts.push(`--${namespace}-${key}: ${value};`);
-    }
-  }
-  return parts.join(' ');
-}
-
 export function createDesignTheme(config: DesignThemeConfig): DesignTheme {
-  const lightTheme = {
+  const lightOverrides = {
     ...flattenSemanticValues(config.light),
     ...flattenPrimitiveOverrides(config.primitives ?? {}),
     ...(config.components?.codeBlock ? { codeBlock: config.components.codeBlock } : {}),
   };
 
-  const className = tokens.createTheme(config.name, lightTheme);
-  const lightDecls = buildVarDeclString(flattenSemanticValues(config.light));
-  const darkDecls = buildVarDeclString(flattenSemanticValues(config.dark));
+  const darkOverrides = flattenSemanticValues(config.dark);
 
-  if (darkDecls.length > 0) {
-    insertRules([
-      {
-        key: `theme:${config.name}:dark-media`,
-        css: `@media (prefers-color-scheme: dark) { .${className} { ${darkDecls} } }`,
-      },
-      {
-        key: `theme:${config.name}:dark-attr`,
-        css: `.${className}[data-mode="dark"] { ${darkDecls} }`,
-      },
-    ]);
-  }
-
-  insertRules([
-    {
-      key: `theme:${config.name}:light-attr`,
-      css: `@media (prefers-color-scheme: dark) { .${className}[data-mode="light"] { ${lightDecls} } }`,
-    },
-  ]);
+  const surface: ThemeSurface = tokens.createTheme(config.name, {
+    base: lightOverrides,
+    colorMode: tokens.colorMode.systemWithLightDarkOverride({
+      attribute: 'data-mode',
+      values: { light: 'light', dark: 'dark' },
+      scope: 'self',
+      light: flattenSemanticValues(config.light),
+      dark: darkOverrides,
+    }),
+  });
 
   return {
-    className,
+    className: surface.className,
     name: config.name,
     lightValues: config.light,
     darkValues: config.dark,
