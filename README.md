@@ -138,14 +138,16 @@ Tokens support theming through standard CSS custom property overrides:
 
 ```tsx
 const theme = tokens.createTheme('dark', {
-  color: {
-    surface: '#1a1a2e',
-    text: '#e0e0e0',
+  base: {
+    color: {
+      surface: '#1a1a2e',
+      text: '#e0e0e0',
+    },
   },
 });
 
-// Apply the theme to any subtree
-<div className={theme}>{/* All children use dark theme values */}</div>;
+// Apply the theme to any subtree (ThemeSurface — use .className in React)
+<div className={theme.className}>{/* All children use dark theme values */}</div>;
 ```
 
 ### Incremental Adoption
@@ -377,7 +379,7 @@ spacing.md; // "var(--spacing-md)"
 
 ### `tokens.createTheme(name, config)`
 
-Creates a theme class that overrides token values (nested token shapes under `base`, plus optional `modes` / `colorMode`).
+Creates a theme surface (class `theme-{name}`) with token overrides. Pass **`base`**, and either **`modes`** (manual `tokens.when` conditions) or **`colorMode`** (presets), not both. Returns a **`ThemeSurface`**—use **`surface.className`** where a string is required.
 
 ```tsx
 const dark = tokens.createTheme('dark', {
@@ -391,6 +393,8 @@ const dark = tokens.createTheme('dark', {
 
 <div className={dark.className}>
 ```
+
+See `tokens.createDarkMode`, `tokens.when`, and `tokens.colorMode` for layered light/dark/system behavior.
 
 ### `createStyles(options?)` and `createTokens(options?)`
 

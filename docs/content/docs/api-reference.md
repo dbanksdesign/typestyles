@@ -77,6 +77,12 @@ Composes naturally with token references.
 - `color.alpha(color, opacity, space?)`: Adjust opacity
 
 See [Color](/docs/color).
+- `tokens.create(namespace, values)`: Registers tokens on `:root` and returns `var(--namespace-key)` references
+- `tokens.use(namespace)`: Returns `var(--namespace-key)` references without emitting CSS (for shared tokens defined elsewhere)
+- `tokens.createTheme(name, config)`: Registers a `.theme-{name}` surface with optional `base`, and either `modes` or `colorMode` (not both). Returns a **`ThemeSurface`** (`className`, `name`, string coercion)—use `.className` in React
+- `tokens.createDarkMode(name, darkOverrides)`: Shorthand for a single dark mode layer under `prefers-color-scheme: dark`
+- `tokens.when`: Condition builders (`media`, `prefersDark`, `prefersLight`, `attr`, `className`, `selector`, `and`, `or`, `not`) for manual `modes`
+- `tokens.colorMode`: Presets (`mediaOnly`, `attributeOnly`, `mediaOrAttribute`, `systemWithLightDarkOverride`) that expand to `modes`—pass as `colorMode` on `createTheme`
 
 ### `global`
 
