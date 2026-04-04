@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { withTypestylesExtract } from '@typestyles/next/build';
 
 const base = {
