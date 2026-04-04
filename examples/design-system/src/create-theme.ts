@@ -1,4 +1,5 @@
-import { tokens, type ThemeSurface, type TokenValues } from 'typestyles';
+import type { ThemeSurface, TokenValues } from 'typestyles';
+import { tokens } from './runtime';
 import type {
   DeepPartial,
   DesignPrimitiveOverrides,

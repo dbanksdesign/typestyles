@@ -7,6 +7,21 @@ description: Design tokens and theming with tokens.create and createTheme
 
 Tokens are design primitives (colors, spacing, etc.) exposed as CSS custom properties. They keep your styles consistent and make theming straightforward.
 
+## Scoped token instances
+
+The default `import { tokens } from 'typestyles'` is unscoped. For a **package or micro-frontend** that shares the page with other TypeStyles bundles, call **`createTokens({ scopeId })`** once and reuse that instance so custom properties and theme classes do not collide:
+
+```ts
+import { createTokens } from 'typestyles';
+
+export const tokens = createTokens({ scopeId: 'acme-ui' });
+
+const color = tokens.create('color', { primary: '#0066ff' });
+// var(--acme-ui-color-primary)
+```
+
+See [Class naming](/docs/class-naming) for how this pairs with `createStyles({ scopeId })` for styles.
+
 ## Creating tokens
 
 Use `tokens.create(prefix, object)` to define a set of tokens:
@@ -41,16 +56,18 @@ When tokens are created in another module or package, use `tokens.use(namespace)
 
 ## Theming
 
-Use `tokens.createTheme(name, overrides)` to define a theme that overrides token values:
+Use `tokens.createTheme(name, config)` with a **`base`** object (and optional `modes` or `colorMode`) to override token values:
 
 ```ts
 const dark = tokens.createTheme('dark', {
-  color: {
-    primary: '#66b3ff',
-    text: '#e0e0e0',
-    surface: '#1a1a2e',
+  base: {
+    color: {
+      primary: '#66b3ff',
+      text: '#e0e0e0',
+      surface: '#1a1a2e',
+    },
   },
 });
 ```
 
-Apply the theme by adding the theme class to a parent (e.g. `document.body.classList.add(dark)`). All token references under that subtree will use the overridden values.
+Apply the theme by adding **`dark.className`** to a parent (e.g. `document.body.classList.add(dark.className)`). All token references under that subtree will use the overridden values. With a scoped `createTokens({ scopeId })`, the class name includes that scope (sanitized), for example `.theme-acme-ui-dark`.

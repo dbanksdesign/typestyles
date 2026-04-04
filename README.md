@@ -189,9 +189,7 @@ const text = styles.component('text', {
 // Destructure and compose with cx()
 const { base, heading, bold, muted } = text;
 
-<h1 className={cx(base, heading, bold)}>
-  {/* class="text-base text-heading text-bold" */}
-</h1>;
+<h1 className={cx(base, heading, bold)}>{/* class="text-base text-heading text-bold" */}</h1>;
 ```
 
 Use the built-in `cx` utility to combine classes from different sources:
@@ -377,20 +375,35 @@ spacing.sm; // "var(--spacing-sm)" (typed as a CSS value)
 spacing.md; // "var(--spacing-md)"
 ```
 
-### `tokens.createTheme(name, overrides)`
+### `tokens.createTheme(name, config)`
 
-Creates a theme class that overrides token values.
+Creates a theme class that overrides token values (nested token shapes under `base`, plus optional `modes` / `colorMode`).
 
 ```tsx
 const dark = tokens.createTheme('dark', {
-  color: {
-    surface: '#1a1a2e',
-    text: '#e0e0e0',
+  base: {
+    color: {
+      surface: '#1a1a2e',
+      text: '#e0e0e0',
+    },
   },
 });
 
-<div className={dark}>   {/* class="theme-dark" */}
+<div className={dark.className}>
 ```
+
+### `createStyles(options?)` and `createTokens(options?)`
+
+For **libraries, design systems, or micro-frontends**, create your own instances so class names and CSS variables stay isolated—no global configuration:
+
+```tsx
+import { createStyles, createTokens } from 'typestyles';
+
+export const styles = createStyles({ scopeId: 'my-ui', mode: 'hashed', prefix: 'ui' });
+export const tokens = createTokens({ scopeId: 'my-ui' });
+```
+
+The default `import { styles, tokens } from 'typestyles'` remains `createStyles()` / `createTokens()` with default options for single-app use.
 
 ### `tokens.use(namespace)`
 

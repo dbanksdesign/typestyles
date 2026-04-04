@@ -18,44 +18,37 @@ Tokens are grouped for clarity; recipes consume the flat `designTokens` object (
 
 **`designMotion`** is a convenience handle: `designMotion.duration.fast`, `designMotion.transition.panelEnter`, etc. New presets include `transition.colorShift` (links) and `transition.controlSurface` (buttons).
 
-## Theme classes
+## TypeStyles runtime (`src/runtime.ts`)
 
-First-class theme classes (all are strings you add to a root element, typically `<html>`):
+Recipes import **`styles`** and **`tokens`** from this module instead of the default `typestyles` exports. That gives the package its own instances (no global naming API) and lets you add **`scopeId`** later if this bundle ever shares a page with another TypeStyles consumer.
 
-| Export                        | Class               | Purpose                                                          |
-| ----------------------------- | ------------------- | ---------------------------------------------------------------- |
-| `lightThemeClass`             | `theme-ds-light`    | Explicit light palette + light syntax (matches `:root` defaults) |
-| `darkThemeClass`              | `theme-ds-dark`     | Default dark `color` tokens + dark syntax                        |
-| `highContrastLightThemeClass` | `theme-ds-hc-light` | Stronger borders and body contrast on light surfaces             |
-| `highContrastDarkThemeClass`  | `theme-ds-hc-dark`  | Stronger borders and body contrast on dark surfaces              |
-
-Strip conflicting classes before applying another (the docs app keeps a fixed list for palette/mode switching).
-
-### Astro (no React context)
-
-Use a tiny inline script or a client island to flip classes on `document.documentElement`. Persist mode in `localStorage` if you want it sticky:
-
-```astro
----
-import { lightThemeClass, darkThemeClass } from '@examples/design-system';
----
-<script is:inline define:vars={{ lightThemeClass, darkThemeClass }}>
-  const key = 'theme-mode';
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const stored = localStorage.getItem(key);
-  const mode = stored === 'light' || stored === 'dark' ? stored : prefersDark ? 'dark' : 'light';
-  document.documentElement.classList.remove(lightThemeClass, darkThemeClass);
-  document.documentElement.classList.add(mode === 'dark' ? darkThemeClass : lightThemeClass);
-</script>
+```ts
+export const styles = createStyles();
+export const tokens = createTokens();
+// With collision risk: createTokens({ scopeId: 'acme-ds' }) / createStyles({ scopeId: 'acme-ds' })
 ```
 
-`import.meta.env.SSR` stays irrelevant: the snippet runs in the browser only. Adjust class lists if you also use palette themes (see `docs/src/tokens.ts` in this repo).
+## Theme classes
+
+Palette themes are created with `createDesignTheme` and expose a **`className`** (and string coercion) for the root element:
+
+| Export         | Typical `className` | Purpose                       |
+| -------------- | ------------------- | ----------------------------- |
+| `defaultTheme` | `theme-default`     | Default slate palette + modes |
+| `forestTheme`  | `theme-forest`      | Forest palette                |
+| `roseTheme`    | `theme-rose`        | Rose palette                  |
+| `amberTheme`   | `theme-amber`       | Amber palette                 |
+
+Light/dark behavior for each theme is driven by the theme config (e.g. `data-mode`); use the theme object’s `className` from your app shell. Strip conflicting theme classes before switching palettes.
 
 ## Theming helpers
 
 ```ts
-import { mergeDesignThemeOverrides, createBrandAccentOverrides } from '@examples/design-system';
-import { tokens } from 'typestyles';
+import {
+  mergeDesignThemeOverrides,
+  createBrandAccentOverrides,
+  tokens,
+} from '@examples/design-system';
 
 const brand = createBrandAccentOverrides({
   accent: '#7c3aed',
@@ -67,10 +60,12 @@ const subtleCodeBlock = mergeDesignThemeOverrides(brand, {
   codeBlock: { rootBg: '#0c1222', headerBg: '#111827' },
 });
 
-export const themeAcme = tokens.createTheme('ds-acme', subtleCodeBlock);
+export const themeAcme = tokens.createTheme('ds-acme', {
+  base: subtleCodeBlock,
+});
 ```
 
-Use `tokens.createTheme('ds-<name>', overrides)` with the same namespace keys as `DesignThemeOverrides`: `color`, `codeSyntax`, `doc`, `codeBlock`, plus primitives.
+Use `tokens.createTheme` with the same namespace keys as `DesignThemeOverrides`: `color`, `syntax`, `doc`, `codeBlock`, plus primitives. Prefer importing **`tokens`** from this package rather than from `typestyles` directly so apps and the design system share one token instance.
 
 ## Extending tokens safely
 
