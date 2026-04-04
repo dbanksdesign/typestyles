@@ -4,16 +4,18 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import type { RunTypestylesBuildOptions } from '@typestyles/build-runner';
 import { flushSync, getRegisteredCss, reset } from 'typestyles';
 
 const runnerDist = fileURLToPath(new URL('../../build-runner/dist/index.js', import.meta.url));
 const parityEnabled = existsSync(runnerDist);
 
+type RunTypestylesBuildFn = (options: RunTypestylesBuildOptions) => Promise<string>;
+
 describe.skipIf(!parityEnabled)('runtime/build parity', () => {
   it('emits identical CSS for component variant APIs', async () => {
-    const { runTypestylesBuild } = (await import(
-      pathToFileURL(runnerDist).href
-    )) as typeof import('@typestyles/build-runner');
+    const mod = await import(pathToFileURL(runnerDist).href);
+    const runTypestylesBuild = mod.runTypestylesBuild as RunTypestylesBuildFn;
 
     const projectRoot = process.cwd();
     const tempDir = await mkdtemp(join(tmpdir(), 'typestyles-parity-'));
