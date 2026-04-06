@@ -67,6 +67,36 @@ describe('cascade layers', () => {
     expect(css).toContain('btn-base');
   });
 
+  it('layered component: function config + internal vars uses dimensioned overload (intent selection types)', () => {
+    const styles = createStyles({
+      scopeId: 'layer-fn',
+      layers: ['components'] as const,
+    });
+    const btn = styles.component(
+      'layered-fn-btn',
+      (c) => {
+        const v = c.vars({
+          fg: { value: '#111', syntax: '<color>', inherits: false },
+        });
+        return {
+          base: { color: v.fg.var },
+          variants: {
+            intent: {
+              primary: { [v.fg.name]: '#fff', backgroundColor: '#336699' },
+              ghost: { [v.fg.name]: '#222', backgroundColor: 'transparent' },
+            },
+          },
+          defaultVariants: { intent: 'ghost' as const },
+        };
+      },
+      { layer: 'components' },
+    );
+    const classes = btn({ intent: 'primary' });
+    expect(classes).toContain('layered-fn-btn');
+    flushSync();
+    expect(getRegisteredCss()).toContain('@layer components');
+  });
+
   it('createTokens emits :root inside tokenLayer', () => {
     createTokens({
       scopeId: 'app',

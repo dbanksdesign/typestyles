@@ -9,11 +9,3 @@ export type DesignCodeBlockValues = {
 export type DesignComponentValues = {
   codeBlock: DesignCodeBlockValues;
 };
-
-export const codeBlockValues: DesignCodeBlockValues = {
-  background: 'var(--color-background-surface)',
-  backgroundHeader: 'var(--color-background-subtle)',
-  backgroundInline: 'var(--color-background-subtle)',
-  backgroundLineHighlight: 'var(--color-background-subtle)',
-  border: 'var(--color-border-default)',
-};

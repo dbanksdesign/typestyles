@@ -1,13 +1,7 @@
-import { insertRules } from 'typestyles';
+import { scopedTokenNamespace } from 'typestyles';
 import { tokens } from '../runtime';
-import { codeBlockValues } from './component';
 import { basePaletteTokenValues } from './palette';
-import {
-  DERIVED_COLOR_TOKENS,
-  type DesignColorRefs,
-  type DesignColorValues,
-  type DesignSyntaxValues,
-} from './semantic';
+import { type DesignColorRefs, type DesignColorValues, type DesignSyntaxValues } from './semantic';
 import {
   durationValues,
   easingValues,
@@ -56,15 +50,44 @@ const emptyThemeColorValues: DesignColorValues = {
   overlay: { default: '' },
 };
 
+const colorCssNs = scopedTokenNamespace(tokens.scopeId?.trim() || undefined, 'color');
+const cref = (path: string) => `var(--${colorCssNs}-${path})`;
+
 const colorRefShape: DesignColorRefs = {
   ...emptyThemeColorValues,
-  text: { ...emptyThemeColorValues.text, disabled: '', placeholder: '' },
-  accent: { ...emptyThemeColorValues.accent, subtle: '' },
-  danger: { ...emptyThemeColorValues.danger, subtle: '', border: '' },
-  success: { ...emptyThemeColorValues.success, subtle: '', border: '' },
-  warning: { ...emptyThemeColorValues.warning, subtle: '', border: '' },
-  info: { ...emptyThemeColorValues.info, subtle: '', border: '' },
-  overlay: { ...emptyThemeColorValues.overlay, backdrop: '' },
+  text: {
+    ...emptyThemeColorValues.text,
+    disabled: `color-mix(in oklch, ${cref('text-secondary')} 45%, transparent)`,
+    placeholder: `color-mix(in oklch, ${cref('text-secondary')} 55%, transparent)`,
+  },
+  accent: {
+    ...emptyThemeColorValues.accent,
+    subtle: `color-mix(in oklch, ${cref('accent-default')} 15%, transparent)`,
+  },
+  danger: {
+    ...emptyThemeColorValues.danger,
+    subtle: `color-mix(in oklch, ${cref('danger-default')} 12%, transparent)`,
+    border: `color-mix(in oklch, ${cref('danger-default')} 40%, transparent)`,
+  },
+  success: {
+    ...emptyThemeColorValues.success,
+    subtle: `color-mix(in oklch, ${cref('success-default')} 12%, transparent)`,
+    border: `color-mix(in oklch, ${cref('success-default')} 40%, transparent)`,
+  },
+  warning: {
+    ...emptyThemeColorValues.warning,
+    subtle: `color-mix(in oklch, ${cref('warning-default')} 12%, transparent)`,
+    border: `color-mix(in oklch, ${cref('warning-default')} 40%, transparent)`,
+  },
+  info: {
+    ...emptyThemeColorValues.info,
+    subtle: `color-mix(in oklch, ${cref('info-default')} 12%, transparent)`,
+    border: `color-mix(in oklch, ${cref('info-default')} 40%, transparent)`,
+  },
+  overlay: {
+    ...emptyThemeColorValues.overlay,
+    backdrop: `color-mix(in oklch, ${cref('overlay-default')} 60%, transparent)`,
+  },
 };
 
 export const colorTokens = tokens.create('color', colorRefShape);
@@ -87,16 +110,14 @@ const emptySyntaxValues: DesignSyntaxValues = {
 };
 
 export const syntaxTokens = tokens.create('syntax', emptySyntaxValues);
-export const codeBlockTokens = tokens.create('codeBlock', codeBlockValues);
 
-insertRules([
-  {
-    key: 'theme:derived-color',
-    css: `:root { ${Object.entries(DERIVED_COLOR_TOKENS)
-      .map(([key, value]) => `--color-${key}: ${value};`)
-      .join(' ')} }`,
-  },
-]);
+export const codeBlockTokens = tokens.create('codeBlock', {
+  background: `${colorTokens.background.surface}`,
+  backgroundHeader: `${colorTokens.background.subtle}`,
+  backgroundInline: `${colorTokens.background.subtle}`,
+  backgroundLineHighlight: `${colorTokens.background.subtle}`,
+  border: `${colorTokens.border.default}`,
+});
 
 export const designPrimitiveTokens = {
   palette: paletteTokens,

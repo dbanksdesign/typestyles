@@ -8,6 +8,6 @@ import { createTypeStyles } from 'typestyles';
 export const { styles, tokens } = createTypeStyles({
   scopeId: 'example-ds',
   mode: 'semantic',
-  // layers: ['tokens', 'components', 'utilities'] as const,
-  // tokenLayer: 'tokens',
+  layers: ['tokens', 'components', 'utilities'] as const,
+  tokenLayer: 'tokens',
 });
