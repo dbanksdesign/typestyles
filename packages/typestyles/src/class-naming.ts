@@ -16,8 +16,9 @@ export type ClassNamingConfig = {
   /** Prefix for hashed / atomic output and for `hashClass`. Default `ts`. */
   prefix: string;
   /**
-   * Optional package or app id mixed into hash input so identical logical
-   * names from different packages do not produce the same class string.
+   * Package, app, or per-file id: same logical `styles.component` / `styles.class` name under different
+   * scopes produces different classes. In development, duplicate registration for the same scope throws.
+   * Use `fileScopeId(import.meta)` for file-local isolation (CSS Modules–style).
    */
   scopeId: string;
   /**
@@ -57,6 +58,26 @@ export function hashString(input: string): string {
     hash = Math.imul(hash, 0x01000193);
   }
   return (hash >>> 0).toString(36);
+}
+
+/**
+ * Stable, short id derived from `import.meta.url` (file path). Use as `createStyles({ scopeId: fileScopeId(import.meta) })`
+ * so the same logical namespace in different files does not collide (similar to CSS Modules file scope).
+ *
+ * @example
+ * ```ts
+ * const styles = createStyles({ scopeId: fileScopeId(import.meta) });
+ * styles.component('button', { base: { padding: '8px' } });
+ * ```
+ */
+export function fileScopeId(meta: { url: string }): string {
+  let pathKey = meta.url;
+  try {
+    pathKey = new URL(meta.url).pathname;
+  } catch {
+    // keep raw url
+  }
+  return `file-${hashString(pathKey)}`;
 }
 
 export function sanitizeClassSegment(label: string): string {

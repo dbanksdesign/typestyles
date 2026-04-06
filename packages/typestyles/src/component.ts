@@ -28,6 +28,52 @@ import { createComponentConfigContextPair } from './component-config-context';
 // ---------------------------------------------------------------------------
 const RESERVED_KEYS = new Set(['base', 'variants', 'compoundVariants', 'defaultVariants', 'slots']);
 
+function devWarnUnknownVariantDimensions(
+  namespace: string,
+  selections: Record<string, unknown>,
+  variants: Record<string, unknown>,
+): void {
+  if (process.env.NODE_ENV === 'production') return;
+  for (const key of Object.keys(selections)) {
+    if (!Object.prototype.hasOwnProperty.call(variants, key)) {
+      console.error(
+        `[typestyles] Unknown variant dimension "${key}" for namespace "${namespace}".`,
+      );
+    }
+  }
+}
+
+/** When `effective` resolves to no valid option class, warn in dev (typos, bad defaults). */
+function devWarnInvalidDimensionOption(
+  namespace: string,
+  dimension: string,
+  effective: unknown,
+  selected: string | undefined,
+  optionMap: Record<string, unknown>,
+): void {
+  if (process.env.NODE_ENV === 'production') return;
+  if (effective == null || effective === false) return;
+  if (selected != null && Object.prototype.hasOwnProperty.call(optionMap, selected)) return;
+  console.error(
+    `[typestyles] Unknown variant "${String(effective)}" for dimension "${dimension}" in namespace "${namespace}".`,
+  );
+}
+
+function devWarnUnknownFlatVariantKeys(
+  namespace: string,
+  selections: Record<string, unknown>,
+  variantKeys: readonly string[],
+): void {
+  if (process.env.NODE_ENV === 'production') return;
+  const allowed = new Set(variantKeys);
+  for (const key of Object.keys(selections)) {
+    if (key === 'base') continue;
+    if (!allowed.has(key)) {
+      console.error(`[typestyles] Unknown variant "${key}" for namespace "${namespace}".`);
+    }
+  }
+}
+
 /**
  * Detect whether a config uses dimensioned variants (has `variants` key)
  * or flat variants (every non-`base` key is a variant).
@@ -145,28 +191,28 @@ function resolveComponentConfig(
  * });
  * ```
  */
-export function createComponent<V extends VariantDefinitions>(
+export function createComponent<const V extends VariantDefinitions>(
   classNaming: ClassNamingConfig,
   namespace: string,
   config: ComponentConfigInput<V>,
   layer?: string,
 ): ComponentReturn<V>;
 
-export function createComponent<K extends string>(
+export function createComponent<const K extends string>(
   classNaming: ClassNamingConfig,
   namespace: string,
   config: FlatComponentConfigInput<K>,
   layer?: string,
 ): FlatComponentReturn<K>;
 
-export function createComponent<S extends string, V extends SlotVariantDefinitions<S>>(
+export function createComponent<const S extends string, V extends SlotVariantDefinitions<S>>(
   classNaming: ClassNamingConfig,
   namespace: string,
   config: SlotComponentConfigInput<S, V>,
   layer?: string,
 ): SlotComponentFunction<S, V>;
 
-export function createComponent<S extends string>(
+export function createComponent<const S extends string>(
   classNaming: ClassNamingConfig,
   namespace: string,
   config: MultiSlotConfigInput<S>,
@@ -188,6 +234,8 @@ export function createComponent(
     }
     assertOwnLayer(classNaming.cascadeLayers, layer, `styles.component('${namespace}', …)`);
   }
+
+  claimComponentNamespace(classNaming, namespace);
 
   const resolved = resolveComponentConfig(classNaming, namespace, config);
   if (isMultiSlotConfig(resolved)) {
@@ -231,6 +279,27 @@ function registryKeyForComponent(classNaming: ClassNamingConfig, namespace: stri
   return `${scope}:${namespace}`;
 }
 
+/**
+ * Reserves the logical namespace before config resolution so nested `styles.component` calls
+ * cannot bypass duplicate detection. In production, duplicate registrations are allowed (rule
+ * insertion dedupes by selector key; first registration wins for CSS).
+ */
+function claimComponentNamespace(classNaming: ClassNamingConfig, namespace: string): void {
+  const key = registryKeyForComponent(classNaming, namespace);
+  if (process.env.NODE_ENV !== 'production' && registeredNamespaces.has(key)) {
+    const scopeLabel = classNaming.scopeId?.trim()
+      ? `'${classNaming.scopeId}'`
+      : 'default (empty scopeId)';
+    throw new Error(
+      `[typestyles] styles.component('${namespace}', ...) was called more than once for scope ${scopeLabel}. ` +
+        `Class names would collide. Use a unique namespace per component, or isolate with ` +
+        `createStyles({ scopeId: fileScopeId(import.meta) }) or createStyles({ scopeId: 'your-package' }) ` +
+        `(import \`fileScopeId\` from 'typestyles').`,
+    );
+  }
+  registeredNamespaces.add(key);
+}
+
 function finalizeComponentRules(
   classNaming: ClassNamingConfig,
   layer: string | undefined,
@@ -249,9 +318,6 @@ function createDimensionedComponent<V extends VariantDefinitions>(
   layer?: string,
 ): ComponentReturn<V> {
   const { base, variants = {} as V, compoundVariants = [], defaultVariants = {} } = config;
-
-  warnDuplicate(classNaming, namespace);
-  registeredNamespaces.add(registryKeyForComponent(classNaming, namespace));
 
   const rules: Array<{ key: string; css: string }> = [];
 
@@ -301,13 +367,25 @@ function createDimensionedComponent<V extends VariantDefinitions>(
 
     if (base && baseClassName) classes.push(baseClassName);
 
+    devWarnUnknownVariantDimensions(namespace, selections, variants as Record<string, unknown>);
+
     // Resolve selections with defaults
     const resolved: Record<string, unknown> = {};
     for (const [dimension, options] of Object.entries(variants)) {
       const optionMap = options as Record<string, CSSProperties>;
       const explicit = selections[dimension];
       const fallback = (defaultVariants as Record<string, unknown>)[dimension];
-      resolved[dimension] = normalizeSelection(explicit ?? fallback, optionMap);
+      const effective = explicit ?? fallback;
+      const selected = normalizeSelection(effective, optionMap);
+      resolved[dimension] = selected;
+
+      devWarnInvalidDimensionOption(
+        namespace,
+        dimension,
+        effective,
+        selected,
+        optionMap as Record<string, unknown>,
+      );
     }
 
     // Apply variant classes
@@ -363,9 +441,6 @@ function createFlatComponent<K extends string>(
   config: FlatComponentConfig<K>,
   layer?: string,
 ): FlatComponentReturn<K> {
-  warnDuplicate(classNaming, namespace);
-  registeredNamespaces.add(registryKeyForComponent(classNaming, namespace));
-
   const rules: Array<{ key: string; css: string }> = [];
   const classMap: Record<string, string> = {};
   const variantKeys: string[] = [];
@@ -388,6 +463,8 @@ function createFlatComponent<K extends string>(
 
   const selectorFn = (selections: Record<string, unknown> = {}): string => {
     const classes: string[] = [];
+
+    devWarnUnknownFlatVariantKeys(namespace, selections, variantKeys);
 
     if (baseClassName) classes.push(baseClassName);
 
@@ -418,9 +495,6 @@ function createMultiSlotComponent<S extends string>(
   layer?: string,
 ): MultiSlotReturn<S> {
   const { slots } = config;
-
-  warnDuplicate(classNaming, namespace);
-  registeredNamespaces.add(registryKeyForComponent(classNaming, namespace));
 
   const rules: Array<{ key: string; css: string }> = [];
   const slotClassMap: Record<string, string> = {};
@@ -488,9 +562,6 @@ function createSlotComponent<S extends string, V extends SlotVariantDefinitions<
     defaultVariants = {},
   } = config;
 
-  warnDuplicate(classNaming, namespace);
-  registeredNamespaces.add(registryKeyForComponent(classNaming, namespace));
-
   const rules: Array<{ key: string; css: string }> = [];
 
   const baseClassBySlot: Record<string, string> = {};
@@ -536,12 +607,18 @@ function createSlotComponent<S extends string, V extends SlotVariantDefinitions<
       (slots as readonly string[]).map((slot) => [slot, [] as string[]]),
     ) as Record<string, string[]>;
 
+    devWarnUnknownVariantDimensions(namespace, selections, variants as Record<string, unknown>);
+
     const resolvedSelections: Record<string, unknown> = {};
     for (const [dimension, options] of Object.entries(variants)) {
       const optionMap = options as Record<string, unknown>;
       const explicit = selections[dimension];
       const fallback = (defaultVariants as Record<string, unknown>)[dimension];
-      resolvedSelections[dimension] = normalizeSelection(explicit ?? fallback, optionMap);
+      const effective = explicit ?? fallback;
+      const selected = normalizeSelection(effective, optionMap);
+      resolvedSelections[dimension] = selected;
+
+      devWarnInvalidDimensionOption(namespace, dimension, effective, selected, optionMap);
     }
 
     for (const [slot, properties] of Object.entries(base as Record<string, CSSProperties>)) {
@@ -613,18 +690,6 @@ function normalizeSelection(value: unknown, options: Record<string, unknown>): s
   }
 
   return String(value);
-}
-
-function warnDuplicate(classNaming: ClassNamingConfig, namespace: string): void {
-  if (process.env.NODE_ENV !== 'production') {
-    const key = registryKeyForComponent(classNaming, namespace);
-    if (registeredNamespaces.has(key)) {
-      console.warn(
-        `[typestyles] styles.component('${namespace}', ...) called more than once. ` +
-          `This will cause class name collisions. Each namespace should be unique.`,
-      );
-    }
-  }
 }
 
 /**

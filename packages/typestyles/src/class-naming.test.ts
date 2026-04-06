@@ -1,7 +1,19 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { fileScopeId } from './class-naming';
 import { createStyles } from './styles';
 import { reset, flushSync } from './sheet';
 import { registeredNamespaces } from './registry';
+
+describe('fileScopeId', () => {
+  it('is stable for the same url and differs for different paths', () => {
+    const a = fileScopeId({ url: 'file:///app/src/Button.tsx' });
+    const b = fileScopeId({ url: 'file:///app/src/Button.tsx' });
+    const c = fileScopeId({ url: 'file:///app/src/Input.tsx' });
+    expect(a).toMatch(/^file-[a-z0-9]+$/);
+    expect(a).toBe(b);
+    expect(a).not.toBe(c);
+  });
+});
 
 describe('class naming modes', () => {
   beforeEach(() => {
