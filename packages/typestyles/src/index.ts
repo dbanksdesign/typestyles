@@ -30,7 +30,12 @@ export type { CreateTokensOptions, TokensApi } from './tokens';
 export type { CascadeLayersInput, CascadeLayersObjectInput, ResolvedCascadeLayers } from './layers';
 
 export type { ClassNamingConfig, ClassNamingMode } from './class-naming';
-export { mergeClassNaming, defaultClassNamingConfig, scopedTokenNamespace } from './class-naming';
+export {
+  mergeClassNaming,
+  defaultClassNamingConfig,
+  scopedTokenNamespace,
+  fileScopeId,
+} from './class-naming';
 
 export { createStyles, createTokens, createTypeStyles };
 

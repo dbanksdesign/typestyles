@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createClass, createHashClass, compose, createStylesWithUtils } from './styles';
 import { cx } from './index';
 import { createComponent } from './component';
@@ -45,6 +45,25 @@ describe('createClass', () => {
     const selectors = rules.map((r) => r.selectorText);
     expect(selectors).toContain('.hover-card');
     expect(selectors).toContain('.hover-card:hover');
+  });
+
+  it('throws in development when the same class name is registered twice under one scope', () => {
+    createClass(defaultClassNamingConfig, 'dup-class', { color: 'red' });
+    expect(() => createClass(defaultClassNamingConfig, 'dup-class', { color: 'blue' })).toThrow(
+      /styles\.class\('dup-class'/,
+    );
+  });
+
+  it('does not throw duplicate class in production', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    try {
+      createClass(defaultClassNamingConfig, 'prod-dup-class', { color: 'red' });
+      expect(() =>
+        createClass(defaultClassNamingConfig, 'prod-dup-class', { color: 'blue' }),
+      ).not.toThrow();
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });
 

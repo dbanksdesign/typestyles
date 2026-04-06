@@ -4,6 +4,39 @@ import { defaultClassNamingConfig, mergeClassNaming } from './class-naming';
 import { reset, flushSync, getRegisteredCss } from './sheet';
 import { registeredNamespaces } from './registry';
 
+describe('createComponent — duplicate namespace', () => {
+  beforeEach(() => {
+    reset();
+    registeredNamespaces.clear();
+  });
+
+  it('throws in development when the same namespace is registered twice under one scope', () => {
+    createComponent(defaultClassNamingConfig, 'dupbtn', { base: { padding: '1px' } });
+    expect(() =>
+      createComponent(defaultClassNamingConfig, 'dupbtn', { base: { padding: '2px' } }),
+    ).toThrow(/styles\.component\('dupbtn'/);
+  });
+
+  it('allows the same logical namespace when scopeId differs', () => {
+    const a = mergeClassNaming({ scopeId: 'pkg-a' });
+    const b = mergeClassNaming({ scopeId: 'pkg-b' });
+    createComponent(a, 'shared', { base: { margin: 0 } });
+    expect(() => createComponent(b, 'shared', { base: { margin: 0 } })).not.toThrow();
+  });
+
+  it('does not throw in production', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    try {
+      createComponent(defaultClassNamingConfig, 'prod-dup', { base: { color: 'red' } });
+      expect(() =>
+        createComponent(defaultClassNamingConfig, 'prod-dup', { base: { color: 'blue' } }),
+      ).not.toThrow();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+});
+
 describe('createComponent — dimensioned variants', () => {
   beforeEach(() => {
     reset();
@@ -262,6 +295,42 @@ describe('createComponent — dimensioned variants', () => {
     expect(btn({ outlined: true })).toBe('boolbtn-outlined-true');
     expect(btn({ outlined: false })).toBe('boolbtn-outlined-false');
   });
+
+  it('logs console.error in dev for unknown variant option value', () => {
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const btn = createComponent(defaultClassNamingConfig, 'badopt', {
+      base: { padding: '8px' },
+      variants: {
+        intent: { primary: { color: 'blue' } },
+      },
+    });
+
+    btn({ intent: 'primry' as 'primary' });
+
+    expect(err).toHaveBeenCalledWith(
+      expect.stringContaining('Unknown variant "primry" for dimension "intent"'),
+    );
+    err.mockRestore();
+  });
+
+  it('logs console.error in dev for unknown variant dimension keys', () => {
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const btn = createComponent(defaultClassNamingConfig, 'unkdim', {
+      base: { padding: '8px' },
+      variants: {
+        intent: { primary: { color: 'blue' } },
+      },
+    });
+
+    btn({ intent: 'primary', typoDim: 'x' } as { intent: 'primary'; typoDim: string });
+
+    expect(err).toHaveBeenCalledWith(
+      expect.stringContaining('Unknown variant dimension "typoDim"'),
+    );
+    err.mockRestore();
+  });
 });
 
 describe('createComponent — flat variants', () => {
@@ -338,6 +407,22 @@ describe('createComponent — flat variants', () => {
 
     expect(card()).toBe('');
     expect(card({ elevated: true })).toBe('nobase-elevated');
+  });
+
+  it('logs console.error in dev for unknown flat variant keys', () => {
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const card = createComponent(defaultClassNamingConfig, 'flatbad', {
+      base: { padding: '16px' },
+      elevated: { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
+    });
+
+    card({ primry: true } as { primry: boolean });
+
+    expect(err).toHaveBeenCalledWith(
+      expect.stringContaining('Unknown variant "primry" for namespace "flatbad"'),
+    );
+    err.mockRestore();
   });
 });
 

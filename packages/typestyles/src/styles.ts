@@ -66,13 +66,16 @@ export function createClass(
   layer?: string,
 ): string {
   const regKey = registryKeyForClass(classNaming, name);
-  if (process.env.NODE_ENV !== 'production') {
-    if (registeredNamespaces.has(regKey)) {
-      console.warn(
-        `[typestyles] styles.class('${name}', ...) called more than once. ` +
-          `This will cause class name collisions. Each class name should be unique.`,
-      );
-    }
+  if (process.env.NODE_ENV !== 'production' && registeredNamespaces.has(regKey)) {
+    const scopeLabel = classNaming.scopeId?.trim()
+      ? `'${classNaming.scopeId}'`
+      : 'default (empty scopeId)';
+    throw new Error(
+      `[typestyles] styles.class('${name}', ...) was called more than once for scope ${scopeLabel}. ` +
+        `Class names would collide. Use a unique class name, or isolate with ` +
+        `createStyles({ scopeId: fileScopeId(import.meta) }) or createStyles({ scopeId: 'your-package' }) ` +
+        `(import \`fileScopeId\` from 'typestyles').`,
+    );
   }
   registeredNamespaces.add(regKey);
 
@@ -220,19 +223,22 @@ export type StylesApi = {
   class: (name: string, properties: CSSProperties) => string;
   hashClass: (properties: CSSProperties, label?: string) => string;
   component: {
-    <V extends VariantDefinitions>(
+    <const V extends VariantDefinitions>(
       namespace: string,
       config: ComponentConfigInput<V>,
     ): ComponentReturn<V>;
-    <K extends string>(
+    <const K extends string>(
       namespace: string,
       config: FlatComponentConfigInput<K>,
     ): FlatComponentReturn<K>;
-    <S extends string, V extends SlotVariantDefinitions<S>>(
+    <const S extends string, V extends SlotVariantDefinitions<S>>(
       namespace: string,
       config: SlotComponentConfigInput<S, V>,
     ): SlotComponentFunction<S, V>;
-    <S extends string>(namespace: string, config: MultiSlotConfigInput<S>): MultiSlotReturn<S>;
+    <const S extends string>(
+      namespace: string,
+      config: MultiSlotConfigInput<S>,
+    ): MultiSlotReturn<S>;
   };
   withUtils: <U extends StyleUtils>(utils: U) => StylesWithUtilsApi<U>;
   compose: typeof compose;
@@ -251,22 +257,22 @@ export type CreateStylesInput = Partial<Omit<ClassNamingConfig, 'cascadeLayers'>
 };
 
 export type LayeredComponentFn<L extends string> = {
-  <V extends VariantDefinitions>(
+  <const V extends VariantDefinitions>(
     namespace: string,
     config: ComponentConfigInput<V>,
     options: LayerOption<L>,
   ): ComponentReturn<V>;
-  <K extends string>(
+  <const K extends string>(
     namespace: string,
     config: FlatComponentConfigInput<K>,
     options: LayerOption<L>,
   ): FlatComponentReturn<K>;
-  <S extends string, V extends SlotVariantDefinitions<S>>(
+  <const S extends string, V extends SlotVariantDefinitions<S>>(
     namespace: string,
     config: SlotComponentConfigInput<S, V>,
     options: LayerOption<L>,
   ): SlotComponentFunction<S, V>;
-  <S extends string>(
+  <const S extends string>(
     namespace: string,
     config: MultiSlotConfigInput<S>,
     options: LayerOption<L>,
@@ -274,22 +280,22 @@ export type LayeredComponentFn<L extends string> = {
 };
 
 export type LayeredComponentFnWithUtils<L extends string> = {
-  <V extends VariantDefinitions>(
+  <const V extends VariantDefinitions>(
     namespace: string,
     config: ComponentConfigInput<V>,
     options: LayerOption<L>,
   ): ComponentReturn<V>;
-  <K extends string>(
+  <const K extends string>(
     namespace: string,
     config: FlatComponentConfigInput<K>,
     options: LayerOption<L>,
   ): FlatComponentReturn<K>;
-  <S extends string, V extends SlotVariantDefinitions<S>>(
+  <const S extends string, V extends SlotVariantDefinitions<S>>(
     namespace: string,
     config: SlotComponentConfigInput<S, V>,
     options: LayerOption<L>,
   ): SlotComponentFunction<S, V>;
-  <S extends string>(
+  <const S extends string>(
     namespace: string,
     config: MultiSlotConfigInput<S>,
     options: LayerOption<L>,
@@ -321,8 +327,9 @@ export type StylesApiWithLayers<L extends string> = Omit<
 
 /**
  * Create a styles API with its own class naming config (scope, mode, prefix).
- * Use one instance per package or micro-frontend so hashed names and dev warnings
- * stay isolated without global mutation.
+ * Use one instance per package or micro-frontend so hashed names stay isolated without global mutation.
+ * Pass **`scopeId`** (or `fileScopeId(import.meta)` per module) so duplicate logical namespaces across
+ * files do not collide; in development, registering the same name twice under one scope throws.
  *
  * Pass **`layers`** to enable CSS cascade layers: a tuple (or `{ order, prependFrameworkLayers? }`)
  * defines a single `@layer a, b, c;` preamble, and every `class` / `hashClass` / `component` call
@@ -436,19 +443,22 @@ export type StylesWithUtilsApi<U extends StyleUtils> = {
   class: (name: string, properties: CSSPropertiesWithUtils<U>) => string;
   hashClass: (properties: CSSPropertiesWithUtils<U>, label?: string) => string;
   component: {
-    <V extends VariantDefinitions>(
+    <const V extends VariantDefinitions>(
       namespace: string,
       config: ComponentConfigInput<V>,
     ): ComponentReturn<V>;
-    <K extends string>(
+    <const K extends string>(
       namespace: string,
       config: FlatComponentConfigInput<K>,
     ): FlatComponentReturn<K>;
-    <S extends string, V extends SlotVariantDefinitions<S>>(
+    <const S extends string, V extends SlotVariantDefinitions<S>>(
       namespace: string,
       config: SlotComponentConfigInput<S, V>,
     ): SlotComponentFunction<S, V>;
-    <S extends string>(namespace: string, config: MultiSlotConfigInput<S>): MultiSlotReturn<S>;
+    <const S extends string>(
+      namespace: string,
+      config: MultiSlotConfigInput<S>,
+    ): MultiSlotReturn<S>;
   };
   compose: typeof compose;
 };
