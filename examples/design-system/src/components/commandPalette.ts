@@ -1,23 +1,6 @@
 import { styles } from '../runtime';
 import { designTokens as t } from '../tokens';
 
-const slots = [
-  'root',
-  'backdrop',
-  'dialog',
-  'inputRow',
-  'inputIcon',
-  'input',
-  'results',
-  'result',
-  'resultLink',
-  'resultLinkActive',
-  'resultTitle',
-  'resultMeta',
-  'mark',
-  'empty',
-] as const;
-
 /**
  * Command / search palette overlay (⌘K-style).
  *
@@ -27,7 +10,22 @@ const slots = [
  * Pass `{ open: true }` when the overlay is visible; default is closed.
  */
 export const commandPalette = styles.component('command-palette', {
-  slots,
+  slots: [
+    'root',
+    'backdrop',
+    'dialog',
+    'inputRow',
+    'inputIcon',
+    'input',
+    'results',
+    'result',
+    'resultLink',
+    'resultLinkActive',
+    'resultTitle',
+    'resultMeta',
+    'mark',
+    'empty',
+  ],
   base: {
     root: {
       position: 'fixed',

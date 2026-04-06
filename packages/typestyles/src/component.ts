@@ -86,14 +86,16 @@ function isDimensionedConfig(
 
 function isSlotWithVariantsConfig(
   config: Record<string, unknown>,
-): config is SlotComponentConfig<string, SlotVariantDefinitions<string>> {
+): config is SlotComponentConfig<readonly string[], SlotVariantDefinitions<string>> {
   return (
     'slots' in config &&
     ('variants' in config || 'compoundVariants' in config || 'defaultVariants' in config)
   );
 }
 
-function isMultiSlotConfig(config: Record<string, unknown>): config is MultiSlotConfig<string> {
+function isMultiSlotConfig(
+  config: Record<string, unknown>,
+): config is MultiSlotConfig<readonly string[]> {
   return (
     'slots' in config &&
     !('variants' in config || 'compoundVariants' in config || 'defaultVariants' in config)
@@ -205,19 +207,22 @@ export function createComponent<const K extends string>(
   layer?: string,
 ): FlatComponentReturn<K>;
 
-export function createComponent<const S extends string, V extends SlotVariantDefinitions<S>>(
+export function createComponent<
+  const Slots extends readonly string[],
+  V extends SlotVariantDefinitions<Slots[number]>,
+>(
   classNaming: ClassNamingConfig,
   namespace: string,
-  config: SlotComponentConfigInput<S, V>,
+  config: SlotComponentConfigInput<Slots, V>,
   layer?: string,
-): SlotComponentFunction<S, V>;
+): SlotComponentFunction<Slots, V>;
 
-export function createComponent<const S extends string>(
+export function createComponent<const Slots extends readonly string[]>(
   classNaming: ClassNamingConfig,
   namespace: string,
-  config: MultiSlotConfigInput<S>,
+  config: MultiSlotConfigInput<Slots>,
   layer?: string,
-): MultiSlotReturn<S>;
+): MultiSlotReturn<Slots>;
 
 export function createComponent(
   classNaming: ClassNamingConfig,
@@ -242,7 +247,7 @@ export function createComponent(
     return createMultiSlotComponent(
       classNaming,
       namespace,
-      resolved as MultiSlotConfig<string>,
+      resolved as MultiSlotConfig<readonly string[]>,
       layer,
     );
   }
@@ -250,7 +255,7 @@ export function createComponent(
     return createSlotComponent(
       classNaming,
       namespace,
-      resolved as SlotComponentConfig<string, SlotVariantDefinitions<string>>,
+      resolved as SlotComponentConfig<readonly string[], SlotVariantDefinitions<string>>,
       layer,
     );
   }
@@ -488,12 +493,12 @@ function createFlatComponent<K extends string>(
 // Multi-slot component (no variants, just multiple independent slot styles)
 // ---------------------------------------------------------------------------
 
-function createMultiSlotComponent<S extends string>(
+function createMultiSlotComponent<Slots extends readonly string[]>(
   classNaming: ClassNamingConfig,
   namespace: string,
-  config: MultiSlotConfig<S>,
+  config: MultiSlotConfig<Slots>,
   layer?: string,
-): MultiSlotReturn<S> {
+): MultiSlotReturn<Slots> {
   const { slots } = config;
 
   const rules: Array<{ key: string; css: string }> = [];
@@ -520,7 +525,7 @@ function createMultiSlotComponent<S extends string>(
     return result;
   };
 
-  return makeMultiSlotObject(selectorFn, slotClassMap) as MultiSlotReturn<S>;
+  return makeMultiSlotObject(selectorFn, slotClassMap) as MultiSlotReturn<Slots>;
 }
 
 function makeMultiSlotObject(
@@ -548,12 +553,15 @@ function makeMultiSlotObject(
 // Slot component (unchanged behavior, kept for complex multi-element components)
 // ---------------------------------------------------------------------------
 
-function createSlotComponent<S extends string, V extends SlotVariantDefinitions<S>>(
+function createSlotComponent<
+  Slots extends readonly string[],
+  V extends SlotVariantDefinitions<Slots[number]>,
+>(
   classNaming: ClassNamingConfig,
   namespace: string,
-  config: SlotComponentConfig<S, V>,
+  config: SlotComponentConfig<Slots, V>,
   layer?: string,
-): SlotComponentFunction<S, V> {
+): SlotComponentFunction<Slots, V> {
   const {
     slots,
     base = {},
@@ -671,8 +679,8 @@ function createSlotComponent<S extends string, V extends SlotVariantDefinitions<
 
     return Object.fromEntries(
       (slots as readonly string[]).map((slot) => [slot, classes[slot].join(' ')]),
-    ) as Record<S, string>;
-  }) as SlotComponentFunction<S, V>;
+    ) as Record<Slots[number], string>;
+  }) as SlotComponentFunction<Slots, V>;
 }
 
 // ---------------------------------------------------------------------------

@@ -2,7 +2,7 @@ import { styles } from '../runtime';
 import { designTokens as t } from '../tokens';
 
 export const select = styles.component('select', {
-  slots: ['root', 'label', 'trigger', 'popover', 'item'] as const,
+  slots: ['root', 'label', 'trigger', 'popover', 'item'],
   root: {
     display: 'grid',
     gap: t.space[1],

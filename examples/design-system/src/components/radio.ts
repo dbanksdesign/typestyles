@@ -2,7 +2,7 @@ import { styles } from '../runtime';
 import { designTokens as t } from '../tokens';
 
 export const radio = styles.component('radio', {
-  slots: ['group', 'item', 'control', 'label', 'groupLabel'] as const,
+  slots: ['group', 'item', 'control', 'label', 'groupLabel'],
   group: {
     display: 'grid',
     gap: t.space[1],

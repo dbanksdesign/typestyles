@@ -3,7 +3,7 @@ import { styles } from '../runtime';
 import { designTokens as t } from '../tokens';
 
 export const alert = styles.component('alert', {
-  slots: ['root', 'icon', 'body', 'title', 'content', 'action', 'actionLink'] as const,
+  slots: ['root', 'icon', 'body', 'title', 'content', 'action', 'actionLink'],
   base: {
     root: {
       display: 'flex',

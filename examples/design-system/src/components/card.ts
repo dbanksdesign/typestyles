@@ -2,16 +2,7 @@ import { styles } from '../runtime';
 import { designTokens as t } from '../tokens';
 
 export const card = styles.component('card', {
-  slots: [
-    'root',
-    'title',
-    'body',
-    'grid',
-    'linkRoot',
-    'linkTitle',
-    'linkDescription',
-    'linkHint',
-  ] as const,
+  slots: ['root', 'title', 'body', 'grid', 'linkRoot', 'linkTitle', 'linkDescription', 'linkHint'],
   root: {
     display: 'flex',
     flexDirection: 'column',

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, expectTypeOf } from 'vitest';
 import { createComponent } from './component';
 import { defaultClassNamingConfig, mergeClassNaming } from './class-naming';
 import { reset, flushSync, getRegisteredCss } from './sheet';
@@ -434,7 +434,7 @@ describe('createComponent with slots', () => {
 
   it('returns per-slot class maps with defaults', () => {
     const tabs = createComponent(defaultClassNamingConfig, 'tabs', {
-      slots: ['root', 'trigger', 'content'] as const,
+      slots: ['root', 'trigger', 'content'],
       base: {
         root: { display: 'grid' },
         trigger: { cursor: 'pointer' },
@@ -466,7 +466,7 @@ describe('createComponent with slots', () => {
 
   it('applies slot compound variants to targeted slots', () => {
     const tabs = createComponent(defaultClassNamingConfig, 'tabs-cv', {
-      slots: ['root', 'trigger', 'content'] as const,
+      slots: ['root', 'trigger', 'content'],
       variants: {
         intent: {
           primary: { trigger: { color: 'blue' } },
@@ -496,7 +496,7 @@ describe('createComponent with slots', () => {
 
   it('injects per-slot CSS class rules', () => {
     createComponent(defaultClassNamingConfig, 'tabs-css', {
-      slots: ['root', 'trigger'] as const,
+      slots: ['root', 'trigger'],
       base: {
         root: { display: 'grid' },
       },
@@ -528,9 +528,26 @@ describe('createComponent — multi-slot (no variants)', () => {
     registeredNamespaces.clear();
   });
 
+  it('infers slot keys from a plain slots array and rejects unknown properties', () => {
+    const dialog = createComponent(defaultClassNamingConfig, 'typed-multislot', {
+      slots: ['root', 'trigger', 'content'],
+      root: {},
+      trigger: {},
+      content: {},
+    });
+    expectTypeOf(dialog.root).toBeString();
+    expectTypeOf(dialog()).toEqualTypeOf<{
+      root: string;
+      trigger: string;
+      content: string;
+    }>();
+    // @ts-expect-error — not a declared slot
+    void dialog.missing;
+  });
+
   it('returns a callable function that returns slot classes', () => {
     const checkbox = createComponent(defaultClassNamingConfig, 'checkbox', {
-      slots: ['root', 'box', 'label'] as const,
+      slots: ['root', 'box', 'label'],
       root: { display: 'flex', gap: '8px' },
       box: { width: '18px', height: '18px' },
       label: { fontSize: '14px' },
@@ -544,7 +561,7 @@ describe('createComponent — multi-slot (no variants)', () => {
 
   it('is destructurable — each slot returns its class string', () => {
     const checkbox = createComponent(defaultClassNamingConfig, 'chk', {
-      slots: ['root', 'box'] as const,
+      slots: ['root', 'box'],
       root: { display: 'flex' },
       box: { width: '20px' },
     });
@@ -555,7 +572,7 @@ describe('createComponent — multi-slot (no variants)', () => {
 
   it('supports optional slots with no styles', () => {
     const dialog = createComponent(defaultClassNamingConfig, 'dialog', {
-      slots: ['overlay', 'modal', 'content'] as const,
+      slots: ['overlay', 'modal', 'content'],
       overlay: { position: 'fixed' },
       modal: { padding: '16px' },
     });
@@ -568,7 +585,7 @@ describe('createComponent — multi-slot (no variants)', () => {
 
   it('supports Object.keys() for enumeration', () => {
     const card = createComponent(defaultClassNamingConfig, 'mscard', {
-      slots: ['root', 'title', 'body'] as const,
+      slots: ['root', 'title', 'body'],
       root: { padding: '16px' },
       title: { fontWeight: 'bold' },
     });
@@ -581,7 +598,7 @@ describe('createComponent — multi-slot (no variants)', () => {
 
   it('injects CSS for all slots', () => {
     createComponent(defaultClassNamingConfig, 'mscss', {
-      slots: ['root', 'box'] as const,
+      slots: ['root', 'box'],
       root: { display: 'flex' },
       box: { width: '24px' },
     });
@@ -695,7 +712,7 @@ describe('createComponent — function config & internal vars', () => {
     const ui = createComponent(defaultClassNamingConfig, 'fn-slot', (c) => {
       const gap = c.var('g');
       return {
-        slots: ['root', 'item'] as const,
+        slots: ['root', 'item'],
         root: { gap: gap.var },
         item: { padding: '2px' },
       };

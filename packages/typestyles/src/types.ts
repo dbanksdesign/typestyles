@@ -424,34 +424,38 @@ export type FlatComponentReturn<K extends string> = {
 // Multi-slot components (no variants, just multiple independent slot styles)
 // ---------------------------------------------------------------------------
 
-export type MultiSlotConfig<S extends string> = {
-  slots: readonly S[];
-} & Partial<Record<S, CSSProperties>>;
+export type MultiSlotConfig<Slots extends readonly string[]> = {
+  slots: Slots;
+} & Partial<Record<Slots[number], CSSProperties>>;
 
-export type MultiSlotReturn<S extends string> = {
-  (): Record<S, string>;
+export type MultiSlotReturn<Slots extends readonly string[]> = {
+  (): Record<Slots[number], string>;
 } & {
-  readonly [K in S]: string;
+  readonly [K in Slots[number]]: string;
 };
 
 // ---------------------------------------------------------------------------
 // Slot component types
 // ---------------------------------------------------------------------------
 
-export type SlotComponentConfig<S extends string, V extends SlotVariantDefinitions<S>> = {
-  slots: readonly S[];
-  base?: SlotStyles<S>;
+export type SlotComponentConfig<
+  Slots extends readonly string[],
+  V extends SlotVariantDefinitions<Slots[number]>,
+> = {
+  slots: Slots;
+  base?: SlotStyles<Slots[number]>;
   variants?: V;
   compoundVariants?: Array<{
     variants: { [K in keyof V]?: CompoundSelectionValue<VariantOptionKey<V, K>> };
-    style: SlotStyles<S>;
+    style: SlotStyles<Slots[number]>;
   }>;
   defaultVariants?: ComponentSelections<V>;
 };
 
-export type SlotComponentFunction<S extends string, V extends SlotVariantDefinitions<S>> = (
-  selections?: ComponentSelections<V>,
-) => Record<S, string>;
+export type SlotComponentFunction<
+  Slots extends readonly string[],
+  V extends SlotVariantDefinitions<Slots[number]>,
+> = (selections?: ComponentSelections<V>) => Record<Slots[number], string>;
 
 /**
  * Config for `styles.component` may be a plain object or a function that receives {@link ComponentConfigContext}.
@@ -464,13 +468,16 @@ export type FlatComponentConfigInput<K extends string> =
   | FlatComponentConfig<K>
   | ((ctx: ComponentConfigContext) => FlatComponentConfig<K>);
 
-export type SlotComponentConfigInput<S extends string, V extends SlotVariantDefinitions<S>> =
-  | SlotComponentConfig<S, V>
-  | ((ctx: ComponentConfigContext) => SlotComponentConfig<S, V>);
+export type SlotComponentConfigInput<
+  Slots extends readonly string[],
+  V extends SlotVariantDefinitions<Slots[number]>,
+> =
+  | SlotComponentConfig<Slots, V>
+  | ((ctx: ComponentConfigContext) => SlotComponentConfig<Slots, V>);
 
-export type MultiSlotConfigInput<S extends string> =
-  | MultiSlotConfig<S>
-  | ((ctx: ComponentConfigContext) => MultiSlotConfig<S>);
+export type MultiSlotConfigInput<Slots extends readonly string[]> =
+  | MultiSlotConfig<Slots>
+  | ((ctx: ComponentConfigContext) => MultiSlotConfig<Slots>);
 
 /**
  * Extract the variant prop types from a ComponentReturn or ComponentFunction.

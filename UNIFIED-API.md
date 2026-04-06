@@ -100,7 +100,7 @@ For complex components with multiple parts/slots like Checkbox, Dialog, or Card:
 
 ```ts
 const checkbox = styles.component('checkbox', {
-  slots: ['root', 'box', 'label'] as const,
+  slots: ['root', 'box', 'label'],
   root: {
     display: 'inline-flex',
     alignItems: 'center',

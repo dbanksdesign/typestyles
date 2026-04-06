@@ -231,14 +231,14 @@ export type StylesApi = {
       namespace: string,
       config: FlatComponentConfigInput<K>,
     ): FlatComponentReturn<K>;
-    <const S extends string, V extends SlotVariantDefinitions<S>>(
+    <const Slots extends readonly string[], V extends SlotVariantDefinitions<Slots[number]>>(
       namespace: string,
-      config: SlotComponentConfigInput<S, V>,
-    ): SlotComponentFunction<S, V>;
-    <const S extends string>(
+      config: SlotComponentConfigInput<Slots, V>,
+    ): SlotComponentFunction<Slots, V>;
+    <const Slots extends readonly string[]>(
       namespace: string,
-      config: MultiSlotConfigInput<S>,
-    ): MultiSlotReturn<S>;
+      config: MultiSlotConfigInput<Slots>,
+    ): MultiSlotReturn<Slots>;
   };
   withUtils: <U extends StyleUtils>(utils: U) => StylesWithUtilsApi<U>;
   compose: typeof compose;
@@ -267,16 +267,16 @@ export type LayeredComponentFn<L extends string> = {
     config: FlatComponentConfigInput<K>,
     options: LayerOption<L>,
   ): FlatComponentReturn<K>;
-  <const S extends string, V extends SlotVariantDefinitions<S>>(
+  <const Slots extends readonly string[], V extends SlotVariantDefinitions<Slots[number]>>(
     namespace: string,
-    config: SlotComponentConfigInput<S, V>,
+    config: SlotComponentConfigInput<Slots, V>,
     options: LayerOption<L>,
-  ): SlotComponentFunction<S, V>;
-  <const S extends string>(
+  ): SlotComponentFunction<Slots, V>;
+  <const Slots extends readonly string[]>(
     namespace: string,
-    config: MultiSlotConfigInput<S>,
+    config: MultiSlotConfigInput<Slots>,
     options: LayerOption<L>,
-  ): MultiSlotReturn<S>;
+  ): MultiSlotReturn<Slots>;
 };
 
 export type LayeredComponentFnWithUtils<L extends string> = {
@@ -290,16 +290,16 @@ export type LayeredComponentFnWithUtils<L extends string> = {
     config: FlatComponentConfigInput<K>,
     options: LayerOption<L>,
   ): FlatComponentReturn<K>;
-  <const S extends string, V extends SlotVariantDefinitions<S>>(
+  <const Slots extends readonly string[], V extends SlotVariantDefinitions<Slots[number]>>(
     namespace: string,
-    config: SlotComponentConfigInput<S, V>,
+    config: SlotComponentConfigInput<Slots, V>,
     options: LayerOption<L>,
-  ): SlotComponentFunction<S, V>;
-  <const S extends string>(
+  ): SlotComponentFunction<Slots, V>;
+  <const Slots extends readonly string[]>(
     namespace: string,
-    config: MultiSlotConfigInput<S>,
+    config: MultiSlotConfigInput<Slots>,
     options: LayerOption<L>,
-  ): MultiSlotReturn<S>;
+  ): MultiSlotReturn<Slots>;
 };
 
 export type StylesWithUtilsApiLayered<U extends StyleUtils, L extends string> = Omit<
@@ -451,14 +451,14 @@ export type StylesWithUtilsApi<U extends StyleUtils> = {
       namespace: string,
       config: FlatComponentConfigInput<K>,
     ): FlatComponentReturn<K>;
-    <const S extends string, V extends SlotVariantDefinitions<S>>(
+    <const Slots extends readonly string[], V extends SlotVariantDefinitions<Slots[number]>>(
       namespace: string,
-      config: SlotComponentConfigInput<S, V>,
-    ): SlotComponentFunction<S, V>;
-    <const S extends string>(
+      config: SlotComponentConfigInput<Slots, V>,
+    ): SlotComponentFunction<Slots, V>;
+    <const Slots extends readonly string[]>(
       namespace: string,
-      config: MultiSlotConfigInput<S>,
-    ): MultiSlotReturn<S>;
+      config: MultiSlotConfigInput<Slots>,
+    ): MultiSlotReturn<Slots>;
   };
   compose: typeof compose;
 };
