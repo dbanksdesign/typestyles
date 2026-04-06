@@ -9,9 +9,9 @@ interface Props {
 const { title } = Astro.props as Props;
 ---
 
-<div class={card('root')}>
-  {title ? <h3 class={card('title')}>{title}</h3> : null}
-  <div class={card('body')}>
+<div class={card.root}>
+  {title ? <h3 class={card.title}>{title}</h3> : null}
+  <div class={card.body}>
     <slot />
   </div>
 </div>

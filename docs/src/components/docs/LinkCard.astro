@@ -12,8 +12,8 @@ interface Props {
 const { href, title, description, hint = 'Read more →' } = Astro.props as Props;
 ---
 
-<a class:list={[card('root'), card('linkRoot')]} href={href}>
-  <span class:list={[card('title'), card('linkTitle')]}>{title}</span>
-  {description ? <p class={card('linkDescription')}>{description}</p> : null}
-  <span class={card('linkHint')}>{hint}</span>
+<a class:list={[card.root, card.linkRoot]} href={href}>
+  <span class:list={[card.title, card.linkTitle]}>{title}</span>
+  {description ? <p class={card.linkDescription}>{description}</p> : null}
+  <span class={card.linkHint}>{hint}</span>
 </a>

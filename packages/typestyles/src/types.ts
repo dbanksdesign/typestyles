@@ -256,10 +256,20 @@ export interface ThemeSurface {
 // ---------------------------------------------------------------------------
 
 /**
- * A map of variant dimensions to their options (each option maps to CSSProperties).
+ * Styles for a single variant option (or slot variant block).
+ * Union with a permissive record so **`[v.name]: value`** from {@link ComponentInternalVarRef}
+ * (custom properties) infers as `{ [key: string]: … }` and still matches — that shape is not
+ * assignable to {@link CSSProperties} alone, which would otherwise reject the dimensioned overload
+ * and fall through to unrelated `component` overloads. **`Record<string, unknown>`** also covers
+ * objects that mix custom-property keys with nested selector blocks like `'&:hover'`.
  */
-export type VariantDefinitions = Record<string, Record<string, CSSProperties>>;
-export type SlotStyles<S extends string> = Partial<Record<S, CSSProperties>>;
+export type VariantOptionStyle = CSSProperties | Record<string, unknown>;
+
+/**
+ * A map of variant dimensions to their options (each option is {@link VariantOptionStyle}).
+ */
+export type VariantDefinitions = Record<string, Record<string, VariantOptionStyle>>;
+export type SlotStyles<S extends string> = Partial<Record<S, VariantOptionStyle>>;
 export type SlotVariantDefinitions<S extends string> = Record<
   string,
   Record<string, SlotStyles<S>>
@@ -353,7 +363,7 @@ export type ComponentConfig<V extends VariantDefinitions> = {
   variants?: V;
   compoundVariants?: Array<{
     variants: { [K in keyof V]?: CompoundSelectionValue<VariantOptionKey<V, K>> };
-    style: CSSProperties;
+    style: VariantOptionStyle;
   }>;
   defaultVariants?: ComponentSelections<V>;
 };
@@ -365,9 +375,19 @@ export type ComponentConfig<V extends VariantDefinitions> = {
 /**
  * Config for flat variants: `{ base: {...}, elevated: {...}, compact: {...} }`.
  * Each key besides `base` is a boolean-style variant.
+ *
+ * **`variants`**, **`defaultVariants`**, **`compoundVariants`**, and **`slots`** are forbidden
+ * on this shape so TypeScript does not pick the flat overload for CVA-style or slot configs.
+ * Nested variant maps can otherwise satisfy {@link CSSProperties} too loosely (index signatures),
+ * which produced wrong callable types for `styles.component(ns, (ctx) => ({ variants: … }), { layer })`
+ * when cascade layers are enabled.
  */
 export type FlatComponentConfig<K extends string> = {
   base?: CSSProperties;
+  variants?: never;
+  defaultVariants?: never;
+  compoundVariants?: never;
+  slots?: never;
 } & Record<K, CSSProperties>;
 
 /**

@@ -65,6 +65,7 @@ export type {
   FlatTokenEntry,
   KeyframeStops,
   VariantDefinitions,
+  VariantOptionStyle,
   ComponentConfig,
   ComponentConfigContext,
   ComponentConfigInput,

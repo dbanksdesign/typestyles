@@ -1,65 +1,89 @@
 import { styles } from '../runtime';
 import { designTokens as t } from '../tokens';
 
-export const button = styles.component('button', {
-  base: {
-    appearance: 'none',
-    border: `1px solid ${t.color.border.default}`,
-    borderRadius: t.radius.md,
-    backgroundColor: t.color.background.surface,
-    color: t.color.text.primary,
-    fontSize: t.fontSize.md,
-    fontWeight: t.fontWeight.medium,
-    padding: `${t.space[2]} ${t.space[4]}`,
-    cursor: 'pointer',
-    textDecoration: 'none',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: t.space[2],
-    transition: 'background-color 140ms ease, border-color 140ms ease, transform 80ms ease',
-    '&:hover': {
-      borderColor: t.color.border.strong,
-      backgroundColor: t.color.background.subtle,
-    },
-    '&:active': {
-      transform: 'translateY(1px)',
-    },
-    '&:focus-visible': {
-      outline: `2px solid ${t.color.border.focus}`,
-      outlineOffset: '2px',
-    },
-  },
-  variants: {
-    intent: {
-      primary: {
-        borderColor: t.color.accent.default,
-        backgroundColor: t.color.accent.default,
-        color: t.color.text.onAccent,
-        '&:hover': {
-          backgroundColor: t.color.accent.hover,
-          borderColor: t.color.accent.hover,
-        },
+export const button = styles.component(
+  'button',
+  (c) => {
+    const v = c.vars({
+      border: {
+        value: `${t.color.border.default}`,
+        syntax: '<color>',
+        inherits: false,
       },
-      secondary: {
-        backgroundColor: t.color.background.surface,
-        borderColor: t.color.border.default,
-        color: t.color.text.primary,
+      background: {
+        value: `${t.color.background.surface}`,
+        syntax: '<color>',
+        inherits: false,
+      },
+      foreground: {
+        value: `${t.color.text.primary}`,
+        syntax: '<color>',
+        inherits: false,
+      },
+    });
+    return {
+      base: {
+        appearance: 'none',
+        border: `1px solid ${v.border.var}`,
+        borderRadius: t.radius.md,
+        backgroundColor: v.background.var,
+        color: v.foreground.var,
+        fontSize: t.fontSize.md,
+        fontWeight: t.fontWeight.medium,
+        padding: `${t.space[2]} ${t.space[4]}`,
+        cursor: 'pointer',
+        textDecoration: 'none',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: t.space[2],
+        transition: 'background-color 140ms ease, border-color 140ms ease, transform 80ms ease',
         '&:hover': {
           borderColor: t.color.border.strong,
           backgroundColor: t.color.background.subtle,
         },
-      },
-      ghost: {
-        backgroundColor: 'transparent',
-        borderColor: 'transparent',
-        color: t.color.text.primary,
-        '&:hover': {
-          backgroundColor: t.color.background.subtle,
+        '&:active': {
+          transform: 'translateY(1px)',
+        },
+        '&:focus-visible': {
+          outline: `2px solid ${t.color.border.focus}`,
+          outlineOffset: '2px',
         },
       },
-    },
+      variants: {
+        intent: {
+          primary: {
+            [v.border.name]: t.color.accent.default,
+            [v.background.name]: t.color.accent.default,
+            [v.foreground.name]: t.color.text.onAccent,
+            '&:hover': {
+              [v.background.name]: t.color.accent.hover,
+              [v.border.name]: t.color.accent.hover,
+            },
+          },
+          secondary: {
+            [v.background.name]: t.color.background.surface,
+            [v.border.name]: t.color.border.default,
+            [v.foreground.name]: t.color.text.primary,
+            '&:hover': {
+              borderColor: t.color.border.strong,
+              backgroundColor: t.color.background.subtle,
+            },
+          },
+          ghost: {
+            [v.background.name]: 'transparent',
+            [v.border.name]: 'transparent',
+            [v.foreground.name]: t.color.text.primary,
+            '&:hover': {
+              backgroundColor: t.color.background.subtle,
+            },
+          },
+        },
+      },
+      defaultVariants: { intent: 'secondary' },
+    };
   },
-});
+  { layer: 'components' },
+);
 
 export const linkButton = button;

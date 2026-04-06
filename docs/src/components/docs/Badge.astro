@@ -9,17 +9,8 @@ interface Props {
 }
 
 const { variant = 'neutral' } = Astro.props as Props;
-
-const tone: Record<BadgeVariant, string> = {
-  neutral: badge('neutral'),
-  accent: badge('accent'),
-  success: badge('success'),
-  warning: badge('warning'),
-  danger: badge('danger'),
-  tip: badge('tip'),
-};
 ---
 
-<span class:list={[badge('root'), tone[variant]]}>
+<span class={badge({ tone: variant })}>
   <slot />
 </span>

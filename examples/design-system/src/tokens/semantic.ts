@@ -70,18 +70,3 @@ export const defaultDarkSyntaxValues: DesignSyntaxValues = {
   deletion: 'oklch(80.3% 0.22 27.5)',
   deletionBackground: 'oklch(18% 0.04 30)',
 };
-
-export const DERIVED_COLOR_TOKENS = {
-  'text-disabled': 'color-mix(in oklch, var(--color-text-secondary) 45%, transparent)',
-  'text-placeholder': 'color-mix(in oklch, var(--color-text-secondary) 55%, transparent)',
-  'accent-subtle': 'color-mix(in oklch, var(--color-accent-default) 15%, transparent)',
-  'danger-subtle': 'color-mix(in oklch, var(--color-danger-default) 12%, transparent)',
-  'danger-border': 'color-mix(in oklch, var(--color-danger-default) 40%, transparent)',
-  'success-subtle': 'color-mix(in oklch, var(--color-success-default) 12%, transparent)',
-  'success-border': 'color-mix(in oklch, var(--color-success-default) 40%, transparent)',
-  'warning-subtle': 'color-mix(in oklch, var(--color-warning-default) 12%, transparent)',
-  'warning-border': 'color-mix(in oklch, var(--color-warning-default) 40%, transparent)',
-  'info-subtle': 'color-mix(in oklch, var(--color-info-default) 12%, transparent)',
-  'info-border': 'color-mix(in oklch, var(--color-info-default) 40%, transparent)',
-  'overlay-backdrop': 'color-mix(in oklch, var(--color-overlay-default) 60%, transparent)',
-} as const;
