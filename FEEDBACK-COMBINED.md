@@ -729,31 +729,19 @@ const color = tokens.use<ColorTokens>('color');
 
 ### 3.3 Improve Slots API Typing
 
-**Problem:** `slots: ['root', 'trigger']` requires `as const` and returns `Record<string, string>` instead of a precisely typed object.
-
-**Current:**
+**Status:** Implemented. `styles.component` infers slot names from an inline `slots` array literal via a `const` type parameter (`Slots extends readonly string[]`); `as const` is not required. Destructuring and `()` return types use `Slots[number]` keys, so unknown properties are type errors.
 
 ```ts
 const dialog = styles.component('dialog', {
-  slots: ['root', 'trigger', 'content'] as const,
-  // ...
-});
-
-dialog.root; // TS type: string ✓ (but only because of as const)
-dialog.missing; // TS type: string ← should be a type error!
-```
-
-**Desired:**
-
-```ts
-const dialog = styles.create('dialog', {
   slots: ['root', 'trigger', 'content'],
   // ...
 });
 
-dialog.root; // string ✓
-dialog.missing; // TS error: Property 'missing' does not exist ✓
+dialog.root; // string
+dialog.missing; // TS error: Property 'missing' does not exist
 ```
+
+**Note:** If `slots` is passed as a separate variable typed as `string[]`, inference widens to `string` keys; use an inline literal in the config (or keep `as const` on a shared tuple constant) for strict slot typing.
 
 ---
 

@@ -2,7 +2,7 @@ import { styles } from '../runtime';
 import { designTokens as t } from '../tokens';
 
 export const switchStyles = styles.component('switch', {
-  slots: ['root', 'track', 'thumb', 'label'] as const,
+  slots: ['root', 'track', 'thumb', 'label'],
   root: {
     display: 'inline-flex',
     alignItems: 'center',

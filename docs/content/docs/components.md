@@ -117,9 +117,11 @@ input({ invalid: true }); // "input-base input-invalid-true"
 
 Pass a `slots` array for components with multiple parts (for example root, trigger, and panel). `base`, `variants`, `compoundVariants`, and `defaultVariants` can each target specific slot keys.
 
+TypeScript infers each slot name from the array literal, so the return value is typed with those keys (for example `tabs.root`, `tabs.trigger`) and unknown keys are errors. You do not need `as const` on `slots` when you pass an inline array inside `styles.component(...)`.
+
 ```ts
 const tabs = styles.component('tabs', {
-  slots: ['root', 'trigger', 'content'] as const,
+  slots: ['root', 'trigger', 'content'],
   base: {
     root: { display: 'grid' },
     trigger: { cursor: 'pointer' },
