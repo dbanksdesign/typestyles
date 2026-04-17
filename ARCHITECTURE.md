@@ -28,7 +28,7 @@ TypeStyles is a runtime CSS-in-TypeScript library. It has three core subsystems:
 typestyles/
 ├── src/
 │   ├── index.ts              # Public API exports
-│   ├── styles.ts             # styles.class(), styles.hashClass(), cx(), compose, withUtils
+│   ├── styles.ts             # styles.class(), styles.hashClass(), cx(), compose, withUtils, createStyles({ utils })
 │   ├── component.ts          # styles.component() — unified CVA-style component API
 │   ├── tokens.ts             # tokens.create(), tokens.use() — CSS custom properties
 │   ├── sheet.ts              # StyleSheet manager — CSS injection and batching
@@ -116,7 +116,7 @@ card.elevated; // "card-elevated"
 
 **`styles.compose(...fns)`** — Compose multiple component functions or strings.
 
-**`styles.withUtils(utils)`** — Create utility-aware styles API (like Stitches' utils).
+**`createStyles({ utils })`** — Preferred way to attach utility shorthands to one instance. **`styles.withUtils(utils)`** — Same behavior from the default `styles` export (like Stitches' utils).
 
 ### 3. Token Registry (`tokens.ts`)
 

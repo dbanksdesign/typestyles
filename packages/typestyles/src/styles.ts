@@ -254,6 +254,11 @@ export type CreateStylesInput = Partial<Omit<ClassNamingConfig, 'cascadeLayers'>
    * Ignored by `createStyles` alone (passing it here avoids repeating the key at the factory).
    */
   tokenLayer?: string;
+  /**
+   * When set, prefer the overloads that return `StylesWithUtilsApi` — this field exists so combined
+   * option objects type-check; do not rely on `createStyles(options?: CreateStylesInput)` alone for utils.
+   */
+  utils?: StyleUtils;
 };
 
 export type LayeredComponentFn<L extends string> = {
@@ -334,7 +339,30 @@ export type StylesApiWithLayers<L extends string> = Omit<
  * Pass **`layers`** to enable CSS cascade layers: a tuple (or `{ order, prependFrameworkLayers? }`)
  * defines a single `@layer a, b, c;` preamble, and every `class` / `hashClass` / `component` call
  * must pass `{ layer: … }` with a name from that stack.
+ *
+ * Pass **`utils`** to register shorthand expanders on this instance (same behavior as
+ * `styles.withUtils(utils)` on the default export, without a second parallel API object).
  */
+export function createStyles<const L extends readonly string[], U extends StyleUtils>(
+  options: Partial<Omit<ClassNamingConfig, 'cascadeLayers'>> & {
+    layers: L;
+    tokenLayer?: L[number];
+    utils: U;
+  },
+): StylesWithUtilsApiLayered<U, L[number]>;
+
+export function createStyles<U extends StyleUtils>(
+  options: Partial<Omit<ClassNamingConfig, 'cascadeLayers'>> & {
+    layers: CascadeLayersObjectInput;
+    tokenLayer?: string;
+    utils: U;
+  },
+): StylesWithUtilsApiLayered<U, string>;
+
+export function createStyles<U extends StyleUtils>(
+  options: Partial<Omit<ClassNamingConfig, 'cascadeLayers'>> & { utils: U },
+): StylesWithUtilsApi<U>;
+
 export function createStyles<const L extends readonly string[]>(
   options: Partial<Omit<ClassNamingConfig, 'cascadeLayers'>> & {
     layers: L;
@@ -351,9 +379,15 @@ export function createStyles(
 
 export function createStyles(options?: CreateStylesInput): StylesApi;
 
-export function createStyles(options?: CreateStylesInput): StylesApi | StylesApiWithLayers<string> {
-  const partial = options ?? {};
-  const { layers, tokenLayer: tokenLayerHint, ...namingPartial } = partial;
+export function createStyles(
+  options?: CreateStylesInput,
+):
+  | StylesApi
+  | StylesApiWithLayers<string>
+  | StylesWithUtilsApi<StyleUtils>
+  | StylesWithUtilsApiLayered<StyleUtils, string> {
+  const partial = (options ?? {}) as CreateStylesInput;
+  const { layers, tokenLayer: tokenLayerHint, utils, ...namingPartial } = partial;
 
   if (process.env.NODE_ENV !== 'production' && tokenLayerHint !== undefined && !layers) {
     console.warn(
@@ -363,6 +397,16 @@ export function createStyles(options?: CreateStylesInput): StylesApi | StylesApi
 
   const cascadeLayers = layers ? resolveCascadeLayers(layers, namingPartial.scopeId) : undefined;
   const classNaming = mergeClassNaming({ ...namingPartial, cascadeLayers });
+
+  if (utils !== undefined) {
+    if (classNaming.cascadeLayers) {
+      return createStylesWithUtilsLayered(utils, classNaming) as StylesWithUtilsApiLayered<
+        StyleUtils,
+        string
+      >;
+    }
+    return createStylesWithUtils(utils, classNaming) as StylesWithUtilsApi<StyleUtils>;
+  }
 
   return buildStylesRuntimeApi(classNaming) as StylesApi | StylesApiWithLayers<string>;
 }
@@ -567,10 +611,12 @@ function createStylesWithUtilsLayered<U extends StyleUtils>(
     has: hasNested,
     is: isNested,
     where: whereNested,
-    class: (name, properties, options) =>
+    class: (name: string, properties: CSSPropertiesWithUtils<U>, options: LayerOption<string>) =>
       createClass(classNaming, name, apply(properties), options.layer),
-    hashClass: (properties, options) =>
-      createHashClass(classNaming, apply(properties), options.label, options.layer),
+    hashClass: (
+      properties: CSSPropertiesWithUtils<U>,
+      options: LayerOption<string> & { label?: string },
+    ) => createHashClass(classNaming, apply(properties), options.label, options.layer),
     component: component as unknown as LayeredComponentFnWithUtils<string>,
     compose,
   };

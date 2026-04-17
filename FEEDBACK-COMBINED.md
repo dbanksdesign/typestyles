@@ -18,7 +18,7 @@ This section reconciles the **original feedback** (written against an older API 
 | Zero-runtime / build extraction                                                        | **Partial** — `@typestyles/vite` and **`buildTypestylesForNext({ root })`** share convention discovery (`@typestyles/build-runner`); **`withTypestyles`** mirrors prod/runtime behavior; `collectStylesFromModules` for custom pipelines |
 | `@property` on **token leaves** + `styles.property`                                    | **Partial** — component-internal vars via `styles.component(ns, (ctx) => …)` with `ctx.var` / `ctx.vars` and `{ name, var }`; token leaf refs are still largely `var(--…)` strings in types                                              |
 | `compose` / `tokens.use` stricter typing                                               | **Open**                                                                                                                                                                                                                                 |
-| `withUtils` vs global `registerUtils`                                                  | **Open**                                                                                                                                                                                                                                 |
+| `withUtils` vs per-instance `createStyles({ utils })`                                  | **Shipped** — prefer `createStyles({ utils })`; no global `registerUtils` in the library                                                                                                                                                 |
 | Namespace duplicate → hard error everywhere                                            | **Partial** — duplicate `styles.class` throws in dev; `styles.component` duplicate handling favors **HMR-safe invalidation** in dev rather than always throwing                                                                          |
 
 The **Summary** table at the end includes a **Status** column aligned with this snapshot.
@@ -888,37 +888,30 @@ color.ensureContrast('#0066ff', '#fff', 'AA'); // → adjusted color meeting WCA
 
 ---
 
-### 4.2 Clean Up `styles.withUtils` — Register Utils Globally
+### 4.2 Clean Up `styles.withUtils` — Per-instance utils via `createStyles`
 
-**Status: Open** — `styles.withUtils` remains a **parallel** API surface.
+**Status: Shipped** — **`createStyles({ utils })`** attaches shorthand expanders to a single styles instance (same runtime as `createStylesWithUtils` / `styles.withUtils`, no global registration).
 
-**Problem:** `styles.withUtils` creates a parallel API universe. You end up with two style APIs in your codebase and utils-aware styles don't compose with the default `styles` instance.
+**Problem (historical):** `styles.withUtils` alone created a parallel API: you either used the utils-aware object or the default `styles`, not both on one instance.
 
-**Current (parallel universe):**
-
-```ts
-const s = styles.withUtils({ marginX: (v) => ({ marginLeft: v, marginRight: v }) });
-
-// You must choose: use `s.class` / `s.component` (has utils) or `styles.*` (no utils)
-s.class('card', { marginX: '16px' }); // ✓ works
-styles.class('card', { marginX: '16px' }); // ✗ marginX not recognized
-```
-
-**Desired:**
+**Recommended:**
 
 ```ts
-// Register utils once, globally (or per-instance if using createStyles)
-import { styles, registerUtils } from 'typestyles';
+import { createStyles } from 'typestyles';
 
-registerUtils({
-  marginX: (v) => ({ marginLeft: v, marginRight: v }),
-  marginY: (v) => ({ marginTop: v, marginBottom: v }),
-  size: (v) => ({ width: v, height: v }),
+export const styles = createStyles({
+  scopeId: 'my-app',
+  utils: {
+    marginX: (v) => ({ marginLeft: v, marginRight: v }),
+    marginY: (v) => ({ marginTop: v, marginBottom: v }),
+    size: (v) => ({ width: v, height: v }),
+  },
 });
 
-// Now all styles.class / styles.component calls on that instance have utils
-styles.component('card', { base: { marginX: '16px' } }); // ✓ just works (aspirational API)
+styles.component('card', { base: { marginX: '16px' } }); // ✓
 ```
+
+**Still supported:** `styles.withUtils({ … })` on the default export when you want utils without a custom `createStyles` — optional; there is **no** `registerUtils` global (avoids side effects on import).
 
 ---
 
@@ -1154,7 +1147,7 @@ Statuses mirror the [Implementation snapshot](#implementation-snapshot-keep-this
 | **12**   | 3.1 Fix `compose` type safety                                                                             | Medium    | Medium                                              | Open    |
 | **13**   | 3.2 Fix `tokens.use` type safety                                                                          | Low       | Medium                                              | Open    |
 | **14**   | 4.1 Rethink color API                                                                                     | Low       | Low-Medium                                          | Open    |
-| **15**   | 4.2 Global utils registration                                                                             | Medium    | Medium                                              | Open    |
+| **15**   | 4.2 Per-instance utils (`createStyles({ utils })`; no global `registerUtils`)                             | Medium    | Medium                                              | Shipped |
 | **16**   | 2.2 `@property`, `.name`/`.var`, `styles.property`, component internal vars (fn config + object overload) | Medium    | Medium                                              | Partial |
 | **17**   | 2.3 Container queries                                                                                     | Low       | Medium — may already work, needs docs               | Shipped |
 | **18**   | 2.4 `:has()/:is()/:where()` docs                                                                          | Low       | Low-Medium                                          | Shipped |
