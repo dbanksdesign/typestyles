@@ -104,6 +104,10 @@ export interface WithTypestylesExtractOptions {
    * Pair with a global stylesheet from {@link buildTypestylesForNext}.
    */
   disableClientRuntime?: boolean;
+  /**
+   * Project root used for module resolution (e.g. loading `webpack`). Defaults to `process.cwd()`.
+   */
+  root?: string;
 }
 
 export interface WithTypestylesOptions extends WithTypestylesExtractOptions {
@@ -130,9 +134,7 @@ export function withTypestyles(
     return nextConfig;
   }
 
-  const { root: _, ...extractOpts } = options;
-  void _;
-  return withTypestylesExtract(nextConfig, extractOpts);
+  return withTypestylesExtract(nextConfig, options);
 }
 
 /**
@@ -148,6 +150,7 @@ export function withTypestylesExtract(
   options: WithTypestylesExtractOptions = {},
 ): NextConfig {
   const disableClientRuntime = options.disableClientRuntime !== false;
+  const projectRoot = options.root ?? process.cwd();
 
   return {
     ...nextConfig,
@@ -169,7 +172,7 @@ export function withTypestylesExtract(
 
       if (disableClientRuntime && !context.isServer) {
         try {
-          const require = createRequire(join(process.cwd(), 'package.json'));
+          const require = createRequire(join(projectRoot, 'package.json'));
           const webpackLib = require('webpack') as WebpackWithDefinePlugin;
           nextWebpack.plugins.push(
             new webpackLib.DefinePlugin({

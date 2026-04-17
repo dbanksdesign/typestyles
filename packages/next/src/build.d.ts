@@ -23,6 +23,7 @@ export declare function buildTypestylesForNext(
 
 export interface WithTypestylesExtractOptions {
   disableClientRuntime?: boolean;
+  root?: string;
 }
 
 export interface WithTypestylesOptions extends WithTypestylesExtractOptions {
