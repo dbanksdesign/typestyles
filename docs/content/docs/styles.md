@@ -165,36 +165,41 @@ cx(base, isElevated && elevated, customClassName);
 
 ## Utility shortcuts
 
-Use `styles.withUtils()` to define reusable shorthand properties (similar to Stitches `utils`).
+Define reusable shorthand properties (similar to Stitches `utils`) on your **`createStyles`** instance so class names, scope, and layers stay on one API — no global registration.
 
 ```ts
-import { styles } from 'typestyles';
+import { createStyles } from 'typestyles';
 
-const s = styles.withUtils({
-  marginX: (value: string | number) => ({
-    marginLeft: value,
-    marginRight: value,
-  }),
-  paddingY: (value: string | number) => ({
-    paddingTop: value,
-    paddingBottom: value,
-  }),
-  size: (value: string | number) => ({
-    width: value,
-    height: value,
-  }),
+const styles = createStyles({
+  scopeId: 'my-app',
+  utils: {
+    marginX: (value: string | number) => ({
+      marginLeft: value,
+      marginRight: value,
+    }),
+    paddingY: (value: string | number) => ({
+      paddingTop: value,
+      paddingBottom: value,
+    }),
+    size: (value: string | number) => ({
+      width: value,
+      height: value,
+    }),
+  },
 });
 
-const avatar = s.class('avatar', {
+const avatar = styles.class('avatar', {
   size: 40,
   marginX: 8,
 });
 
-const button = s.component('button', {
+const button = styles.component('button', {
   base: { paddingY: 8 },
   compact: { paddingY: 4 },
 });
 ```
+
+The returned API is utility-aware (`class`, `hashClass`, `component` accept your utility keys). If you already use the default `import { styles } from 'typestyles'`, you can instead call **`styles.withUtils({ … })`** to get the same behavior from a second object — prefer **`createStyles({ utils })`** when you want a single exported styles instance.
 
 Utility keys are fully typed from your utility definitions and can be mixed with normal CSS properties.
 

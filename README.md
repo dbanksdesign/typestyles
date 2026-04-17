@@ -407,6 +407,8 @@ export const styles = createStyles({ scopeId: 'my-ui', mode: 'hashed', prefix: '
 export const tokens = createTokens({ scopeId: 'my-ui' });
 ```
 
+Pass optional **`utils`** on `createStyles` to attach shorthand style expanders (same idea as `styles.withUtils` on the default export) on that single instance.
+
 The default `import { styles, tokens } from 'typestyles'` remains `createStyles()` / `createTokens()` with default options for single-app use.
 
 ### `tokens.use(namespace)`

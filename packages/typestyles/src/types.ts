@@ -35,7 +35,7 @@ export interface CSSProperties extends CSS.Properties<CSSValue> {
 }
 
 /**
- * Utility function map used by styles.withUtils().
+ * Utility function map used by `createStyles({ utils })` and `styles.withUtils()`.
  * Each key becomes an extra style property that expands into CSSProperties.
  */
 type BivariantCallback<Arg, Ret> = {

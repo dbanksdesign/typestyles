@@ -28,7 +28,7 @@ export const styles = createStyles({
 });
 ```
 
-Use `styles.component`, `styles.class`, `styles.hashClass`, and `styles.withUtils` from that object. The default `import { styles } from 'typestyles'` is simply `createStyles()` with default options—fine for apps that own the whole page.
+Use `styles.component`, `styles.class`, and `styles.hashClass` from that object. For [utility shortcuts](/docs/styles#utility-shortcuts), pass **`utils`** into `createStyles` (or call `styles.withUtils(…)` on the default export). The default `import { styles } from 'typestyles'` is simply `createStyles()` with default options—fine for apps that own the whole page.
 
 **Tokens and themes** use the same idea: **`createTokens({ scopeId })`** so custom properties and theme classes do not collide when multiple bundles share one document:
 

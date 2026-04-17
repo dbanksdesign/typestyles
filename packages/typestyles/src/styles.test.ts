@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { createClass, createHashClass, compose, createStylesWithUtils } from './styles';
+import {
+  createClass,
+  createHashClass,
+  compose,
+  createStyles,
+  createStylesWithUtils,
+} from './styles';
 import { cx } from './index';
 import { createComponent } from './component';
 import { defaultClassNamingConfig } from './class-naming';
@@ -168,6 +174,26 @@ describe('createStylesWithUtils', () => {
   beforeEach(() => {
     reset();
     registeredNamespaces.clear();
+  });
+
+  it('createStyles({ utils }) matches createStylesWithUtils', () => {
+    const viaFactory = createStyles({
+      utils: {
+        marginX: (value: string | number) => ({ marginLeft: value, marginRight: value }),
+      },
+    });
+
+    const cls = viaFactory.class('util-create-styles', { marginX: 12 });
+    expect(cls).toBe('util-create-styles');
+    flushSync();
+
+    const style = document.getElementById('typestyles') as HTMLStyleElement;
+    const rule = Array.from(style.sheet?.cssRules ?? []).find(
+      (r) => r instanceof CSSStyleRule && r.selectorText === '.util-create-styles',
+    ) as CSSStyleRule;
+
+    expect(rule.style.getPropertyValue('margin-left')).toBe('12px');
+    expect(rule.style.getPropertyValue('margin-right')).toBe('12px');
   });
 
   it('expands utility keys in class()', () => {

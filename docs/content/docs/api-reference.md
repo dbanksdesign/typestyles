@@ -24,7 +24,7 @@ per package or micro-frontend for isolation.
 - `styles.containerRef(label)`: Readable `{scopeId}-{label}` or `{prefix}-{label}` `container-name` (see `createContainerRef`)
 - `styles.hashClass(properties, label?)`: Create a deterministic hashed class
 - `styles.compose(...fns)`: Compose multiple style functions
-- `styles.withUtils(utils)`: Create utility-aware styles API
+- `styles.withUtils(utils)`: Create a utility-aware styles API (prefer `createStyles({ utils })` for a single instance)
 - `styles.classNaming`: Read-only resolved naming config for the default `styles` instance
 
 **Named exports (same behavior as `styles.*`):** `container`, `createContainerRef`, `atRuleBlock`, `has`, `is`, `where`.
@@ -33,7 +33,7 @@ per package or micro-frontend for isolation.
 
 ### `createStyles(options?)`
 
-Returns a new style API (same shape as `styles`) with its own class naming config. Pass `Partial<ClassNamingConfig>`: `mode` (`'semantic' | 'hashed' | 'atomic'`), `prefix`, `scopeId`. Optionally pass **`layers`** (tuple or `{ order, prependFrameworkLayers? }`) to enable **`@layer`** output; then every **`class`**, **`hashClass`**, and **`component`** call must include a third argument **`{ layer: '…' }`** (see [Cascade layers](/docs/cascade-layers)).
+Returns a new style API (same shape as `styles`) with its own class naming config. Pass `Partial<ClassNamingConfig>`: `mode` (`'semantic' | 'hashed' | 'atomic'`), `prefix`, `scopeId`. Optionally pass **`utils`** — a map of shorthand expanders — to get a utility-aware API in one step (same typing as `styles.withUtils(…)`; see [Styles](/docs/styles#utility-shortcuts)). Optionally pass **`layers`** (tuple or `{ order, prependFrameworkLayers? }`) to enable **`@layer`** output; then every **`class`**, **`hashClass`**, and **`component`** call must include a third argument **`{ layer: '…' }`** (see [Cascade layers](/docs/cascade-layers)).
 
 The default `import { styles } from 'typestyles'` is `createStyles()` with default options.
 
