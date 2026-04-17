@@ -1,10 +1,6 @@
 import { resolve as resolvePath } from 'node:path';
 import type { Plugin, ResolvedConfig, UserConfig } from 'vite';
-import {
-  discoverDefaultExtractModules,
-  DEFAULT_EXTRACT_MODULE_CANDIDATES,
-  runTypestylesBuild,
-} from '@typestyles/build-runner';
+import { discoverDefaultExtractModules, runTypestylesBuild } from '@typestyles/build-runner';
 
 /** Re-export shared convention discovery (same paths as `@typestyles/next/build`). */
 export {
