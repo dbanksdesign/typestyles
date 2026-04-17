@@ -36,7 +36,7 @@ Typestyles occupies a unique position in the CSS-in-JS landscape:
 
 ### 2. Zero-Runtime Build Option
 
-- **Goal**: Optional "no runtime CSS-in-JS" mode that still uses the same `styles`, `tokens`, and `keyframes` APIs. **Shipped** for Vite/Rollup via `@typestyles/build-runner` + plugin `extract`; Next via `@typestyles/next/build` + `withTypestylesExtract`.
+- **Goal**: Optional "no runtime CSS-in-JS" mode that still uses the same `styles`, `tokens`, and `keyframes` APIs. **Shipped** for Vite/Rollup via `@typestyles/build-runner` + plugin `extract`; Next via `@typestyles/next/build` (`buildTypestylesForNext`, **`withTypestyles`** / `withTypestylesExtract`) sharing the same convention entry discovery.
 - **Package**: `@typestyles/build` for build-time CSS collection (Node API); integrations call into `@typestyles/build-runner` for bundler pipelines.
 - **Output**:
   - Generates static CSS files at build time (like vanilla-extract).
@@ -44,8 +44,8 @@ Typestyles occupies a unique position in the CSS-in-JS landscape:
 - **Integration – Vite** (done)
   - `mode`: `"runtime"` | `"build"` | `"hybrid"`; with `extract.modules` set, `mode` defaults to `"build"` so `vite dev` keeps HMR/runtime and `vite build` emits CSS + disables client injection.
 - **Integration – Next.js** (done)
-  - `@typestyles/next/build` provides `buildTypestylesForNext`, `withTypestylesExtract`, and Turbopack-safe `NEXT_PUBLIC_TYPESTYLES_RUNTIME_DISABLED`.
-  - Recommended: apply `withTypestylesExtract` only in production; import generated CSS from the root layout.
+  - `@typestyles/next/build` provides `buildTypestylesForNext` (convention discovery + default `app/typestyles.css`), **`withTypestyles`** (production + convention file → `withTypestylesExtract`; dev unchanged), `withTypestylesExtract`, and Turbopack-safe `NEXT_PUBLIC_TYPESTYLES_RUNTIME_DISABLED`.
+  - Recommended: **`withTypestyles`** in `next.config`; run extraction before `next build`; import generated CSS from the root layout.
 - **Motivation**
   - Addresses the "runtime overhead" concern that led companies to abandon Emotion/styled-components.
   - Keeps incremental adoption: projects can start in runtime mode and later switch specific routes or the whole app to build mode.

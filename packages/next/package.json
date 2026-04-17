@@ -73,6 +73,9 @@
       "optional": true
     }
   },
+  "dependencies": {
+    "@typestyles/build-runner": "workspace:*"
+  },
   "devDependencies": {
     "eslint": "^9.39.2",
     "vitest": "^3.0.0",

@@ -3,19 +3,11 @@ import react from '@vitejs/plugin-react';
 import typestyles from '@typestyles/vite';
 
 /**
- * With `extract` set, the plugin defaults to mode `"build"`: runtime injection + HMR during
- * `vite dev`, the same extracted CSS served at `typestyles.css` for the index.html link, static
- * asset + zero client injection on `vite build`.
+ * With `src/typestyles-entry.ts` present, `@typestyles/vite` discovers it and defaults to
+ * `mode: "build"`: runtime + HMR during `vite dev`, extracted CSS at `typestyles.css`, zero client
+ * injection on `vite build`. Override with `extract` / `mode` when you need a different entry or
+ * filename.
  */
 export default defineConfig({
-  plugins: [
-    react(),
-    typestyles({
-      extract: {
-        /** Design system + app shell (see `src/typestyles-entry.ts`). */
-        modules: ['src/typestyles-entry.ts'],
-        fileName: 'typestyles.css',
-      },
-    }),
-  ],
+  plugins: [react(), typestyles()],
 });

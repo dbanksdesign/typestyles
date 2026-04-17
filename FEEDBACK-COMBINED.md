@@ -1,45 +1,68 @@
 # TypeStyles: Combined Feedback & Prioritized Improvements
 
-This document synthesizes three independent expert reviews into a single prioritized action plan. Items are grouped into tiers by impact and urgency. Each item includes concrete DX examples showing the current pain and the desired outcome.
+This document synthesizes three independent expert reviews into a single prioritized action plan. Items are grouped into tiers by impact and urgency. Each item includes concrete DX examples showing the original pain points and target outcomes. **For authoritative API details**, use the repo **`README`**, **`CHANGELOG`**, and the **docs site**; this file is a **spec + history** aligned to the [implementation snapshot](#implementation-snapshot-keep-this-doc-trustworthy) below.
+
+## Implementation snapshot (keep this doc trustworthy)
+
+This section reconciles the **original feedback** (written against an older API surface) with the **current library** as of early 2026. Unless a subsection explicitly says **Open** or **Partial**, treat “Current” / “Problem” blocks as **historical context** for why the item was filed—not a claim about today’s behavior.
+
+| Theme                                                                                  | Status                                                                                                                                                                                                                                   |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Single variant API (`styles.create` vs `styles.component`)                             | **Shipped** — `styles.create` was **removed**; **`styles.component`** is the only variant/class-recipe API. Examples below use `styles.component` where they describe intended usage.                                                    |
+| Built-in `cx()`                                                                        | **Shipped**                                                                                                                                                                                                                              |
+| Nested `tokens.create` + nested theme overrides                                        | **Shipped** (`flattenTokenEntries`, `ThemeConfig` / `createTheme` with nested `base`, etc.)                                                                                                                                              |
+| Dark / media / attribute themes without `insertRules`                                  | **Shipped** (`createDarkMode`, `when`, `colorMode`, expanded `createTheme`)                                                                                                                                                              |
+| Per-instance APIs (`createStyles`, `createTokens`, `createTypeStyles`, `createGlobal`) | **Shipped** — global `configureClassNaming` / `resetClassNaming` removed                                                                                                                                                                 |
+| Cascade `@layer` + factory `layers` / `tokenLayer`                                     | **Shipped**                                                                                                                                                                                                                              |
+| Container queries + relational pseudo helpers                                          | **Shipped** (helpers + docs; raw `@container` / `@` keys still work)                                                                                                                                                                     |
+| Zero-runtime / build extraction                                                        | **Partial** — `@typestyles/vite` and **`buildTypestylesForNext({ root })`** share convention discovery (`@typestyles/build-runner`); **`withTypestyles`** mirrors prod/runtime behavior; `collectStylesFromModules` for custom pipelines |
+| `@property` on **token leaves** + `styles.property`                                    | **Partial** — component-internal vars via `styles.component(ns, (ctx) => …)` with `ctx.var` / `ctx.vars` and `{ name, var }`; token leaf refs are still largely `var(--…)` strings in types                                              |
+| `compose` / `tokens.use` stricter typing                                               | **Open**                                                                                                                                                                                                                                 |
+| `withUtils` vs global `registerUtils`                                                  | **Open**                                                                                                                                                                                                                                 |
+| Namespace duplicate → hard error everywhere                                            | **Partial** — duplicate `styles.class` throws in dev; `styles.component` duplicate handling favors **HMR-safe invalidation** in dev rather than always throwing                                                                          |
+
+The **Summary** table at the end includes a **Status** column aligned with this snapshot.
 
 ---
 
 ## Tier 1: Architectural / Structural (Do These First)
 
-These are foundational issues that affect every user and constrain the library's growth. They should be addressed before adding new features.
+These were foundational issues that affected every user and constrained growth. **Most of Tier 1 is now shipped** (see the snapshot); treat subsections as **history + remaining gaps** (for example zero-runtime defaults), not a list of blockers in the current codebase.
 
 ---
 
-### 1.1 Unify `styles.create` and `styles.component` Into a Single API
+### 1.1 Single variant API — `styles.component` only
 
-**Problem:** Two APIs solve the same problem with different call signatures, different behavior around `base` styles, and incompatible composition. Every new user hits the "which one do I use?" question, and the design-system example bypasses both entirely.
+**Status: Shipped** (see [Implementation snapshot](#implementation-snapshot-keep-this-doc-trustworthy)).
 
-**Current (confusing):**
+**Original problem:** Two APIs (`styles.create` and `styles.component`) solved the same problem with different call signatures, different behavior around `base` styles, and incompatible composition. Every new user hit the “which one do I use?” question, and some design-system examples bypassed both.
+
+**Historical APIs (removed / superseded):**
 
 ```ts
-// API 1: styles.create — flat varargs, base NOT auto-applied
+// Former styles.create — flat varargs, base NOT auto-applied (removed from the library)
 const button = styles.create('button', {
   base: { padding: '8px 16px' },
   primary: { backgroundColor: '#0066ff' },
 });
-button('primary');          // BUG: missing base styles!
+button('primary'); // BUG: missing base styles!
 button('base', 'primary'); // correct, but easy to forget
 
-// API 2: styles.component — object args, base IS auto-applied
+// styles.component — object config, base auto-applied (this is the surviving API)
 const button = styles.component('button', {
   base: { padding: '8px 16px' },
   variants: { intent: { primary: { backgroundColor: '#0066ff' } } },
 });
 button({ intent: 'primary' }); // base auto-applied ✓
 
-// API 3: what people actually do (design-system example)
+// What some codebases still do for full control (still valid)
 const buttonBase = styles.class('ds-button', { ... });
 const buttonPrimary = styles.hashClass({ ... }, 'ds-button-primary');
 export const button = { base: buttonBase, primary: buttonPrimary } as const;
-// ...then hand-roll a cx() to combine them
+// ... combine with built-in cx() from 'typestyles'
 ```
 
-**Desired:**
+**Target DX (matches shipped direction):**
 
 ```ts
 // One API. Base always auto-applied. Variants are typed dimensions.
@@ -70,19 +93,21 @@ const card = styles.component('card', {
 card(); // "card"
 ```
 
-**Key decisions:**
+**Also shipped:** `styles.component(namespace, (ctx) => config)` for component-scoped internal custom properties (`ctx.var` / `ctx.vars`) — see §2.2.1.
 
-- `styles.create` should absorb `styles.component`'s behavior (auto-apply base, typed variant objects, defaultVariants, compoundVariants)
-- `styles.component` should be the only function, remove `styles.create`
-- The old varargs `button('base', 'primary')` calling convention should be removed
-- `styles.class` stays as-is for single standalone classes
-- `styles.hashClass` stays as an escape hatch
+**Resolution (original “key decisions”):**
+
+- **`styles.component` is the only variant/recipe constructor** — `styles.create` was removed (reviewers were agnostic on the final name; the behavior landed under `component`).
+- Varargs `button('base', 'primary')` is gone with `styles.create`.
+- **`styles.class`** stays for single standalone classes; **`styles.hashClass`** remains an escape hatch.
 
 ---
 
 ### 1.2 Ship a Built-in `cx()` Utility
 
-**Problem:** Every project needs a class-name joining utility. The design-system example hand-rolls one. The varargs filtering in `styles.create` goes halfway but doesn't work with `styles.class`, `styles.hashClass`, or external class strings.
+**Status: Shipped** — `import { cx } from 'typestyles'`.
+
+**Problem:** Every project needs a class-name joining utility. The design-system example hand-rolls one. Older varargs-style composition did not replace a real `cx` for combining `styles.class`, `styles.hashClass`, and external class strings.
 
 **Current (hand-rolled in every project):**
 
@@ -117,9 +142,11 @@ This is ~5 lines of code. Its absence makes the library feel incomplete dispropo
 
 ### 1.3 Make the Token System Support Nested Objects
 
-**Problem:** Real design systems have hierarchically structured tokens. The current flat `Record<string, string>` forces users to build infrastructure the library should provide. The design-system example had to build `buildColorRefs` and `flattenColorValues` as workarounds.
+**Status: Shipped** — nested `tokens.create` trees, proxy access, and `flattenTokenEntries` for consumers who need the same flattening rules.
 
-**Current (flat only):**
+**Problem:** Real design systems have hierarchically structured tokens. A flat-only `Record<string, string>` forced users to build infrastructure the library should provide. The design-system example once used ad-hoc `buildColorRefs` / `flattenColorValues` workarounds.
+
+**Previously (flat only):**
 
 ```ts
 // Can only do flat tokens
@@ -163,9 +190,11 @@ color.brand.hover; // → "var(--color-brand-hover)"
 
 ### 1.4 Make `createTheme` Accept the Same Nested Structure as `tokens.create`
 
-**Problem:** `tokens.createTheme` only accepts `Record<namespace, Record<key, value>>` — flat two levels. If tokens are nested (as they should be per 1.3), you can't use `createTheme` without a manual flattening bridge.
+**Status: Shipped** — nested overrides align with nested tokens; the public shape is a **`ThemeConfig`** (e.g. token values under `base`, optional `modes` / `colorMode`, etc.). The short sketch below omits that wrapper for readability—see the package docs and `CHANGELOG` for the exact contract.
 
-**Current (inconsistent):**
+**Problem:** `tokens.createTheme` used to accept only shallow namespace maps. If tokens are nested (per 1.3), authors needed a manual flattening bridge.
+
+**Previously (inconsistent):**
 
 ```ts
 // Tokens are structured
@@ -183,21 +212,26 @@ const flatDark = flattenColorValues({ text: { primary: '#e0e0e0' } });
 tokens.createTheme('dark', { color: flatDark });
 ```
 
-**Desired:**
+**Desired (conceptual — nested overrides):**
 
 ```ts
 tokens.createTheme('dark', {
-  color: {
-    text: { primary: '#e0e0e0', secondary: '#a1a1aa' },
-    background: { surface: '#1a1a2e', subtle: '#262640' },
+  base: {
+    color: {
+      text: { primary: '#e0e0e0', secondary: '#a1a1aa' },
+      background: { surface: '#1a1a2e', subtle: '#262640' },
+    },
   },
+  // …plus modes / colorMode / conditions per shipped ThemeConfig
 });
-// → .theme-dark { --color-text-primary: #e0e0e0; --color-background-surface: #1a1a2e; ... }
+// → theme surface + CSS custom properties reflecting nested keys
 ```
 
 ---
 
 ### 1.5 Add First-Class Dark Mode / Media-Query Theme Support
+
+**Status: Shipped** — `tokens.createDarkMode`, `tokens.when`, `tokens.colorMode`, and conditional/multi-mode `createTheme` without requiring `insertRules` for the common cases.
 
 **Problem:** The design-system example had to import `insertRules` (an internal API) to support `@media (prefers-color-scheme: dark)`. Dark mode via OS preference is table stakes, not an advanced feature.
 
@@ -233,19 +267,23 @@ tokens.createMediaTheme('@media (prefers-color-scheme: dark)', {
   color: { text: { primary: '#e0e0e0' } },
 });
 
-// Option C: convenience shorthand
-tokens.createDarkMode({
+// Option C: convenience shorthand (shipped shape — name + overrides)
+tokens.createDarkMode('dark', {
   color: { text: { primary: '#e0e0e0' } },
 });
 ```
+
+**Shipped vs sketch:** Option C matches **`createDarkMode(name, overrides)`**. Option A/B illustrate intent; the real surface is **`tokens.createTheme`** with **`ThemeConfig`** plus **`tokens.when`** / **`tokens.colorMode`** (see docs and `CHANGELOG`), not necessarily those exact function names.
 
 ---
 
 ### 1.6 Make the API Instanceable, Not Global Singleton
 
-**Problem:** `configureClassNaming()` is a global mutable singleton. This breaks library authors shipping TypeStyles-based packages, micro-frontends sharing a page, and testing (requires `resetClassNaming()` cleanup).
+**Status: Shipped** — `createStyles`, `createTokens`, `createTypeStyles`, `createGlobal`; default `import { styles, tokens } from 'typestyles'` are pre-built instances.
 
-**Current (global mutation):**
+**Problem:** `configureClassNaming()` was a global mutable singleton. That broke library authors shipping TypeStyles-based packages, micro-frontends sharing a page, and testing (required `resetClassNaming()` cleanup).
+
+**Previously (global mutation):**
 
 ```ts
 // Package A
@@ -283,11 +321,13 @@ import { styles, tokens } from 'typestyles';
 
 ### 1.7 Zero-Runtime Should Be the Default (or at Least Equal)
 
-**Problem:** Runtime CSS injection is the default and only working mode. Zero-runtime extraction is on the roadmap but not shipped. This is leading with the library's weakest foot — runtime injection bypasses browser CSS caching, parallel parsing, and is exactly what CSS-platform advocates are trying to escape.
+**Status: Shipped (Vite + Next)** — **`@typestyles/build-runner`** defines one ordered list of convention paths (including `styles/typestyles-entry.ts` for typical Next layouts). **`@typestyles/vite`** defaults to **`mode: 'build'`** when an entry resolves; **`buildTypestylesForNext({ root })`** discovers the same entries and defaults output to **`app/typestyles.css`** / manifest; **`withTypestyles`** applies **`withTypestylesExtract`** in production when an entry exists (dev unchanged). Opt out with `mode: 'runtime'` (Vite) or **`withTypestylesExtract`** only when you want injection disabled without convention detection.
 
-**Current:** Runtime-only. `@typestyles/build` is mentioned in the roadmap but not implemented.
+**Problem:** Runtime CSS injection as the only story bypasses browser CSS caching, parallel parsing, and is exactly what CSS-platform advocates are trying to escape unless a **build** path is first-class.
 
-**Desired:** Ship zero-runtime extraction as a first-class mode in `@typestyles/vite` and `@typestyles/next`. The API stays identical — only the output changes:
+**Previously:** Runtime-only; extraction was roadmap-only.
+
+**Target:** Zero-runtime (or hybrid) extraction as a first-class mode in `@typestyles/vite` and `@typestyles/next`. Application **TypeScript APIs stay the same** — only how CSS is emitted changes:
 
 ```ts
 // vite.config.ts
@@ -308,19 +348,21 @@ This is already acknowledged as high priority in the roadmap. Elevating it here 
 
 ## Tier 2: Modern CSS Support (Critical for 2025+ Relevance)
 
-These features are essential for a library that claims to embrace the web platform.
+These features are essential for a library that claims to embrace the web platform. **Large portions are shipped** (`@layer`, container helpers, relational pseudos, partial `@property` via component vars); **§2.2 token-level** and **§2.5 `@scope`** remain the main open gaps.
 
 ---
 
 ### 2.1 `@layer` (Cascade Layers) Support
 
+**Status: Shipped** — opt-in `layers` + `tokenLayer` on `createStyles` / `createTokens` / `createTypeStyles`; when enabled, `class` / `hashClass` / `component` take a **`layer`** option (typed from the tuple).
+
 **Problem:** All TypeStyles-generated classes compete at 0-1-0 specificity. There's no way to declare base vs. component vs. utility layers, and runtime injection can't guarantee layer declaration order across code-split bundles.
 
 **Why it matters:** `@layer` is the platform-native answer to specificity management. Without it, TypeStyles forces users into specificity wars when integrating with existing CSS.
 
-**Desired (revised DX):** Layer order should be declared once, at the same place the style API is constructed — not via a separate `layers.declare()` that is easy to misplace, duplicate, or call in the wrong order relative to imports. **Default:** if `layers` is omitted, TypeStyles emits **no** `@layer` rules (flat cascade, same as today). Opting in is explicit: pass a `layers` tuple and get **literal-union typing** for every `layer` option on `styles.create` / `styles.component`.
+**Desired (revised DX):** Layer order should be declared once, at the same place the style API is constructed — not via a separate `layers.declare()` that is easy to misplace, duplicate, or call in the wrong order relative to imports. **Default:** if `layers` is omitted, TypeStyles emits **no** `@layer` rules (flat cascade, same as today). Opting in is explicit: pass a `layers` tuple and get **literal-union typing** for every `layer` option on **`styles.class`**, **`styles.hashClass`**, and **`styles.component`**.
 
-**Why consider `createTypeStyles`:** Today `createStyles` and `createTokens` are separate entry points; authors repeat `scopeId` (and any future cross-cutting options like layers, `@property` defaults, or build targets). Tokens that compile to CSS (`:root`, `@property`, global base styles) may need to live in a specific layer (e.g. `tokens`) so utilities and components can override them predictably. A single factory keeps **one config object**, guarantees **one scope**, and lets the runtime/build plugin emit **one ordered `@layer` preamble** that covers both token CSS and class rules.
+**Why `createTypeStyles`:** `createStyles` and `createTokens` remain separate entry points for minimal setups, but **`createTypeStyles`** keeps **one shared `scopeId`** and shared **`layers` / `tokenLayer`** so token CSS (`:root`, themes) and class rules follow one stack. Tokens that compile to CSS may need to live in a specific layer (e.g. `tokens`) so utilities and components can override them predictably.
 
 ```ts
 import { createTypeStyles } from 'typestyles';
@@ -334,9 +376,9 @@ const { styles, tokens } = createTypeStyles({
 });
 
 // With layers enabled, `layer` is required on each style (typed union from the tuple).
-const reset = styles.create('reset', { base: { margin: 0, padding: 0 } }, { layer: 'reset' });
+const reset = styles.class('reset', { margin: 0, padding: 0 }, { layer: 'reset' });
 
-const button = styles.create(
+const button = styles.component(
   'button',
   {
     base: { padding: '8px 16px' },
@@ -355,7 +397,7 @@ const button = styles.create(
 `createStyles` / `createTokens` can remain as **narrow constructors** for styles-only or tokens-only use cases (no layers, or layers only where the implementation can still apply). Alternatively they become **thin aliases** over the same internal builder as `createTypeStyles` so behavior never diverges.
 
 ```ts
-// Explicitly no cascade layers: omit `layers` — no @layer in output, no `layer` on styles.create
+// Explicitly no cascade layers: omit `layers` — no @layer in output, no per-call `layer` option
 const { styles, tokens } = createTypeStyles({ scopeId: 'ds', mode: 'semantic' });
 ```
 
@@ -383,6 +425,8 @@ TypeStyles can sit between Panda’s “layers by convention” and Vanilla Extr
 
 ### 2.2 `@property` Registration for Typed Custom Properties
 
+**Status: Partial** — **`styles.component(..., (ctx) => …)`** with **`ctx.var` / `ctx.vars`** registers component-scoped properties and optional `@property`; token **leaves** are still primarily **`var(--…)` strings** in the type system (no universal `{ name, var }` on every token leaf yet); **`styles.property`** as described below is **not shipped**.
+
 **Problem:** Tokens are plain custom properties — you can't animate them, they don't have type safety in CSS, and they inherit by default. `@property` solves all of this and is the natural companion to a token system built on custom properties.
 
 **Additional requirements (not obvious from `@property` alone):**
@@ -393,7 +437,7 @@ TypeStyles can sit between Panda’s “layers by convention” and Vanilla Extr
 
 2. **`styles.property` for non-token usage** — Not every registered custom property belongs in the token/theme system (one-off component variables, experiments, third-party bridges). **`styles.property(options)`** registers `@property` + optional initial `:root` (or layer) value on the same `scopeId` as the style API, returns the same `{ name, var }` ref shape, and keeps naming consistent without `tokens.create`.
 
-**Desired:**
+**Desired (target end-state — `styles.property` + token leaf refs not fully shipped):**
 
 ```ts
 const color = tokens.create('color', {
@@ -417,7 +461,7 @@ const space = tokens.create('space', {
 // backgroundColor: color.primary.var
 
 // Declaration / transition contexts: use .name — never repeat the string literal.
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: {
     [color.primary.name]: '#0066ff',
     transition: `${color.primary.name} 0.3s ease`,
@@ -433,7 +477,7 @@ const lift = styles.property({
   initialValue: '0px',
 });
 // lift.name → e.g. '--{scope}-lift' (stable id, no collision across packages when scopeId is set)
-const surface = styles.create('surface', {
+const surface = styles.component('surface', {
   base: {
     [lift.name]: '4px',
     transition: `${lift.name} 0.2s ease`,
@@ -442,7 +486,7 @@ const surface = styles.create('surface', {
 });
 ```
 
-**Type / runtime note:** Today token refs are plain `var(--…)` strings, so they cannot serve as declaration keys. This item implies upgrading leaf refs to a small branded object (or tuple) with `toString()` → `var` for backward compatibility, plus explicit `.name` / `.var` for clarity.
+**Type / runtime note:** Token refs are still often plain `var(--…)` strings, so they **cannot** serve as declaration keys without the upgrade below. Fully branded leaf refs (`toString()` → `var`, plus explicit `.name` / `.var`) and **`styles.property`** remain **open** work; **`ctx.var`** covers the component-internal case.
 
 #### 2.2.1 Component-internal custom properties (`styles.component` sugar)
 
@@ -582,12 +626,14 @@ Prefer **overload A + B**: default **object** config for simple cases; **functio
 
 ### 2.3 First-Class Container Queries
 
-**Problem:** `@container` queries are fully supported in all browsers and are the preferred way to write responsive components. They're not mentioned in docs or examples.
+**Status: Shipped** (helpers such as **`styles.container`**, **`styles.containerRef`**, typed `@container` keys, and documentation — verify current doc titles under the docs site).
+
+**Problem:** `@container` queries are fully supported in all browsers and are the preferred way to write responsive components. They were under-documented relative to their importance.
 
 **Desired:**
 
 ```ts
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: {
     containerType: 'inline-size',
     padding: '16px',
@@ -600,14 +646,14 @@ const card = styles.create('card', {
 });
 
 // Named containers
-const sidebar = styles.create('sidebar', {
+const sidebar = styles.component('sidebar', {
   base: {
     containerType: 'inline-size',
     containerName: 'sidebar',
   },
 });
 
-const sidebarItem = styles.create('sidebar-item', {
+const sidebarItem = styles.component('sidebar-item', {
   base: {
     '@container sidebar (min-width: 300px)': {
       flexDirection: 'row',
@@ -616,18 +662,20 @@ const sidebarItem = styles.create('sidebar-item', {
 });
 ```
 
-If `@container` already works via raw nested `@` keys (like `@media` does), this needs documentation and typed support in the CSS properties interface.
+Raw nested `@container …` keys (like `@media`) also work; typed helpers reduce string duplication.
 
 ---
 
 ### 2.4 `:has()`, `:is()`, `:where()` Support and Documentation
 
-**Problem:** `:where()` is particularly important for libraries — it provides zero-specificity selectors that let consumers override without fighting. `:has()` is transformative for parent selectors. Neither is documented or actively encouraged.
+**Status: Shipped** — **`styles.has`**, **`styles.is`**, **`styles.where`** (and relational pseudo docs).
+
+**Problem:** `:where()` is particularly important for libraries — it provides zero-specificity selectors that let consumers override without fighting. `:has()` is transformative for parent selectors. They were under-documented relative to their power.
 
 **Desired:**
 
 ```ts
-const nav = styles.create('nav', {
+const nav = styles.component('nav', {
   base: {
     // :where() for low-specificity library defaults (easy to override)
     '&:where(.nav)': { display: 'flex', gap: '8px' },
@@ -647,12 +695,14 @@ At minimum, document that these work with `&` nesting. Ideally, add typed autoco
 
 ### 2.5 `@scope` Support (Forward-Looking)
 
+**Status: Open** — typically via raw nested at-rule keys in style objects unless/until dedicated helpers ship.
+
 **Problem:** `@scope` is the native solution to style encapsulation — the very problem CSS-in-JS exists to solve. A library that embraces the web platform should have a story for it.
 
 **Desired (at minimum):** Documentation acknowledging `@scope` and showing how to use it with TypeStyles' `@` nesting:
 
 ```ts
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: {
     '@scope (.card) to (.card-content)': {
       color: 'gray',
@@ -665,27 +715,29 @@ const card = styles.create('card', {
 
 ## Tier 3: API Cleanup & Type Safety
 
-These fix sharp edges in the current API that erode developer trust.
+These fix sharp edges that erode developer trust. Several items below are **still open** even though the dual `create` / `component` split is resolved.
 
 ---
 
 ### 3.1 Fix `styles.compose` Type Safety
 
-**Problem:** `compose` is silently lossy. Invalid variant names produce no type error and no runtime warning — just a missing class.
+**Status: Open** — `compose` exists; strict variant-key typing across composed callables is still aspirational.
 
-**Current (unsafe):**
+**Problem:** `compose` can be silently lossy. Invalid selections may produce no type error and no runtime warning — just a missing class.
+
+**Example (still unsafe today):**
 
 ```ts
-const layout = styles.create('layout', { flex: { display: 'flex' } });
-const spacing = styles.create('spacing', { padded: { padding: '16px' } });
+const layout = styles.component('layout', { flex: { display: 'flex' } });
+const spacing = styles.component('spacing', { padded: { padding: '16px' } });
 
 const composed = styles.compose(layout, spacing);
-composed('flex', 'padded', 'typo'); // 'typo' silently produces nothing — no error!
+composed({ flex: true, padded: true, typo: true }); // flat keys: wrong key may do nothing useful
 ```
 
-**Additionally:** `styles.component` results (object args) can't be composed with `styles.create` results (varargs). The two API branches are fundamentally incompatible in composition. Unifying the API (Tier 1.1) would also fix this.
+**Additionally:** Historically, `styles.component` results could not be composed with **varargs** `styles.create` results. That split is **gone**; remaining work is **typing + dev warnings** for `compose` itself.
 
-**Desired (after API unification):**
+**Desired:**
 
 ```ts
 const composed = styles.compose(layout, spacing);
@@ -696,6 +748,8 @@ const composed = styles.compose(layout, spacing);
 ---
 
 ### 3.2 Fix `tokens.use` Type Safety
+
+**Status: Open** — authors still rely on exporting `typeof` token trees or manual generics for strictness.
 
 **Problem:** `tokens.use` defaults to `Record<string, string>`, requiring manual type annotation. This defeats the purpose of a typed token system and will silently rot as token definitions change.
 
@@ -729,7 +783,7 @@ const color = tokens.use<ColorTokens>('color');
 
 ### 3.3 Improve Slots API Typing
 
-**Status:** Implemented. `styles.component` infers slot names from an inline `slots` array literal via a `const` type parameter (`Slots extends readonly string[]`); `as const` is not required. Destructuring and `()` return types use `Slots[number]` keys, so unknown properties are type errors.
+**Status: Shipped** — `styles.component` infers slot names from an inline `slots` array literal via a `const` type parameter (`Slots extends readonly string[]`); `as const` is not required. Destructuring and `()` return types use `Slots[number]` keys, so unknown properties are type errors.
 
 ```ts
 const dialog = styles.component('dialog', {
@@ -747,21 +801,23 @@ dialog.missing; // TS error: Property 'missing' does not exist
 
 ### 3.4 Namespace Collision Should Be an Error, Not a Warning
 
-**Problem:** Duplicate `styles.create('button', ...)` in different files produces a `console.warn` in dev. Warnings get ignored. This becomes a production bug.
+**Status: Partial** — duplicate **`styles.class`** registrations **throw** in development; **`styles.component`** reserves namespaces in dev in an **HMR-tolerant** way (invalidation / re-registration rather than always throwing). Production behavior still favors safety over crashing.
 
-**Current:**
+**Problem:** Duplicate registrations for the same logical name in the same scope used to surface as easy-to-ignore **warnings**. That hides real collisions until production.
+
+**Example:**
 
 ```ts
 // file-a.ts
-styles.create('button', { base: { color: 'red' } });
+styles.component('button', { base: { color: 'red' } });
 
-// file-b.ts
-styles.create('button', { base: { color: 'blue' } }); // console.warn — easily missed
+// file-b.ts — same scope + namespace: should be impossible in a well-scoped package
+styles.component('button', { base: { color: 'blue' } });
 ```
 
 **Desired:**
 
-- In development: throw an error (not a warning) for duplicate namespaces
+- In development: throw an error (not a warning) for duplicate namespaces **when it is not an HMR re-run**
 - In production: silently deduplicate (same as today, for safety)
 - Better: automatic scoping by file path by default (like CSS Modules), with opt-in semantic naming
 - The `scopeId` config should be prominently documented and easy to set up, not a post-collision discovery
@@ -770,20 +826,28 @@ styles.create('button', { base: { color: 'blue' } }); // console.warn — easily
 
 ### 3.5 Silent Failure on Invalid Variants
 
-**Problem:** Passing a variant name that doesn't exist silently returns an empty class string. No compile-time or runtime feedback.
+**Status: Shipped (for `styles.component`)** — unknown variant dimensions/options log **`console.error`** in development; TypeScript catches many typos on dimensioned variants.
 
-**Current:**
+**Problem:** Passing a variant selection that doesn't exist should never fail silently.
+
+**Previously (removed `styles.create` API):** varargs typos could yield empty output with little feedback.
+
+**Current (`styles.component`):**
 
 ```ts
-const button = styles.create('button', { base: { color: 'red' }, primary: { color: 'blue' } });
-button('primry'); // typo → returns "" silently. No error, no warning.
+const button = styles.component('button', {
+  base: { color: 'red' },
+  variants: { intent: { primary: { color: 'blue' } } },
+});
+button({ intent: 'primry' }); // dev: console.error; TS: error on literal typo
 ```
 
-**Desired:**
+**Desired (stricter):**
 
 ```ts
-button('primry'); // TypeScript error: Argument of type '"primry"' is not assignable to '"base" | "primary"'
-// Runtime dev mode: console.error('Unknown variant "primry" for namespace "button"')
+// TypeScript should always catch impossible keys; runtime dev should always log for dynamic values
+button({ intent: 'primry' }); // TS error where the key is a string literal
+// Runtime dev mode: console.error('Unknown variant "primry" for dimension "intent" in namespace "button"')
 ```
 
 ---
@@ -795,6 +859,8 @@ These aren't blockers but significantly improve daily usage.
 ---
 
 ### 4.1 Remove or Rethink the Color API
+
+**Status: Open**.
 
 **Problem:** `color.rgb()`, `color.hsl()`, `color.oklch()` are string factories with no benefit over string literals. `color.alpha()` uses `color-mix(in srgb, ..., transparent)` which is a hack — CSS has native alpha channels.
 
@@ -822,16 +888,18 @@ color.ensureContrast('#0066ff', '#fff', 'AA'); // → adjusted color meeting WCA
 
 ### 4.2 Clean Up `styles.withUtils` — Register Utils Globally
 
-**Problem:** `styles.withUtils` creates a parallel API universe. You end up with two `create` functions in your codebase and utils-aware styles don't compose with regular styles.
+**Status: Open** — `styles.withUtils` remains a **parallel** API surface.
+
+**Problem:** `styles.withUtils` creates a parallel API universe. You end up with two style APIs in your codebase and utils-aware styles don't compose with the default `styles` instance.
 
 **Current (parallel universe):**
 
 ```ts
 const s = styles.withUtils({ marginX: (v) => ({ marginLeft: v, marginRight: v }) });
 
-// Now you must choose: use `s.create` (has utils) or `styles.create` (no utils)
-s.create('card', { base: { marginX: '16px' } }); // ✓ works
-styles.create('card', { base: { marginX: '16px' } }); // ✗ marginX not recognized
+// You must choose: use `s.class` / `s.component` (has utils) or `styles.*` (no utils)
+s.class('card', { marginX: '16px' }); // ✓ works
+styles.class('card', { marginX: '16px' }); // ✗ marginX not recognized
 ```
 
 **Desired:**
@@ -846,13 +914,15 @@ registerUtils({
   size: (v) => ({ width: v, height: v }),
 });
 
-// Now all styles.create calls have access to utils
-styles.create('card', { base: { marginX: '16px' } }); // ✓ just works
+// Now all styles.class / styles.component calls on that instance have utils
+styles.component('card', { base: { marginX: '16px' } }); // ✓ just works (aspirational API)
 ```
 
 ---
 
 ### 4.3 Allow Custom CSS Variable Name Control
+
+**Status: Open**.
 
 **Problem:** Token namespace prefix is always auto-prepended. Existing design systems with established CSS variable naming conventions can't migrate without renaming all their variables.
 
@@ -884,9 +954,11 @@ tokens.create(
 
 ### 4.4 Getting Started Docs Need a Complete Working Example
 
-**Problem:** The getting started guide shows `styles.create` but stops at `// In your component:`. The reader never sees a complete file-to-component flow.
+**Status: Partial** — verify the live **Getting started** page includes an end-to-end file + component snippet using **`styles.component`**; the sketch below is the intended shape.
 
-**Current docs:**
+**Problem:** Getting started once showed **`styles.create`** and stopped before a full file-to-component flow, so readers did not see a complete pattern.
+
+**Previously (docs smell):**
 
 ```ts
 const button = styles.create('button', {
@@ -903,7 +975,7 @@ const button = styles.create('button', {
 // styles/button.ts
 import { styles } from 'typestyles';
 
-export const button = styles.create('button', {
+export const button = styles.component('button', {
   base: { padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer' },
   variants: {
     intent: {
@@ -946,6 +1018,8 @@ export function App() {
 
 ### 4.5 SSR: Consolidate to One API
 
+**Status: Open** — low-level collection primitives exist; a single “blessed” SSR story is still TBD as extraction matures.
+
 **Problem:** `collectStyles(renderFn)` and `getRegisteredCss()` are two APIs for the same thing. Integration packages each re-implement SSR wiring separately.
 
 **Desired:** One canonical SSR API. The lower-level `getRegisteredCss()` can stay as an escape hatch but shouldn't be the recommended path. With zero-runtime extraction (Tier 1.7), most of this complexity disappears.
@@ -954,13 +1028,15 @@ export function App() {
 
 ### 4.6 `global.style()` Needs Guardrails
 
-**Problem:** `global.style(selector, properties)` bypasses all library safety guarantees — no namespace, no deduplication, no semantic naming. It's positioned as equivalent to `styles.create` but is fundamentally different. It will be overused because it's the only way to do reset styles and third-party overrides.
+**Status: Partial** — `createGlobal` / `createTypeStyles` → **`global`**, **`typestyles/globals`** recipes, cascade layers for global CSS; a single `global.reset()` sugar may still differ from this bullet list.
+
+**Problem:** `global.style(selector, properties)` bypasses all library safety guarantees — no namespace, no deduplication, no semantic naming. It is easy to mistake for **`styles.component`**, but it is fundamentally different. It gets overused when resets and third-party overrides are hard to reach otherwise.
 
 **Desired:**
 
 - Docs should clearly mark `global.style()` as an escape hatch, not a primary API
 - Provide `global.reset()` or a reset/normalize recipe so users don't need `global.style()` for the most common case
-- When `@layer` is supported, `global.style()` should default to the lowest layer
+- When `@layer` is enabled via the factory, global CSS should participate in the same layer story (`globalLayer`, etc.)
 
 ---
 
@@ -971,6 +1047,8 @@ Lower priority but would round out the library for production design systems.
 ---
 
 ### 5.1 `@typestyles/react` — `css` Prop and `styled()` API
+
+**Status: Open**.
 
 A `css` prop and `styled(Component)` API would remove migration friction from Emotion/styled-components:
 
@@ -991,11 +1069,13 @@ const StyledButton = styled('button', {
 
 ### 5.2 Responsive Object Syntax
 
+**Status: Open**.
+
 Shorthand for breakpoint-based responsive styles:
 
 ```ts
 // Instead of nested @media queries:
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: {
     padding: '8px',
     '@media (min-width: 768px)': { padding: '16px' },
@@ -1004,7 +1084,7 @@ const card = styles.create('card', {
 });
 
 // Optionally support a responsive shorthand:
-const card = styles.create('card', {
+const card = styles.component('card', {
   base: {
     padding: { base: '8px', md: '16px', lg: '24px' },
   },
@@ -1017,6 +1097,8 @@ This requires a breakpoint configuration step. Lower priority than the structura
 
 ### 5.3 Developer Tooling
 
+**Status: Open**.
+
 - **Browser DevTools integration:** Inspect which TypeStyles definition generated a class
 - **VS Code extension:** Autocomplete for variant names, hover previews of generated CSS, go-to-definition for token references
 - **TypeScript language plugin:** Enhanced IntelliSense for pseudo-classes and at-rules
@@ -1024,6 +1106,8 @@ This requires a breakpoint configuration step. Lower priority than the structura
 ---
 
 ### 5.4 Built-in Reset/Normalize
+
+**Status: Partial** — reset-oriented CSS ships via **`typestyles/globals`** and layered **`createGlobal`** / **`createTypeStyles`**; a single `global.reset()` API may still differ from this sketch.
 
 ```ts
 import { global } from 'typestyles';
@@ -1044,38 +1128,40 @@ All three reviewers agreed on what works well:
 - **Zero dependencies except `csstype`** — rare and valuable
 - **No build step required** — removes the #1 objection to adoption
 - **`styles.class` for single standalone classes** — clean, direct, no over-engineering
-- **`styles.component` variant/compoundVariant/defaultVariant design** — this is what CVA should have been (keep this design, just unify it into `styles.create`)
+- **`styles.component` variant / compoundVariant / defaultVariant design** — this is what CVA should have been; it is now **the** primary recipe API
 
 ---
 
 ## Summary: Prioritized Action Order
 
-| Priority | Item                                                                                                      | Effort    | Impact                                              |
-| -------- | --------------------------------------------------------------------------------------------------------- | --------- | --------------------------------------------------- |
-| **1**    | 1.1 Unify `styles.create` / `styles.component`                                                            | High      | Critical — everything builds on this                |
-| **2**    | 1.2 Ship built-in `cx()`                                                                                  | Low       | High — 5 lines, disproportionate DX impact          |
-| **3**    | 1.3 Nested token objects                                                                                  | Medium    | Critical — unblocks real design systems             |
-| **4**    | 1.4 `createTheme` accepts nested structure                                                                | Medium    | Critical — paired with 1.3                          |
-| **5**    | 1.5 Dark mode / media-query themes                                                                        | Medium    | High — table stakes for design systems              |
-| **6**    | 3.4 Namespace collision → error                                                                           | Low       | Medium — prevents silent production bugs            |
-| **7**    | 3.5 Invalid variant feedback                                                                              | Low       | Medium — prevents silent failures                   |
-| **8**    | 2.1 `@layer` support                                                                                      | High      | High — essential for cascade management             |
-| **9**    | 1.6 Instanceable API                                                                                      | High      | High — unblocks library authors and micro-frontends |
-| **10**   | 1.7 Zero-runtime extraction                                                                               | Very High | High — already on roadmap, elevate priority         |
-| **11**   | 4.4 Complete getting-started docs                                                                         | Low       | Medium — first 5 minutes experience                 |
-| **12**   | 3.1 Fix `compose` type safety                                                                             | Medium    | Medium                                              |
-| **13**   | 3.2 Fix `tokens.use` type safety                                                                          | Low       | Medium                                              |
-| **14**   | 4.1 Rethink color API                                                                                     | Low       | Low-Medium                                          |
-| **15**   | 4.2 Global utils registration                                                                             | Medium    | Medium                                              |
-| **16**   | 2.2 `@property`, `.name`/`.var`, `styles.property`, component internal vars (fn config + object overload) | Medium    | Medium                                              |
-| **17**   | 2.3 Container queries                                                                                     | Low       | Medium — may already work, needs docs               |
-| **18**   | 2.4 `:has()/:is()/:where()` docs                                                                          | Low       | Low-Medium                                          |
-| **19**   | 4.3 Custom CSS variable names                                                                             | Low       | Low — migration convenience                         |
-| **20**   | 3.3 Slots API typing                                                                                      | Low       | Low                                                 |
-| **21**   | 4.5 SSR API consolidation                                                                                 | Low       | Low — disappears with zero-runtime                  |
-| **22**   | 4.6 `global.style()` guardrails                                                                           | Low       | Low                                                 |
-| **23**   | 5.1 React `css` prop / `styled()`                                                                         | High      | Medium — migration convenience                      |
-| **24**   | 5.2 Responsive object syntax                                                                              | Medium    | Low                                                 |
-| **25**   | 5.3 Developer tooling                                                                                     | High      | Medium                                              |
-| **26**   | 5.4 Built-in reset                                                                                        | Low       | Low                                                 |
-| **27**   | 2.5 `@scope` support                                                                                      | Low       | Low — forward-looking                               |
+Statuses mirror the [Implementation snapshot](#implementation-snapshot-keep-this-doc-trustworthy): **Shipped**, **Partial**, or **Open**.
+
+| Priority | Item                                                                                                      | Effort    | Impact                                              | Status  |
+| -------- | --------------------------------------------------------------------------------------------------------- | --------- | --------------------------------------------------- | ------- |
+| **1**    | 1.1 Single variant API (`styles.component` only; former `styles.create` removed)                          | High      | Critical — everything builds on this                | Shipped |
+| **2**    | 1.2 Ship built-in `cx()`                                                                                  | Low       | High — 5 lines, disproportionate DX impact          | Shipped |
+| **3**    | 1.3 Nested token objects                                                                                  | Medium    | Critical — unblocks real design systems             | Shipped |
+| **4**    | 1.4 `createTheme` accepts nested structure (`ThemeConfig` / nested `base`)                                | Medium    | Critical — paired with 1.3                          | Shipped |
+| **5**    | 1.5 Dark mode / media-query themes                                                                        | Medium    | High — table stakes for design systems              | Shipped |
+| **6**    | 3.4 Namespace collision → error                                                                           | Low       | Medium — prevents silent production bugs            | Partial |
+| **7**    | 3.5 Invalid variant feedback                                                                              | Low       | Medium — prevents silent failures                   | Shipped |
+| **8**    | 2.1 `@layer` support                                                                                      | High      | High — essential for cascade management             | Shipped |
+| **9**    | 1.6 Instanceable API                                                                                      | High      | High — unblocks library authors and micro-frontends | Shipped |
+| **10**   | 1.7 Zero-runtime extraction                                                                               | Very High | High — already on roadmap, elevate priority         | Partial |
+| **11**   | 4.4 Complete getting-started docs                                                                         | Low       | Medium — first 5 minutes experience                 | Partial |
+| **12**   | 3.1 Fix `compose` type safety                                                                             | Medium    | Medium                                              | Open    |
+| **13**   | 3.2 Fix `tokens.use` type safety                                                                          | Low       | Medium                                              | Open    |
+| **14**   | 4.1 Rethink color API                                                                                     | Low       | Low-Medium                                          | Open    |
+| **15**   | 4.2 Global utils registration                                                                             | Medium    | Medium                                              | Open    |
+| **16**   | 2.2 `@property`, `.name`/`.var`, `styles.property`, component internal vars (fn config + object overload) | Medium    | Medium                                              | Partial |
+| **17**   | 2.3 Container queries                                                                                     | Low       | Medium — may already work, needs docs               | Shipped |
+| **18**   | 2.4 `:has()/:is()/:where()` docs                                                                          | Low       | Low-Medium                                          | Shipped |
+| **19**   | 4.3 Custom CSS variable names                                                                             | Low       | Low — migration convenience                         | Open    |
+| **20**   | 3.3 Slots API typing                                                                                      | Low       | Low                                                 | Shipped |
+| **21**   | 4.5 SSR API consolidation                                                                                 | Low       | Low — disappears with zero-runtime                  | Open    |
+| **22**   | 4.6 `global.style()` guardrails                                                                           | Low       | Low                                                 | Partial |
+| **23**   | 5.1 React `css` prop / `styled()`                                                                         | High      | Medium — migration convenience                      | Open    |
+| **24**   | 5.2 Responsive object syntax                                                                              | Medium    | Low                                                 | Open    |
+| **25**   | 5.3 Developer tooling                                                                                     | High      | Medium                                              | Open    |
+| **26**   | 5.4 Built-in reset                                                                                        | Low       | Low                                                 | Partial |
+| **27**   | 2.5 `@scope` support                                                                                      | Low       | Low — forward-looking                               | Open    |

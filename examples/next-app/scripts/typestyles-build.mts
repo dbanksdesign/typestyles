@@ -5,12 +5,6 @@ import { buildTypestylesForNext } from '@typestyles/next/build';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 
-await buildTypestylesForNext({
-  root,
-  modules: ['styles/typestyles-entry.ts'],
-  cssOutFile: 'app/typestyles.css',
-  manifestOutFile: 'app/typestyles.manifest.json',
-  manifestCssPath: 'app/typestyles.css',
-});
+await buildTypestylesForNext({ root });
 
 console.log('[typestyles] Wrote app/typestyles.css and app/typestyles.manifest.json');
