@@ -5,7 +5,7 @@ description: How to eliminate the typestyles runtime in production and emit a st
 
 # Zero-Runtime Build Extraction
 
-By default, typestyles injects CSS at runtime when components render. This has minimal overhead but some performance-sensitive applications prefer to ship **zero JavaScript for styling** — generating a static CSS file at build time just like CSS Modules or Vanilla Extract.
+Without a bundler integration, typestyles injects CSS at runtime when components render. With **`@typestyles/vite`**, you can make **production** zero-runtime by default: if the plugin finds a [convention entry file](#vite) under the project root, it resolves an extraction module and defaults to `mode: 'build'` (runtime + HMR in dev, static CSS + no client injection on `vite build`). Apps that prefer injection-only can set `mode: 'runtime'` or omit a convention entry and any `extract.modules` list.
 
 Typestyles supports an optional **build extraction** mode through its bundler integrations. When enabled:
 
@@ -23,7 +23,7 @@ The same `styles.component`, `tokens.create`, and `keyframes.create` APIs work i
 
 **Production:** You want a plain `.css` file: normal browser caching, parallel download/parse with JS, and no style injection work on the main thread after load.
 
-The Vite plugin implements this split automatically when you configure `extract`: it defaults to `mode: 'build'`, which **only** disables the runtime and emits CSS during `vite build`. `vite dev` keeps injection enabled.
+The Vite plugin implements this split when at least one extraction module is resolved (explicit `extract.modules`, or an auto-discovered convention entry): it defaults to `mode: 'build'`, which **only** disables the runtime and emits CSS during `vite build`. `vite dev` keeps injection enabled.
 
 ---
 
@@ -45,7 +45,32 @@ Install the Vite plugin:
 npm install --save-dev @typestyles/vite
 ```
 
-In `vite.config.ts`, list the modules that register styles. With `extract.modules` set, **`mode` defaults to `'build'`** (runtime stays on during `vite dev`; extraction and zero-runtime apply on `vite build`):
+In `vite.config.ts`, either **add a convention entry** so the plugin can discover it, or **set `extract.modules`** yourself. When at least one module resolves, **`mode` defaults to `'build'`** (runtime stays on during `vite dev`; extraction and zero-runtime apply on `vite build`).
+
+**Convention entry (minimal config):** add a file at one of these paths (first match wins), re-exporting or importing every registration side effect — for example `src/typestyles-entry.ts` that imports your tokens and components. After the `src/…` entries, the same names are tried under a top-level `styles/` folder (common in Next.js apps without `src/`).
+
+```text
+src/typestyles-entry.ts
+src/typestyles.ts
+src/styles/index.ts
+src/styles.ts
+styles/typestyles-entry.ts
+styles/typestyles.ts
+```
+
+```ts
+import { defineConfig } from 'vite';
+import typestyles from '@typestyles/vite';
+
+export default defineConfig({
+  plugins: [
+    // Discovers src/typestyles-entry.ts (etc.); mode defaults to 'build'
+    typestyles(),
+  ],
+});
+```
+
+**Explicit modules** (multiple entries or non-standard paths):
 
 ```ts
 import { defineConfig } from 'vite';
@@ -54,10 +79,7 @@ import typestyles from '@typestyles/vite';
 export default defineConfig({
   plugins: [
     typestyles({
-      // mode defaults to 'build' when extract.modules is non-empty
       extract: {
-        // List all entry files that import and register typestyles styles.
-        // Any transitive imports are automatically included.
         modules: ['src/styles/tokens.ts', 'src/styles/components.ts'],
         fileName: 'typestyles.css', // optional, default: "typestyles.css"
       },
@@ -77,11 +99,11 @@ typestyles({
 
 ### Modes
 
-| Mode        | Description                                                                                                                    |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `"runtime"` | Default when `extract` is omitted. CSS is injected at runtime via `<style>`. No CSS file emitted.                              |
-| `"build"`   | Default when `extract.modules` is non-empty. CSS is extracted on `vite build`; runtime disabled **only** in production builds. |
-| `"hybrid"`  | CSS is extracted AND the runtime is kept (useful for dynamic styles not known at build time).                                  |
+| Mode        | Description                                                                                                                                           |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"runtime"` | Default when **no** extraction modules resolve (no `extract.modules`, no discovered convention file). Injection only; no emitted CSS file.            |
+| `"build"`   | Default when at least one module resolves (explicit or discovered). CSS is extracted on `vite build`; runtime disabled **only** in production builds. |
+| `"hybrid"`  | CSS is extracted AND the runtime is kept (useful for dynamic styles not known at build time).                                                         |
 
 ### Linking the CSS file
 
@@ -124,28 +146,29 @@ Install the Next.js integration:
 npm install --save-dev @typestyles/next
 ```
 
-Wrap your Next.js config with `withTypestylesExtract` for **production** so development keeps client-side injection for faster iteration (same idea as Vite: runtime in dev, static CSS + no injection in prod):
+Use **`withTypestyles`** so behavior matches **`@typestyles/vite`**: when `NODE_ENV === 'production'` and a **convention entry file** exists under the project root (same discovery order as Vite — see the list above), the client bundle disables `<style>` injection (`withTypestylesExtract` under the hood). In **development**, the config is left unchanged so the runtime stays on (no need to branch on `NODE_ENV` yourself).
 
 ```js
 // next.config.mjs
-import { withTypestylesExtract } from '@typestyles/next/build';
+import { withTypestyles } from '@typestyles/next/build';
 
-const base = {
-  // Your existing Next.js config
-};
-
-export default process.env.NODE_ENV === 'production' ? withTypestylesExtract(base) : base;
-```
-
-Run `buildTypestylesForNext` (or your own script) before `next build` to emit the stylesheet your layout imports.
-
-For a single config that always disables the client runtime, pass the config object directly:
-
-```js
-export default withTypestylesExtract({
-  /* your config */
+export default withTypestyles({
+  // your existing config, e.g. transpilePackages: ['typestyles', '@typestyles/next'],
 });
 ```
+
+Run extraction before `next build` (CI or a `prebuild` script). **Defaults** match the Vite story: `buildTypestylesForNext({ root })` discovers a convention entry, then writes **`app/typestyles.css`** and **`app/typestyles.manifest.json`** (override with `cssOutFile`, `manifestOutFile`, or `modules` when you need a custom layout).
+
+```ts
+// scripts/typestyles-build.mts
+import { buildTypestylesForNext } from '@typestyles/next/build';
+
+await buildTypestylesForNext({ root: process.cwd() });
+```
+
+Import the emitted CSS from your App Router layout (`import './typestyles.css'`).
+
+For full manual control, **`withTypestylesExtract`** is still available (always merges production defines). **`discoverDefaultExtractModules`** and **`DEFAULT_EXTRACT_MODULE_CANDIDATES`** are re-exported from `@typestyles/next/build` (same as `@typestyles/build-runner` / `@typestyles/vite`).
 
 Add the `TypestylesProvider` to your root layout to handle streaming SSR (React 18 App Router):
 
@@ -191,8 +214,8 @@ typestyles({
 
 Typestyles is designed for incremental migration from runtime to build extraction:
 
-1. **Start in runtime mode** — omit `extract` (or set `mode: 'runtime'`).
-2. **Add `extract`** — default `build` mode gives dev runtime + prod extraction in Vite.
+1. **Start in runtime-only mode** — omit a convention entry and any `extract.modules` (or set `mode: 'runtime'`).
+2. **Add a convention entry or `extract`** — default `build` mode gives dev runtime + prod extraction in Vite.
 3. **Use `hybrid`** when you need a static baseline plus runtime for dynamic values.
 
 ---

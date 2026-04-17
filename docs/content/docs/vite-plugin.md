@@ -30,7 +30,7 @@ export default defineConfig({
 });
 ```
 
-For **zero-runtime production** builds while keeping **runtime + HMR in development**, add `extract` with your style entry modules (see [Zero-runtime extraction](/docs/zero-runtime)). When `extract.modules` is non-empty, the plugin defaults to `mode: 'build'`: `vite dev` still injects styles at runtime, and `vite build` emits a static CSS file and strips client injection.
+For **zero-runtime production** builds while keeping **runtime + HMR in development**, add a [convention style entry](/docs/zero-runtime#vite) (e.g. `src/typestyles-entry.ts`) or set `extract.modules` (see [Zero-runtime extraction](/docs/zero-runtime)). When at least one extraction module resolves, the plugin defaults to `mode: 'build'`: `vite dev` still injects styles at runtime, and `vite build` emits a static CSS file and strips client injection.
 
 For loading self-hosted fonts with Vite’s asset pipeline, see [Fonts](/docs/fonts).
 
@@ -68,7 +68,24 @@ This helps catch issues early, since duplicate namespaces can cause unexpected s
 
 This is the usual setup for Vite: **development** uses the typestyles runtime so edits hot-reload without running a separate extraction step; **production** emits a real `.css` asset the browser can cache and parse in parallel with JS.
 
-Configure `extract` with one or more modules that import every registration side effect (often a small entry file that re-exports your tokens and components). You do **not** need to pass `mode` — with `extract.modules` set, it defaults to `build`, and the plugin only disables the runtime during `vite build`, not during `vite dev`.
+Add a convention entry file that imports every registration side effect (see [Zero-runtime extraction](/docs/zero-runtime)), **or** set `extract.modules` explicitly. You do **not** need to pass `mode` — when modules resolve (discovered or explicit), it defaults to `build`, and the plugin only disables the runtime during `vite build`, not during `vite dev`.
+
+**Using discovery (minimal `vite.config`):**
+
+```ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import typestyles from '@typestyles/vite';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    typestyles(), // discovers e.g. src/typestyles-entry.ts when present
+  ],
+});
+```
+
+**Explicit `extract` (multiple entries or custom paths):**
 
 ```ts
 import { defineConfig } from 'vite';

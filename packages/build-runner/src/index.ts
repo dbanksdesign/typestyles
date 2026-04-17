@@ -1,3 +1,5 @@
+export { DEFAULT_EXTRACT_MODULE_CANDIDATES, discoverDefaultExtractModules } from './discover';
+
 import { build as esbuildBuild } from 'esbuild';
 import { existsSync, unlinkSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';

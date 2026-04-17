@@ -378,6 +378,10 @@ importers:
         version: 3.2.4(@types/debug@4.1.12)(@types/node@25.2.1)(jiti@2.6.1)(jsdom@25.0.1)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/next:
+    dependencies:
+      '@typestyles/build-runner':
+        specifier: workspace:*
+        version: link:../build-runner
     devDependencies:
       '@types/node':
         specifier: ^25.2.1

@@ -53,6 +53,7 @@ export default defineConfig([
     external: [
       'typestyles',
       'typestyles/build',
+      '@typestyles/build-runner',
       'next',
       'webpack',
       'node:fs/promises',

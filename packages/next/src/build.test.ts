@@ -1,7 +1,10 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, it, expect, vi } from 'vitest';
 import type { NextConfig } from 'next';
 import type { Configuration } from 'webpack';
-import { withTypestylesExtract } from './build';
+import { withTypestyles, withTypestylesExtract } from './build';
 
 type WebpackContext = Parameters<NonNullable<NextConfig['webpack']>>[1];
 
@@ -38,6 +41,43 @@ describe('withTypestylesExtract', () => {
       (p: unknown) => p instanceof webpackMod.default.DefinePlugin,
     );
     expect(hasDefine).toBe(true);
+  });
+
+  it('applies extract in production when a convention entry exists under root', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'typestyles-next-cwd-'));
+    mkdirSync(join(dir, 'styles'), { recursive: true });
+    writeFileSync(join(dir, 'styles/typestyles-entry.ts'), 'export {}\n');
+
+    const prev = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    try {
+      const merged = withTypestyles({ env: { CUSTOM: 'y' } }, { root: dir });
+      expect(merged.env).toEqual({
+        CUSTOM: 'y',
+        NEXT_PUBLIC_TYPESTYLES_RUNTIME_DISABLED: 'true',
+      });
+    } finally {
+      process.env.NODE_ENV = prev;
+    }
+
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('does not apply extract in development even when a convention entry exists', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'typestyles-next-dev-'));
+    mkdirSync(join(dir, 'styles'), { recursive: true });
+    writeFileSync(join(dir, 'styles/typestyles-entry.ts'), 'export {}\n');
+
+    const prev = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+    try {
+      const merged = withTypestyles({ env: { CUSTOM: 'y' } }, { root: dir });
+      expect(merged.env).toEqual({ CUSTOM: 'y' });
+    } finally {
+      process.env.NODE_ENV = prev;
+    }
+
+    rmSync(dir, { recursive: true, force: true });
   });
 
   it('does not add DefinePlugin for server bundles', async () => {

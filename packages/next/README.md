@@ -142,11 +142,11 @@ const css = await getTypestylesMetadata(<Home />);
 
 ## Build-time CSS + Turbopack
 
-To ship a static `typestyles.css` and avoid client-side `<style>` injection (uses `typestyles/build` under the hood):
+To ship a static stylesheet and avoid client-side `<style>` injection (uses `typestyles/build` under the hood):
 
-1. Run `buildTypestylesForNext` before `next build` to emit CSS (and optional manifest).
+1. Run **`buildTypestylesForNext({ root })`** before `next build`. It discovers the same **convention entry** as `@typestyles/vite` (see `DEFAULT_EXTRACT_MODULE_CANDIDATES` from `@typestyles/build-runner`) and by default writes **`app/typestyles.css`** plus **`app/typestyles.manifest.json`** (override paths or pass explicit `modules` when needed).
 2. Import that CSS from your root layout (e.g. `import './typestyles.css'`).
-3. Wrap config with `withTypestylesExtract` from `@typestyles/next/build`.
+3. Wrap config with **`withTypestyles`** from `@typestyles/next/build` — in **production**, if a convention entry exists, it applies **`withTypestylesExtract`**; in **development** it leaves your config unchanged so the runtime stays on.
 
 `withTypestylesExtract` sets **`NEXT_PUBLIC_TYPESTYLES_RUNTIME_DISABLED`** via `next.config` `env` (works with **webpack and Turbopack**) and adds webpack **`DefinePlugin`** for `__TYPESTYLES_RUNTIME_DISABLED__` on client bundles when webpack runs. Example app: `examples/next-app`.
 
@@ -156,16 +156,14 @@ During `next dev`, keeping the client runtime **enabled** avoids tying every sty
 
 ```js
 // next.config.mjs
-import { withTypestylesExtract } from '@typestyles/next/build';
+import { withTypestyles } from '@typestyles/next/build';
 
-const base = {
-  /* your config */
-};
-
-export default process.env.NODE_ENV === 'production' ? withTypestylesExtract(base) : base;
+export default withTypestyles({
+  transpilePackages: ['typestyles', '@typestyles/next'],
+});
 ```
 
-You still typically generate `typestyles.css` before production builds (CI or `prebuild`). The example app uses this pattern.
+You still typically run extraction before production builds (CI or `prebuild`). For full manual control, **`withTypestylesExtract`** remains available.
 
 ## API Reference
 

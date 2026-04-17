@@ -1,6 +1,9 @@
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import type { ResolvedConfig } from 'vite';
-import { extractNamespaces } from './index';
+import { discoverDefaultExtractModules, extractNamespaces } from './index';
 
 /** Vite plugin hooks may be a function or `{ handler }`. */
 function viteHookFn<F>(hook: F | { handler: F } | undefined | null): F | undefined {
@@ -8,6 +11,15 @@ function viteHookFn<F>(hook: F | { handler: F } | undefined | null): F | undefin
   if (typeof hook === 'function') return hook;
   return (hook as { handler: F }).handler;
 }
+
+describe('discoverDefaultExtractModules', () => {
+  it('returns the first existing candidate path', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'typestyles-disc-'));
+    mkdirSync(join(dir, 'src', 'styles'), { recursive: true });
+    writeFileSync(join(dir, 'src/typestyles.ts'), '\n');
+    expect(discoverDefaultExtractModules(dir)).toEqual(['src/typestyles.ts']);
+  });
+});
 
 describe('extractNamespaces', () => {
   it('extracts styles.component namespaces as prefixes', () => {
@@ -149,12 +161,32 @@ describe('typestyles vite plugin', () => {
     expect(build?.define?.__TYPESTYLES_RUNTIME_DISABLED__).toBe(JSON.stringify('true'));
   });
 
-  it('defaults to runtime mode when extract is omitted', async () => {
+  it('defaults to runtime mode when no extraction modules resolve', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'typestyles-vite-empty-'));
     const mod = await import('./index');
     const plugin = mod.default();
     const config = viteHookFn(plugin.config);
-    const build = await Promise.resolve(config?.({}, { command: 'build', mode: 'production' }));
+    const build = await Promise.resolve(
+      config?.({ root: dir }, { command: 'build', mode: 'production' }),
+    );
     expect(build?.define?.__TYPESTYLES_RUNTIME_DISABLED__).toBeUndefined();
+  });
+
+  it('discovers a convention entry and defaults to build on vite build', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'typestyles-vite-disco-'));
+    mkdirSync(join(dir, 'src'), { recursive: true });
+    writeFileSync(join(dir, 'src/typestyles-entry.ts'), "import 'typestyles';\n");
+    const mod = await import('./index');
+    const plugin = mod.default();
+    const config = viteHookFn(plugin.config);
+    const serve = await Promise.resolve(
+      config?.({ root: dir }, { command: 'serve', mode: 'development' }),
+    );
+    expect(serve?.define?.['__TYPESTYLES_RUNTIME_DISABLED__']).toBeUndefined();
+    const build = await Promise.resolve(
+      config?.({ root: dir }, { command: 'build', mode: 'production' }),
+    );
+    expect(build?.define?.__TYPESTYLES_RUNTIME_DISABLED__).toBe(JSON.stringify('true'));
   });
 
   it('honors mode: runtime with extract on build', async () => {

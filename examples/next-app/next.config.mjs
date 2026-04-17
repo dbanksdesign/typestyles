@@ -1,15 +1,11 @@
-import process from 'node:process';
-import { withTypestylesExtract } from '@typestyles/next/build';
-
-const base = {
-  transpilePackages: ['typestyles', '@typestyles/next'],
-};
+import { withTypestyles } from '@typestyles/next/build';
 
 /**
- * Production: disable client `<style>` injection so the pre-built stylesheet is the only source
- * (cacheable, parallel-parsed CSS). Development: keep the runtime enabled so edits hot-reload
- * without re-running the extraction script on every change.
+ * In production, disables client `<style>` injection when a convention entry exists (same paths as
+ * `@typestyles/vite`). Development keeps runtime injection for fast refresh without re-running the
+ * extraction script on every change — pair `pnpm dev` with `pnpm typestyles:build` once (or rely on
+ * prebuilt CSS from a prior build).
  */
-export default process.env.NODE_ENV === 'production'
-  ? withTypestylesExtract(base)
-  : base;
+export default withTypestyles({
+  transpilePackages: ['typestyles', '@typestyles/next'],
+});

@@ -5,11 +5,15 @@ export interface TypestylesExtractManifestV1 {
   css: string;
 }
 
+export declare const DEFAULT_EXTRACT_MODULE_CANDIDATES: readonly string[];
+
+export declare function discoverDefaultExtractModules(root: string): string[];
+
 export interface BuildTypestylesForNextOptions {
   root: string;
-  modules: string[];
-  cssOutFile: string;
-  manifestOutFile?: string;
+  modules?: string[];
+  cssOutFile?: string;
+  manifestOutFile?: string | false;
   manifestCssPath?: string;
 }
 
@@ -20,6 +24,15 @@ export declare function buildTypestylesForNext(
 export interface WithTypestylesExtractOptions {
   disableClientRuntime?: boolean;
 }
+
+export interface WithTypestylesOptions extends WithTypestylesExtractOptions {
+  root?: string;
+}
+
+export declare function withTypestyles(
+  nextConfig?: NextConfig,
+  options?: WithTypestylesOptions,
+): NextConfig;
 
 export declare function withTypestylesExtract(
   nextConfig?: NextConfig,

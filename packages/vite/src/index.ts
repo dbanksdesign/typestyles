@@ -1,5 +1,16 @@
+import { resolve as resolvePath } from 'node:path';
 import type { Plugin, ResolvedConfig, UserConfig } from 'vite';
-import { runTypestylesBuild } from '@typestyles/build-runner';
+import {
+  discoverDefaultExtractModules,
+  DEFAULT_EXTRACT_MODULE_CANDIDATES,
+  runTypestylesBuild,
+} from '@typestyles/build-runner';
+
+/** Re-export shared convention discovery (same paths as `@typestyles/next/build`). */
+export {
+  DEFAULT_EXTRACT_MODULE_CANDIDATES,
+  discoverDefaultExtractModules,
+} from '@typestyles/build-runner';
 
 /**
  * Regex patterns to extract namespace strings from typestyles API calls.
@@ -23,8 +34,12 @@ export interface TypestylesExtractOptions {
   /**
    * Modules that should be imported during build to register styles.
    * Paths are resolved relative to Vite's project root.
+   *
+   * When omitted, the plugin looks for the first existing file among
+   * {@link DEFAULT_EXTRACT_MODULE_CANDIDATES} under the project root (same resolution as when
+   * `extract` itself is omitted).
    */
-  modules: string[];
+  modules?: string[];
   /**
    * Output CSS filename (in the build assets). Defaults to "typestyles.css".
    */
@@ -40,17 +55,31 @@ export interface TypestylesPluginOptions {
    * - `"build"`: emit a static CSS asset on `vite build` and disable client injection there.
    * - `"hybrid"`: extract on build and keep runtime-compatible behavior.
    *
-   * When omitted and `extract.modules` is non-empty, defaults to `"build"`: `vite dev` keeps
-   * runtime injection + HMR (runtime is only disabled during `vite build`), serves the same
-   * extracted CSS at `extract.fileName` so `<link href="/typestyles.css">` is valid (avoids SPA
-   * fallback returning HTML for that URL), and production emits the CSS file. With no `extract`
-   * config, defaults to `"runtime"`.
+   * When omitted and at least one extraction module is resolved (explicit `extract.modules`, or a
+   * discovered convention entry file), defaults to `"build"`: `vite dev` keeps runtime
+   * injection + HMR (runtime is only disabled during `vite build`), serves the same extracted CSS
+   * at `extract.fileName` so `<link href="/typestyles.css">` is valid (avoids SPA fallback
+   * returning HTML for that URL), and production emits the CSS file. If no modules are resolved,
+   * defaults to `"runtime"`.
    */
   mode?: 'runtime' | 'build' | 'hybrid';
   /**
    * Options for build-time CSS extraction when mode is "build" or "hybrid".
+   *
+   * Omitted entirely: discover a convention entry under the project root (see
+   * {@link discoverDefaultExtractModules}); if none exist, stays in runtime-only mode.
    */
   extract?: TypestylesExtractOptions;
+}
+
+function resolveExtractModules(
+  root: string,
+  extract: TypestylesExtractOptions | undefined,
+): string[] {
+  if (extract?.modules !== undefined) {
+    return extract.modules;
+  }
+  return discoverDefaultExtractModules(root);
 }
 
 /**
@@ -101,8 +130,10 @@ export function extractNamespaces(code: string): {
  */
 export default function typestylesPlugin(options: TypestylesPluginOptions = {}): Plugin {
   const { warnDuplicates = true, extract } = options;
-  const extractModules = extract?.modules ?? [];
-  const mode = options.mode ?? (extractModules.length > 0 ? 'build' : 'runtime');
+
+  /** Effective module list after optional convention discovery; set in `config`. */
+  let resolvedExtractModules: string[] = [];
+  let resolvedMode: 'runtime' | 'build' | 'hybrid' = 'runtime';
 
   // Track namespaces per module for duplicate detection
   const moduleNamespaces = new Map<string, { keys: string[]; prefixes: string[] }>();
@@ -122,7 +153,11 @@ export default function typestylesPlugin(options: TypestylesPluginOptions = {}):
     config(config: UserConfig, env) {
       isBuildCommand = env.command === 'build';
 
-      if (env.command === 'build' && (mode === 'build' || mode === 'hybrid')) {
+      const root = resolvePath(config.root ?? process.cwd());
+      resolvedExtractModules = resolveExtractModules(root, extract);
+      resolvedMode = options.mode ?? (resolvedExtractModules.length > 0 ? 'build' : 'runtime');
+
+      if (env.command === 'build' && (resolvedMode === 'build' || resolvedMode === 'hybrid')) {
         config.define = {
           ...(config.define ?? {}),
           // Inlined by the bundler so typestyles sheet skips creating <style> in production
@@ -139,10 +174,10 @@ export default function typestylesPlugin(options: TypestylesPluginOptions = {}):
     },
 
     configureServer(server) {
-      if (!extract || extractModules.length === 0) return;
-      if (mode === 'runtime') return;
+      if (resolvedExtractModules.length === 0) return;
+      if (resolvedMode === 'runtime') return;
 
-      const fileName = extract.fileName ?? 'typestyles.css';
+      const fileName = extract?.fileName ?? 'typestyles.css';
 
       const invalidateDevExtract = (): void => {
         devExtractCss = null;
@@ -189,7 +224,7 @@ export default function typestylesPlugin(options: TypestylesPluginOptions = {}):
           if (!devExtractInFlight) {
             devExtractInFlight = runTypestylesBuild({
               root,
-              modules: extractModules,
+              modules: resolvedExtractModules,
             })
               .then((css) => {
                 devExtractCss = css;
@@ -265,17 +300,17 @@ if (import.meta.hot) {
 
     async generateBundle() {
       if (!isBuildCommand) return;
-      if (mode === 'runtime') return;
-      if (!extract || !extractModules.length) return;
+      if (resolvedMode === 'runtime') return;
+      if (!resolvedExtractModules.length) return;
       if (!resolvedConfig) return;
 
       const root = resolvedConfig.root ?? process.cwd();
-      const fileName = extract.fileName ?? 'typestyles.css';
+      const fileName = extract?.fileName ?? 'typestyles.css';
 
       try {
         const css = await runTypestylesBuild({
           root,
-          modules: extractModules,
+          modules: resolvedExtractModules,
         });
         this.emitFile({
           type: 'asset',
