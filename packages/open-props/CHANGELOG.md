@@ -1,5 +1,12 @@
 # @typestyles/open-props
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [aa88d25]
+  - typestyles@0.6.0
+
 ## 0.3.0
 
 ### Minor Changes

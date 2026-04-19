@@ -1,5 +1,12 @@
 # @typestyles/props
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [aa88d25]
+  - typestyles@0.6.0
+
 ## 0.4.0
 
 ### Minor Changes
