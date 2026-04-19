@@ -32,7 +32,7 @@ The returned object is both **callable** and **destructurable**:
 
 ```ts
 // Call as a function -- base styles are always auto-applied:
-card(); // "card-base card-elevated" (if elevated is default, or just "card-base")
+card(); // "card-base" (flat variants are opt-in via the call or `defaultVariants`)
 
 // Destructure for direct class access:
 const { base, elevated } = card;

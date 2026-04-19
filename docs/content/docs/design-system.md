@@ -211,18 +211,18 @@ export const space = tokens.create('space', {
 });
 ```
 
+Split typography into **separate token namespaces** so scale names like `normal` and `tight` do not collide across weight, line height, and tracking (a single `tokens.create('font', …)` object cannot contain duplicate keys).
+
 ```ts
 // tokens/semantic/typography.ts
 import { tokens } from 'typestyles';
 import { primitiveTypography } from '../primitives/typography';
 
 export const font = tokens.create('font', {
-  // Family
   sans: primitiveTypography.fontFamily.sans.join(', '),
   serif: primitiveTypography.fontFamily.serif.join(', '),
   mono: primitiveTypography.fontFamily.mono.join(', '),
 
-  // Size scale
   xs: primitiveTypography.fontSize.xs,
   sm: primitiveTypography.fontSize.sm,
   base: primitiveTypography.fontSize.base,
@@ -232,7 +232,6 @@ export const font = tokens.create('font', {
   '3xl': primitiveTypography.fontSize['3xl'],
   '4xl': primitiveTypography.fontSize['4xl'],
 
-  // Semantic sizes
   body: primitiveTypography.fontSize.base,
   bodySm: primitiveTypography.fontSize.sm,
   bodyLg: primitiveTypography.fontSize.lg,
@@ -242,22 +241,25 @@ export const font = tokens.create('font', {
   headingXl: primitiveTypography.fontSize['4xl'],
   display: primitiveTypography.fontSize['5xl'],
   displayLg: primitiveTypography.fontSize['6xl'],
+});
 
-  // Weight
+export const fontWeight = tokens.create('font-weight', {
   normal: primitiveTypography.fontWeight.normal,
   medium: primitiveTypography.fontWeight.medium,
   semibold: primitiveTypography.fontWeight.semibold,
   bold: primitiveTypography.fontWeight.bold,
+});
 
-  // Line height
+export const lineHeight = tokens.create('line-height', {
   none: primitiveTypography.lineHeight.none,
   tight: primitiveTypography.lineHeight.tight,
   snug: primitiveTypography.lineHeight.snug,
   normal: primitiveTypography.lineHeight.normal,
   relaxed: primitiveTypography.lineHeight.relaxed,
   loose: primitiveTypography.lineHeight.loose,
+});
 
-  // Letter spacing
+export const letterSpacing = tokens.create('letter-spacing', {
   tighter: primitiveTypography.letterSpacing.tighter,
   tight: primitiveTypography.letterSpacing.tight,
   normal: primitiveTypography.letterSpacing.normal,
@@ -274,7 +276,7 @@ Component-specific tokens:
 ```ts
 // tokens/components/button.ts
 import { tokens } from 'typestyles';
-import { color, space, font } from '../semantic';
+import { color, space, font, fontWeight } from '../semantic';
 
 export const button = tokens.create('button', {
   // Size
@@ -286,6 +288,9 @@ export const button = tokens.create('button', {
   paddingHorizontalSm: space[3],
   paddingHorizontalMd: space[4],
   paddingHorizontalLg: space[6],
+  paddingVerticalSm: space[2],
+  paddingVerticalMd: space[2],
+  paddingVerticalLg: space[3],
 
   // Border radius
   borderRadius: '6px',
@@ -296,7 +301,7 @@ export const button = tokens.create('button', {
   fontSizeSm: font.sm,
   fontSizeMd: font.base,
   fontSizeLg: font.lg,
-  fontWeight: font.medium,
+  fontWeight: fontWeight.medium,
 
   // Primary variant
   primaryBackground: color.brand,
@@ -545,24 +550,17 @@ if (contrastRatio < 4.5) {
 
 ### Multiple formats
 
-```ts
-// Build script to generate multiple formats
-import { tokens } from './tokens';
+TypeStyles **does not** ship a separate “token compiler” — your `tokens.create` calls emit **CSS custom properties** when the module runs (or when an extraction build evaluates your entry). For **additional** artifacts (JSON for Figma pipelines, SCSS for legacy apps), treat primitives as the source of truth in TypeScript and add your own small exporters.
 
-// CSS custom properties
-const css = generateCSS(tokens);
+**CSS (what TypeStyles already produces)**
 
-// SCSS variables
-const scss = generateSCSS(tokens);
+- **Diagnostics / tests** — `getRegisteredCss()` from `typestyles` after importing your token modules.
+- **SSR** — `collectStyles()` from `typestyles/server` around `renderToString`, then inject the returned CSS string.
+- **Production bundle** — `@typestyles/vite`, `@typestyles/rollup`, or `@typestyles/next` with an [extraction entry](/docs/zero-runtime) so a static `.css` file includes `:root` and theme rules.
 
-// JSON
-const json = JSON.stringify(tokens, null, 2);
+**JSON / SCSS**
 
-// Write to files
-fs.writeFileSync('dist/tokens.css', css);
-fs.writeFileSync('dist/tokens.scss', scss);
-fs.writeFileSync('dist/tokens.json', json);
-```
+- Export plain objects from `tokens/primitives/*.ts` and `JSON.stringify` them, or generate SCSS variables from those objects in a script. Keep TypeStyles as the runtime source of truth for `var(--…)` values that components actually use.
 
 ## Token governance
 
