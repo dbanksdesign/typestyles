@@ -422,16 +422,19 @@ color.primary; // "var(--color-primary)"
 
 ## Comparison
 
-| Feature                    | TypeStyles  | StyleX    | styled-components | Tailwind        |
-| -------------------------- | ----------- | --------- | ----------------- | --------------- |
-| Readable class names       | Yes         | No        | No                | Utility classes |
-| Type-safe                  | Yes         | Yes       | Partial           | No              |
-| No build step required     | Yes         | No        | Yes               | No              |
-| Works with plain CSS       | Yes         | Limited   | Limited           | Yes             |
-| Incremental adoption       | Yes         | Difficult | Yes               | Yes             |
-| CSS custom property tokens | First-class | Limited   | Manual            | Via config      |
-| SSR support                | Yes         | Yes       | Yes               | Yes             |
-| Runtime overhead           | Minimal     | None      | Moderate          | None            |
+High-level tradeoffs (details and nuance: [docs — TypeStyles vs alternatives](./docs/content/docs/framework-comparison.md)):
+
+| Feature                    | TypeStyles                   | StyleX           | Emotion / styled-components | Panda CSS    | vanilla-extract  | CSS Modules | Tailwind        |
+| -------------------------- | ---------------------------- | ---------------- | --------------------------- | ------------ | ---------------- | ----------- | --------------- |
+| Readable class names       | Yes                          | No               | No                          | Utilities    | Hashed / modules | Scoped      | Utility classes |
+| Type-safe                  | Yes                          | Yes              | Partial                     | Yes          | Yes              | Partial     | No              |
+| No build step required     | Yes                          | No               | Yes                         | No           | No               | No          | No              |
+| Works with plain CSS       | Yes                          | Difficult        | Limited                     | Moderate     | Good             | Excellent   | Yes             |
+| Incremental adoption       | Yes                          | Difficult        | Yes                         | Moderate     | Moderate         | Yes         | Yes             |
+| CSS custom property tokens | First-class                  | Limited          | Manual                      | First-class  | Manual           | Manual      | Via config      |
+| Zero-runtime path          | Yes (opt-in build plugins)   | Compiler default | Varies                      | Build output | Always           | Always      | Build output    |
+| SSR support                | Yes                          | Yes              | Yes                         | Yes          | Yes              | Yes         | Yes             |
+| Runtime overhead           | Minimal (off when extracted) | None             | Moderate                    | Low–none     | None             | None        | None            |
 
 ## Installation
 

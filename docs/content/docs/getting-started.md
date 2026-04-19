@@ -15,6 +15,17 @@ pnpm add typestyles
 npm install typestyles
 ```
 
+## Building a design system
+
+If you are standardizing tokens and components for a product or a published library, this is the spine most teams follow:
+
+1. **One scoped constructor** — `createTypeStyles({ scopeId, … })` returns matching `styles`, `tokens`, and `global` so class names and CSS variables stay aligned (see [Cascade layers](/docs/cascade-layers) when you need `@layer`).
+2. **Tokens as CSS variables** — `tokens.create` for primitives → semantics → component namespaces ([Design system with tokens](/docs/design-system)).
+3. **Variants** — `styles.component` for recipes; `cx()` for composition ([Components](/docs/components)).
+4. **Production CSS** — optional [Zero-runtime extraction](/docs/zero-runtime) so the browser loads a normal stylesheet instead of relying on injection.
+
+When you are evaluating TypeStyles against StyleX, Panda, vanilla-extract, CSS Modules, or plain CSS, read [TypeStyles vs other styling options](/docs/framework-comparison) first, then the [Migration guide](/docs/migration) for API mapping.
+
 ## Basic usage
 
 Create styles with `styles.component()` and apply them by calling the returned function or destructuring it:
