@@ -1,5 +1,25 @@
 # @typestyles/next
 
+## 0.4.0
+
+### Minor Changes
+
+- 8bf64b0: Add shared convention entry discovery: `discoverDefaultExtractModules` and `DEFAULT_EXTRACT_MODULE_CANDIDATES` (including `styles/typestyles-entry.ts` and `styles/typestyles.ts` after the `src/…` paths).
+
+  **@typestyles/vite** re-exports these from `@typestyles/build-runner` and resolves optional `extract.modules` using the same list.
+
+  **@typestyles/next** depends on `@typestyles/build-runner`, aligns `buildTypestylesForNext` with that discovery, defaults `cssOutFile` to `app/typestyles.css` and manifest output unless overridden, adds `withTypestyles` for production config when a convention file exists, and re-exports the discovery helpers.
+
+  `withTypestyles` now passes `root` through to extraction internals so webpack resolution uses the same project root as convention discovery.
+
+  **Breaking (Next):** `BuildTypestylesForNextOptions` no longer requires `modules` or `cssOutFile`; pass them explicitly when you need non-default behavior.
+
+### Patch Changes
+
+- 8bf64b0: Ensure `withTypestyles({ root })` uses the same `root` for downstream webpack module resolution as it does for convention discovery.
+- Updated dependencies [8bf64b0]
+  - @typestyles/build-runner@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes

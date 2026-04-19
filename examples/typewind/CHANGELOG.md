@@ -1,5 +1,12 @@
 # @examples/typewind
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [aa88d25]
+  - typestyles@0.6.0
+
 ## 0.0.1
 
 ### Patch Changes

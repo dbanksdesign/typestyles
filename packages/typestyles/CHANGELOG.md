@@ -1,5 +1,11 @@
 # typestyles
 
+## 0.6.0
+
+### Minor Changes
+
+- aa88d25: Add **`createStyles({ utils })`** (and **`createTypeStyles({ utils })`**) so shorthand style expanders attach to one styles instance without a separate `withUtils` object. **`styles.withUtils`** remains on the default export; there is no global **`registerUtils`**.
+
 ## 0.5.0
 
 ### Minor Changes
